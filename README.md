@@ -136,8 +136,66 @@ backboneFauxServer.addRoutes({
 		}
 	}
 }
-
 ```
+
+Reference
+---------
+
+### Methods
+
+#### addRoute
+
+```javascript
+addRoute (name, urlExp, httpMethod, handler)
+```
+Add a route to the BFS. Every route defines a mapping from a Model(or Collection)-URL & sync-method
+(as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific handler (callback):
+
+`<model-URL, sync-method> → handler`
+
+So every time a Model is created, read, updated or deleted, its URL and the the sync method being used will
+be tested against defined routes in order to find a handler for creating, reading, updating or deleting this
+Model. The same applies to reading Collections. Everytime a Collection is read, its URL (and the 'read'
+method) will be tested against defined routes in order to find a handler for reading this Collection. When a
+match for the <model-URL, sync-method> pair is not found among defined routes, the native sync (or a custom
+handler) will be invoked (see backboneFauxServer.setOnNoRoute).
+* `name`: The name of the route
+* `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
+    functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
+    parameter parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`, which
+    can match any number of URL components. The values captured by params and splats will be passed as parameters
+    to the given handler method. The `urlExp` can also be a raw regular expression, in which case all values captured
+    by reg-exp capturing groups will be passed as parameters to the given handler method.
+* `httpMethod`: The sync method, as defined in the context of HTTP (POST, GET, PUT, DELETE), that should trigger
+    the route's handler (both the URL and the method should match for the handler to be invoked). Note that when
+    Backbone.emulateHTTP is set to true, 'create', 'update' and 'delete' are all mapped to POST. This may be set to
+    '*' or any falsy value in order for the route's handler to be invoked when `urlExp` matches the Model's
+    (or Collection's) URL _regardless_ of method. (In this case, the handler's `context` parameter may be queried for
+the method that is currently being handled.)
+* `handler`: The handler to be invoked when both route's URL and route's method match. The handler's signature should be
+    
+    `function (context, [param1, [param2, ...]])`
+    
+    where context contains properties `data`, `httpMethod` and `route` and `param1`, `param2`, ... are parameters
+    deduced from matching the `urlExp` to the Model (or Collection) URL. Specifically:
+    * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on 'create' (POST) or 'update' (PUT).
+    * `context.httpMethod`: The HTTP Method (POST, GET, PUT, DELETE) that is currently being handled by the handler.
+    * `context.route`: The route that is currently being handled by the handler.
+    
+    On success, the handler should return created Model attributes after handling a POST and updated Model attributes
+    after handling a PUT. Return Model attributes after handling a GET or an array of Model attributes after handling
+    a GET that refers to a collection. Note that only attributes that have been changed on the server (and should be
+    updated on the client) need to be included in returned hashes. Return nothing after handling a DELETE. On failure,
+    return any string (presumably a custom error messsage, an HTTP status code that indicates failure, etc).
+
+#### addRoutes
+
+```javascript
+addRoutes (routes)
+```
+Add multiple routes to the BFS.
+* `routes`: A hash of routes to add. Hash keys should be the route names and each route (nested hash) should contain
+    `urlExp`, `name` and `handler` properties. Also see `addRoute`.
 
 License
 -------
