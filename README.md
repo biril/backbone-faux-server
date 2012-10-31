@@ -70,8 +70,8 @@ specific handler (callback):
 
 `<model-URL, sync-method> → handler`
 
-For example, to handle the creation of a Book you'd have to map the pair `<"library-app/books", "POST">` to
-a handler, like so:
+For example, to handle the creation of a Book you'd have define a route that maps the pair 
+`<"library-app/books", "POST">` to a handler, like so:
 
 ```javascript
 backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
@@ -79,19 +79,65 @@ backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function 
 	//  attributes) to create the Book entry in your persistence layer. Return attributes of
 	//  created Book. Something along the lines of:
 	context.data.id = newId(); // Almost certainly, you'll have to create an id
-	books[context.data.id] = context.data; // Save to persistence layer
+	books.push(context.data); // Save to persistence layer
 	return context.data;
 });
 ```
 
 The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is
 very straightforward in the preceding example but note that the URL may also be specified as a matching
-expression, simillar to those used on [Backbone routes](http://backbonejs.org/#Router-routes). so
+expression, simillar to those used on [Backbone routes](http://backbonejs.org/#Router-routes). So
 URL-expressions may contain parameter parts, `:param`, which match a single URL component between slashes;
 and splat parts `*splat`, which can match any number of URL components. The values 'captured' by params and
 splats will be passed as parameters to the given handler method. The URL-expression can also be a raw regular
 expression, in which case all values captured by reg-exp capturing groups will be passed as parameters to the
 handler method.
+
+More routes may be defined to handle all actions (create, read, update and delete) for the preceding Book example:
+
+```javascript
+backboneFauxServer.addRoutes({
+	createBook: {
+		urlExp: "library-app/books",
+		httpMethod: "POST",
+		handler: function (context) {
+			// Create book using attributes in context.data
+			// Save to persistence layer
+			// Return attributes of newly created book
+		}
+	},
+	readBooks: {
+		urlExp: "library-app/books",
+		httpMethod: "GET",
+		handler: function (context) {
+			// Return array of stored book attributes
+		}
+	},
+	readBook: {
+		urlExp: "library-app/books/:id",
+		httpMethod: "GET",
+		handler: function (context, bookId) {
+			// Return attributes of stored book with id 'bookId'
+		}
+	},
+	updateBook: {
+		urlExp: "library-app/books/:id",
+		httpMethod: "PUT",
+		handler: function (context, bookId) {
+			// Update stored book with id 'bookId', using attributes in context.data
+			// Return updated attributes
+		}
+	},
+	deleteBook: {
+		urlExp: "library-app/books/:id",
+		httpMethod: "DELETE",
+		handler: function (context, bookId) {
+			// Delete stored book of id 'bookId'
+		}
+	}
+}
+
+```
 
 License
 -------
