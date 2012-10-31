@@ -39,6 +39,23 @@ Backbone-faux-server ('BFS' onwards) will be exposed as a Global, CommonJS modul
     });
     ```
 
+Define Backbone models and collections as you normally would:
+
+```javascript
+var Book = Backbone.Model.extend({
+	defaults: {
+		title: "Unknown title",
+		author: "Unknown author"
+	}
+});
+var Books = Backbone.Collection.extend({
+	model: Book,
+	url: "api/books"
+});
+```
+
+Note that the `url` property is used, as it normally would in any scenario involving a remote server.
+
 License
 -------
 
