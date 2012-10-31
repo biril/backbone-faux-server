@@ -200,7 +200,7 @@ setOnNoRoute (handler)
 ```
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>` pair. By default the
 native sync will be invoked - call this method to provide a custom handler which overrides this behaviour.
-* `handler` A handler to be invoked when no route is matched to the current `<model-URL, sync-method>`. Ommit the
+* `handler`: A handler to be invoked when no route is matched to the current `<model-URL, sync-method>`. Ommit the
     parameter to set the default native sync behaviour. The handler should have the same signature as Backbone's sync.
     That is, `function (method, model, [options])`
 
@@ -210,7 +210,7 @@ enable (shouldEnable)
 ```
 Enable or disable the BFS. When disabled, syncing is performed by the native Backbone sync method. Handy for easily
 toggling between mock / real server
-* `shouldEnable` Indicates whether the BFS should be enabled or disabled. Set to true or ommit altogether to enable, set
+* `shouldEnable`: Indicates whether the BFS should be enabled or disabled. Set to true or ommit altogether to enable, set
     to false to disable
 
 #### getVersion
@@ -223,7 +223,7 @@ Get current version of BFS
 ```javascript
 noConflict ()
 ```
-Run in noConflict mode, setting the global `backboneFauxServer` variable to to its previous value. Returns a reference
+Run in no-conflict mode, setting the global `backboneFauxServer` variable to to its previous value. Returns a reference
 to the BFS
 
 License
