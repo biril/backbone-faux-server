@@ -1,16 +1,24 @@
 Backbone Faux Server
 ====================
 
-A (tiny) framework for easily mocking-up a server when working with [Backbone.js](https://github.com/documentcloud/backbone)
+A (tiny) framework for easily mocking-up a server when working with
+[Backbone.js](https://github.com/documentcloud/backbone)
 
-Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers (callbacks). Faux-server overrides Backbone's native sync so that whenever a Model (or Collection) is synced and its URL along with the sync method being used form a pair that matches a defined route, the route's handler is invoked. Implement handlers in JS to test the expected behaviour of your app, work with dummy data, support persistence using local-storage, etc. When / if you choose to move to a real server, switching to Backbone's native, ajax-based sync is as simple as calling `backboneFauxServer.enable(false)`.
+Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers (callbacks).
+Faux-server overrides Backbone's native sync so that whenever a Model (or Collection) is synced and
+its URL along with the sync method being used form a pair that matches a defined route, the route's
+handler is invoked. Implement handlers in JS to test the expected behaviour of your app, work with
+dummy data, support persistence using local-storage, etc. When / if you choose to move to a real server,
+switching to Backbone's native, ajax-based sync is as simple as calling `backboneFauxServer.enable(false)`.
 
 Usage
 -----
 
-Backbone-faux-server ('BFS' onwards) will be exposed as a Global, CommonJS module or AMD module depending on the detected environment. 
+Backbone-faux-server ('BFS' onwards) will be exposed as a Global, CommonJS module or AMD module depending
+on the detected environment. 
 
-* When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
+* When working in a *browser environment, without a module-framework,* include backbone.faux.server.js
+    after backbone.js
 
     ```html
     <script type="text/javascript" src="backbone.js"></script>
@@ -23,7 +31,7 @@ Backbone-faux-server ('BFS' onwards) will be exposed as a Global, CommonJS modul
     console.log("working with version " + backboneFauxServer.getVersion());
     ```
 
-* `Require` when working *with CommonJS* (e.g. Node.js)
+* `require` when working *with CommonJS* (e.g. Node.js)
 
     ```javascript
     var backboneFauxServer = require("./backbone.faux.server.js");
@@ -50,11 +58,40 @@ var Book = Backbone.Model.extend({
 });
 var Books = Backbone.Collection.extend({
 	model: Book,
-	url: "api/books"
+	url: "library-app/books"
 });
 ```
 
 Note that the `url` property is used, as it normally would in any scenario involving a remote server.
+
+Continue by defining routes on the BFS, to handle model syncing. Every route defines a mapping from a
+Model(or Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some
+specific handler (callback):
+
+`<model-URL, sync-method> → handler`
+
+For example, to handle the creation of a Book you'd have to map the pair `<"library-app/books", "POST">` to
+a handler, like so:
+
+```javascript
+backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+	// Every handler receives a 'context' parameter. Use context.data (which is a hash of Book
+	//  attributes) to create the Book entry in your persistence layer. Return attributes of
+	//  created Book. Something along the lines of:
+	context.data.id = newId(); // Almost certainly, you'll have to create an id
+	books[context.data.id] = context.data; // Save to persistence layer
+	return context.data;
+});
+```
+
+The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is
+very straightforward in the preceding example but note that the URL may also be specified as a matching
+expression, simillar to those used on [Backbone routes](http://backbonejs.org/#Router-routes). so
+URL-expressions may contain parameter parts, `:param`, which match a single URL component between slashes;
+and splat parts `*splat`, which can match any number of URL components. The values 'captured' by params and
+splats will be passed as parameters to the given handler method. The URL-expression can also be a raw regular
+expression, in which case all values captured by reg-exp capturing groups will be passed as parameters to the
+handler method.
 
 License
 -------
