@@ -156,7 +156,7 @@ against defined routes in order to find a handler for creating, reading, updatin
 applies to reading Collections. Everytime a Collection is read, its URL (and the 'read' method) will be tested against
 defined routes in order to find a handler for reading this Collection. When a match for the `<model-URL, sync-method>`
 pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see
-[setOnNoRoute](https://github.com/biril/backbone-faux-server#setOnNoRoute)).
+[setOnNoRoute](https://github.com/biril/backbone-faux-server#setonnoroute)).
 * `name`: The name of the route
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
     functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
@@ -193,7 +193,7 @@ addRoutes (routes)
 ```
 Add multiple routes to the BFS.
 * `routes`: A hash of routes to add. Hash keys should be the route names and each route (nested hash) should contain
-    `urlExp`, `name` and `handler` properties. See [addRoute](https://github.com/biril/backbone-faux-server#addRoute).
+    `urlExp`, `name` and `handler` properties. See [addRoute](https://github.com/biril/backbone-faux-server#addroute).
 
 #### setOnNoRoute
 ```javascript
