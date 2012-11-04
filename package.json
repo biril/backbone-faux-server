@@ -1,0 +1,26 @@
+{
+  "name": "backbone-faux-server",
+  "version": "0.2.0",
+  "author": "biril <alexlambiris@gmail.com>",
+  "description": "A (tiny) framework for easily mocking-up a server when working with Backbone.js",
+  "contributors": [],
+  "main": "./backbone.faux.server",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/biril/backbone-faux-server"
+  },
+  "keywords": [
+    "util",
+    "server",
+    "dummy",
+    "backbone"
+  ],
+  "dependencies" : {
+    "underscore" :  "1.4.x",
+    "backbone"   :  "0.9.x"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.8"
+  }
+}
