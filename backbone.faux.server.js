@@ -183,10 +183,19 @@
 			return this; // Chain
 		},
 		/**
+		 * Remove route of given name
+		 * @param  {string} routeName Name of route to remove
+		 * @return {object} The faux-server
+		 */
+		removeRoute: function (routeName) {
+			routes = _.reject(routes, function (route) { route.name === routeName; });
+			return this; // Chain
+		},
+		/**
 		 * Remove all previously defined routes
 		 * @return {object} The faux-server
 		 */
-		clearRoutes: function () {
+		removeRoutes: function () {
 			routes = [];
 			return this; // Chain
 		},
