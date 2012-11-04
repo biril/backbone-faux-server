@@ -15,7 +15,7 @@
 	
 	// A global 'exports' object signifies Node.js / CommonJS environment
 	if (typeof exports !== "undefined") {
-		createModule(root, exports, require("underscore", "backbone"));
+		createModule(root, exports, require("underscore"), require("backbone"));
 		return;
 	}
 
@@ -172,6 +172,7 @@
 		 *  server (and should be updated on the client) need to be included in returned hashes. Return nothing
 		 *  after handling a DELETE. On failure: Return any string (presumably a custom error messsage, an HTTP
 		 *  status code that indicates failure, etc).
+		 * @return {object} The faux-server
 		 */
 		addRoute: function (name, urlExp, httpMethod, handler) {
 			routes.push({
@@ -187,6 +188,7 @@
 		 * @param {object} routesToAdd A hash of routes to add. Hash keys should be the route names
 		 *  and each route (nested hash) should contain urlExp, name and handler properties. Also see
 		 *  addRoute()
+		 * @return {object} The faux-server
 		 */
 		addRoutes: function (routesToAdd) {
 			_.each(routesToAdd, function (r, routeName) {
@@ -219,6 +221,7 @@
 		 *  <model-URL, sync-method>. Ommit the parameter to set the default native sync behaviour.
 		 *  The handler should have the same signature as Backbone's sync. That is,
 		 *  function (method, model, [options])
+		 * @return {object} The faux-server
 		 */
 		setOnNoRoute: function (handler) {
 			onNoRoute = _.isFunction(handler) ? handler : nativeSync;
@@ -229,6 +232,7 @@
 		 *  by the native Backbone sync method. Handy for easily toggling between mock / real server
 		 * @param {bool} shouldEnable Indicates whether the faux-server should be enabled
 		 *  or disabled. Set to true or ommit altogether to enable, set to false to disable
+		 * @return {object} The faux-server
 		 */
 		enable: function (shouldEnable) {
 			isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
@@ -240,17 +244,17 @@
 		 * @return {string} Current version of the library
 		 */
 		getVersion: function () {
-			return "0.1";
+			return "0.2.0";
 		},
 	
 		/**
 		 * Run in noConflict mode, setting the global 'backboneFauxServer' variable to to its
 		 *  previous value
-		 * @return {[type]} A reference to the backboneFauxServer module
+		 * @return {object} The faux-server
 		 */
 		noConflict: function () {
 			root.backboneFauxServer = previousBackboneFauxServer;
-			return this;
+			return this; // Chain
 		}
 	});
 }));
