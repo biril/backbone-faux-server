@@ -183,6 +183,14 @@
 			return this; // Chain
 		},
 		/**
+		 * Remove all previously defined routes
+		 * @return {object} The faux-server
+		 */
+		clearRoutes: function () {
+			routes = [];
+			return this; // Chain
+		},
+		/**
 		 * Set a handler to be invoked when no route is matched to the current
 		 *  <model-URL, sync-method> pair. By default the native sync will be invoked -
 		 *  call this method to provide a custom handler which overrides this behaviour.
