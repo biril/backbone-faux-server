@@ -13,7 +13,7 @@
 
 	// Export faux-server module depending on current environment:
 	
-	// A global 'exports' object signifies Node.js / CommonJS environment
+	// A global 'exports' object signifies CommonJS environment
 	if (typeof exports !== "undefined") {
 		createModule(root, exports, require("underscore"), require("backbone"));
 		return;
@@ -28,7 +28,7 @@
 		return;
 	}
 
-	// Browser
+	// Browser environment, without a module-framework
 	root.backboneFauxServer = createModule(root, {}, _, Backbone);
 
 }(this, function (root, backboneFauxServer, _, Backbone) {
@@ -202,7 +202,7 @@
 		 * @return {object} The faux-server
 		 */
 		removeRoute: function (routeName) {
-			routes = _.reject(routes, function (route) { route.name === routeName; });
+			routes = _.reject(routes, function (route) { return route.name === routeName; });
 			return this; // Chain
 		},
 		/**
@@ -212,6 +212,18 @@
 		removeRoutes: function () {
 			routes = [];
 			return this; // Chain
+		},
+		/**
+		 * Get route of specified name
+		 * @param  {string} routeName Name of route to acquire
+		 * @return {object} Route of specified name or null if no such route exists. Note that
+		 *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
+		 */
+		getRoute: function (routeName) {
+			var route = _.find(routes, function (r) {
+				return r.name === routeName;
+			});
+			return !route ? null : _.clone(route);
 		},
 		/**
 		 * Set a handler to be invoked when no route is matched to the current
