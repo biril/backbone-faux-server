@@ -61,7 +61,31 @@
 		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE" },
 		
 		// Routes
-		routes = {};
+		routes = {},
+
+		/**
+		 * Get a route matching the given <URL, HTTP-method> pair. Routes that exactly
+		 *  match the HTTP-method are prefered to match-all routes (those with '*'-method)
+		 * @param  {string} url The URL
+		 * @param  {string} httpMethod The HTTP method
+		 * @return {object} A matching route if one is found, undefined otherwise
+		 */
+		getMatchingRoute = function (url, httpMethod) {
+			var rName, r, weakMatch, match;
+			for (rName in routes) {
+				if (routes.hasOwnProperty(rName)) {
+					r = routes[rName];
+					if (r.urlExp.test(url)) {
+						if (r.httpMethod === httpMethod) { return r; } // Found a match
+						if (r.httpMethod === "*") { weakMatch = r; } // Found a weak match
+					}
+				}
+			}
+			return weakMatch; // Found no match - returning a weak match or undefined
+		},
+
+		// A convenient no-op to reuse
+		noOp = function () {};
 
 	// Modify Backbone's sync to use the faux-server sync method (when appropriate)
 	Backbone.sync = function (crudMethod, model, options) {
@@ -88,10 +112,7 @@
 			throw new Error("A 'url' property or function must be specified");
 		}
 
-		// Find route for given URL
-		route = _.find(routes, function (r) {
-			return r.urlExp.test(url) && (r.httpMethod === httpMethod || r.httpMethod === "*");
-		});
+		route = getMatchingRoute(url, httpMethod); // Find route for given URL
 
 		// If route is not found
 		if (!route) { return onNoRoute.call(model, crudMethod, model, options); }
@@ -139,7 +160,7 @@
 		 * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
 		 *  tested. This is syntactically and functionally analogous to Backbone routes so urlExps may contain
 		 *  parameter parts, ':param', which match a single URL component between slashes; and splat parts
-		 *  '*splat', which can match any number of URL components. The values 'captured' by params and splats
+		 *  '*splat', which can match any number of URL components. The values captured by params and splats
 		 *  will be passed as parameters to the given handler method. (see http://backbonejs.org/#Router-routes).
 		 *  The urlExp can also be a raw regular expression, in which case all values captured by reg-exp
 		 *  capturing groups will be passed as parameters to the given handler method.
@@ -152,8 +173,8 @@
 		 *  true, 'create', 'update' and 'delete' are all mapped to POST so context.httpMethod will be set to POST
 		 *  for these methods. However, in this case, the true HTTP method being handled may be acquired by
 		 *  querying the handler's context for context.httpMethodOverride.
-		 * @param {function} handler The handler to be invoked when both route's URL and route's method match.
-		 *  The handler's signature should be
+		 * @param {function} handler The handler to be invoked when both route's URL and route's method match. A
+		 *  do-nothing handler will be used if one is not provided. Its signature should be
 		 *  function (context, [param1, [param2, ...]])
 		 *  where context contains properties data, httpMethod, httpMethodOverrde, route and param1, param2, ...
 		 *  are parameters deduced from matching the urlExp to the Model (or Collection) URL. Specifically, about
@@ -178,7 +199,7 @@
 			routes[name] = {
 				urlExp: _.isRegExp(urlExp) ? urlExp : routeExpToRegExp(urlExp),
 				httpMethod: httpMethod.toUpperCase() || "*",
-				handler: handler
+				handler: handler || noOp
 			};
 			return this; // Chain
 		},
@@ -222,6 +243,10 @@
 			var route = routes[routeName];
 			return !route ? null : _.clone(route);
 		},
+		/**
+		 *
+		 */
+		getMatchingRoute: getMatchingRoute,
 		/**
 		 * Set a handler to be invoked when no route is matched to the current
 		 *  <model-URL, sync-method> pair. By default the native sync will be invoked -
