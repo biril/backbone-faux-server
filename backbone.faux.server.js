@@ -164,17 +164,18 @@
 		 *  will be passed as parameters to the given handler method. (see http://backbonejs.org/#Router-routes).
 		 *  The urlExp can also be a raw regular expression, in which case all values captured by reg-exp
 		 *  capturing groups will be passed as parameters to the given handler method.
-		 * @param {string} httpMethod The sync method, as defined in the context of HTTP (POST, GET, PUT, DELETE),
-		 *  that should trigger the route's handler (both the URL-expression and the method should match for the
-		 *  handler to be invoked). httpMethod may also be set to '*' (or any falsy value) in order for the
-		 *  route's handler to be invoked whenever urlExp matches the model's (or collection's) URL _regardless_
-		 *  of method. When handling a sync, the HTTP method currently being handled may be acquired by querying
-		 *  the handler's context parameter for context.httpMethod. Note that when Backbone.emulateHTTP is set to
-		 *  true, 'create', 'update' and 'delete' are all mapped to POST so context.httpMethod will be set to POST
-		 *  for these methods. However, in this case, the true HTTP method being handled may be acquired by
-		 *  querying the handler's context for context.httpMethodOverride.
-		 * @param {function} handler The handler to be invoked when both route's URL and route's method match. A
-		 *  do-nothing handler will be used if one is not provided. Its signature should be
+		 * @param {string} [httpMethod="*"] The sync method, as defined in the context of HTTP (POST, GET, PUT,
+		 *  DELETE), that should trigger the route's handler (both the URL-expression and the method should
+		 *  match for the handler to be invoked). httpMethod may also be set to '*' to create a
+		 *  match-all-methods handler; one that will be invoked whenever urlExp matches the model's
+		 *  (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
+		 *  the same effect. In the scope of a math-all-mmethods handler, the HTTP method currently being
+		 *  handled may be acquired by querying the context parameter for context.httpMethod. Note that when
+		 *  Backbone.emulateHTTP is set to true, 'create', 'update' and 'delete' are all mapped to POST so
+		 *  context.httpMethod will be set to POST for all these methods. However, in this case, the true HTTP
+		 *  method being handled may be acquired by querying the handler's context for context.httpMethodOverride.
+		 * @param {function} [handler=no-op] The handler to be invoked when both route's URL and route's method
+		 *  match. A do-nothing handler will be used if one is not provided. Its signature should be
 		 *  function (context, [param1, [param2, ...]])
 		 *  where context contains properties data, httpMethod, httpMethodOverrde, route and param1, param2, ...
 		 *  are parameters deduced from matching the urlExp to the Model (or Collection) URL. Specifically, about
@@ -198,7 +199,7 @@
 		addRoute: function (name, urlExp, httpMethod, handler) {
 			routes[name] = {
 				urlExp: _.isRegExp(urlExp) ? urlExp : routeExpToRegExp(urlExp),
-				httpMethod: httpMethod.toUpperCase() || "*",
+				httpMethod: httpMethod ? httpMethod.toUpperCase() : "*",
 				handler: handler || noOp
 			};
 			return this; // Chain
