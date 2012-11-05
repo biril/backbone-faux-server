@@ -156,7 +156,8 @@ against defined routes in order to find a handler for creating, reading, updatin
 applies to reading Collections. Everytime a Collection is read, its URL (and the 'read' method) will be tested against
 defined routes in order to find a handler for reading this Collection. When a match for the `<model-URL, sync-method>`
 pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see
-[setOnNoRoute](https://github.com/biril/backbone-faux-server#setonnoroute)).
+[setOnNoRoute](https://github.com/biril/backbone-faux-server#setonnoroute)). Later routes take precedence over earlier
+routes so in situations where multiple routes match, the one most recently defined will be used.
 * `name`: The name of the route
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
     functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
@@ -164,16 +165,17 @@ pair is not found among defined routes, the native sync (or a custom handler) wi
     match any number of URL components. The values captured by params and splats will be passed as parameters to the
     given handler method. The `urlExp` can also be a raw regular expression, in which case all values captured by
     reg-exp capturing groups will be passed as parameters to the given handler method.
-* `httpMethod` The sync method, as defined in the context of HTTP (POST, GET, PUT, DELETE), that should trigger the
+* `httpMethod`: The sync method, as defined in the context of HTTP (POST, GET, PUT, DELETE), that should trigger the
 	route's handler (both the URL-expression and the method should match for the handler to be invoked). `httpMethod`
-	may also be set to '*' (or any falsy value) in order for the route's handler to be invoked whenever `urlExp` matches
-	the model's (or collection's) URL _regardless_ of method. When handling a sync, the HTTP method currently being
-	handled may be acquired by querying the handler's `context` parameter for `context.httpMethod`. Note that when
-	`Backbone.emulateHTTP` is set to true, 'create', 'update' and 'delete' are all mapped to POST so `context.httpMethod`
-	will be set to POST for these methods. However, in this case, the true HTTP method being handled may be acquired by
-	querying the handler's `context` for `context.httpMethodOverride`.
-* `handler`: The handler to be invoked when both route's URL-expression and route's method match. The handler's signature 
-	should be
+	may also be set to '*' to create a match-all-methods handler; one that will be invoked whenever `urlExp` matches
+	the model's (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
+	the same effect. In the scope of a math-all-mmethods handler, the HTTP method currently being handled may be
+	acquired by querying the `context` parameter for `context.httpMethod`. Note that when `Backbone.emulateHTTP` is
+	set to true, 'create', 'update' and 'delete' are all mapped to POST so `context.httpMethod` will be set to POST
+	for all these methods. However, in this case, the true HTTP method being handled may be acquired by querying the
+	handler's `context` for `context.httpMethodOverride`.
+* `handler`: The handler to be invoked when both route's URL-expression and route's method match. A do-nothing handler
+	will be used if one is not provided. Its signature should be
     
     `function (context, [param1, [param2, ...]])`
     
@@ -199,8 +201,9 @@ pair is not found among defined routes, the native sync (or a custom handler) wi
 addRoutes (routes)
 ```
 Add multiple routes to the BFS.
-* `routes`: A hash of routes to add. Hash keys should be the route names and each route (nested hash) should contain
-    `urlExp`, `name` and `handler` properties. See [addRoute](https://github.com/biril/backbone-faux-server#addroute).
+* `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and each route (nested
+hash) need only contain `urlExp`, `httpMethod` and `handler`. See
+[addRoute](https://github.com/biril/backbone-faux-server#addroute).
 
 #### setOnNoRoute
 ```javascript
