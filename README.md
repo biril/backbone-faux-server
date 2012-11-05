@@ -20,8 +20,10 @@ detected environment.
 * When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
 
     ```html
+    ...
     <script type="text/javascript" src="backbone.js"></script>
     <script type="text/javascript" src="backbone.faux.server.js"></script>
+    ...
     ```
 
     and faux-server will be exposed as the global `fauxServer`:
@@ -36,6 +38,8 @@ detected environment.
     var fauxServer = require("./backbone.faux.server.js");
     console.log("working with version " + fauxServer.getVersion());
     ```
+    
+    (remember to `amd install` dependencies beforehand - see package.json)
 
 * Or list as a dependency when working *with an AMD loader* (e.g. require.js)
 
@@ -45,6 +49,9 @@ detected environment.
     	console.log("working with version " + fauxServer.getVersion());
     });
     ```
+
+    (use AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
+    [Underscore](https://github.com/amdjs/underscore))
 
 Define Backbone Models and Collections as you normally would:
 
@@ -137,10 +144,21 @@ fauxServer.addRoutes({
 }
 ```
 
+Testing
+-------
+
+A QUnit test suite is provided. To run the tests open test/index.html in a browser.
+
 Reference
 ---------
 
+The following list is not exhaustive, but includes all essential parts of the faux-server API. The ommitted
+bits are there to aid testing and fascilitate fancy stuff you probably won't ever need. Further insight may
+be gained by taking a look at the test suit and - of course - the source.
+
 ### Methods
+
+All methods return the faux-server unless otherwise noted
 
 #### addRoute (name, urlExp, httpMethod, handler)
 
@@ -153,9 +171,9 @@ So every time a Model is created, read, updated or deleted, its URL and the the 
 against defined routes in order to find a handler for creating, reading, updating or deleting this Model. The same
 applies to reading Collections. Everytime a Collection is read, its URL (and the 'read' method) will be tested against
 defined routes in order to find a handler for reading this Collection. When a match for the `<model-URL, sync-method>`
-pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see
-[setOnNoRoute](https://github.com/biril/backbone-faux-server#setonnoroute)). Later routes take precedence over earlier
-routes so in situations where multiple routes match, the one most recently defined will be used.
+pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see `setOnNoRoute`).
+Later routes take precedence over earlier routes so in situations where multiple routes match, the one most recently
+defined will be used.
 * `name`: The name of the route
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
     functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
@@ -198,13 +216,26 @@ routes so in situations where multiple routes match, the one most recently defin
 
 Add multiple routes to the faux-server.
 * `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and each route (nested
-hash) need only contain `urlExp`, `httpMethod` and `handler`. See
-[addRoute](https://github.com/biril/backbone-faux-server#addroute).
+hash) need only contain `urlExp`, `httpMethod` and `handler`. Also see `addRoute`.
 
-#### setOnNoRoute
-```javascript
-setOnNoRoute (handler)
-```
+#### removeRoute (name)
+
+Remove a route of given name.
+* `name`: Name of route to remove.
+
+#### removeRoutes ()
+
+Remove all defined routes.
+
+#### getRoute (name)
+
+Get route of given name. 
+* `name`: Name of route to acquire.
+* returns: Route of given name or null if no such route exists. Note that the returned route is a copy and cannot
+	be modified to alter faux-server's behaviour
+	
+#### setOnNoRoute (handler)
+
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>` pair. By default the
 native sync will be invoked - call this method to provide a custom handler which overrides this behaviour.
 * `handler`: A handler to be invoked when no route is matched to the current `<model-URL, sync-method>`. Ommit the
