@@ -61,7 +61,7 @@
 		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE" },
 		
 		// Routes
-		routes = [];
+		routes = {};
 
 	// Modify Backbone's sync to use the faux-server sync method (when appropriate)
 	Backbone.sync = function (crudMethod, model, options) {
@@ -175,12 +175,11 @@
 		 * @return {object} The faux-server
 		 */
 		addRoute: function (name, urlExp, httpMethod, handler) {
-			routes.push({
-				name: name,
+			routes[name] = {
 				urlExp: _.isRegExp(urlExp) ? urlExp : routeExpToRegExp(urlExp),
 				httpMethod: httpMethod.toUpperCase() || "*",
 				handler: handler
-			});
+			};
 			return this; // Chain
 		},
 		/**
@@ -191,8 +190,8 @@
 		 * @return {object} The faux-server
 		 */
 		addRoutes: function (routesToAdd) {
-			_.each(routesToAdd, function (r, routeName) {
-				this.addRoute(routeName, r.urlExp, r.httpMethod, r.handler);
+			_.each(routesToAdd, function (r, rName) {
+				this.addRoute(rName, r.urlExp, r.httpMethod, r.handler);
 			}, this);
 			return this; // Chain
 		},
@@ -202,7 +201,7 @@
 		 * @return {object} The faux-server
 		 */
 		removeRoute: function (routeName) {
-			routes = _.reject(routes, function (route) { return route.name === routeName; });
+			if (routes[routeName]) { delete routes[routeName]; }
 			return this; // Chain
 		},
 		/**
@@ -210,7 +209,7 @@
 		 * @return {object} The faux-server
 		 */
 		removeRoutes: function () {
-			routes = [];
+			routes = {};
 			return this; // Chain
 		},
 		/**
@@ -220,9 +219,7 @@
 		 *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
 		 */
 		getRoute: function (routeName) {
-			var route = _.find(routes, function (r) {
-				return r.name === routeName;
-			});
+			var route = routes[routeName];
 			return !route ? null : _.clone(route);
 		},
 		/**
