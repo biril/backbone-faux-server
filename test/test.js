@@ -38,20 +38,73 @@
 			"testRoute3": { urlExp: "", httpMethod: "PUT", handler: h }
 		});
 
-		ok(backboneFauxServer.getRoute("testRoute1"), "addRoute adds route");
-		ok(backboneFauxServer.getRoute("testRoute2"), "addRoutes adds routes");
-		ok(backboneFauxServer.getRoute("testRoute3"), "addRoutes adds routes");
+		ok(backboneFauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
+		ok(backboneFauxServer.getRoute("testRoute2"), "_addRoutes_ adds routes");
+		ok(backboneFauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
 
 		backboneFauxServer.addRoute("testRoute3", "override", "POST", h);
 		strictEqual(backboneFauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
 
 		backboneFauxServer.removeRoute("testRoute2");
-		ok(!backboneFauxServer.getRoute("testRoute2"), "removeRoute removes route");
+		ok(!backboneFauxServer.getRoute("testRoute2"), "_removeRoute_ removes route");
 
 		backboneFauxServer.removeRoutes();
 
-		ok(!backboneFauxServer.getRoute("testRoute1"), "removeRoutes removes routes");
-		ok(!backboneFauxServer.getRoute("testRoute3"), "removeRoutes removes routes");
+		ok(!backboneFauxServer.getRoute("testRoute1"), "_removeRoutes_ removes routes");
+		ok(!backboneFauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
+	});
+
+	test("URL-expressions match", function () {
+		var matchingRoute = null, i, numOfTests,
+			tests = [{
+				urlExp: "some/url",
+				url: "some/url",
+				params: []
+			},
+			{
+				urlExp: "1/2/:param1/:param2/3/4",
+				url: "1/2/hello/world/3/4",
+				params: ["hello", "world"]
+			}, {
+				urlExp: "1/2/*param",
+				url: "1/2/hello/world/3/4",
+				params: ["hello/world/3/4"]
+			}, {
+				urlExp: "1/2/*param/3/4",
+				url: "1/2/hello/world/3/4",
+				params: ["hello/world"]
+			}, {
+				urlExp: "1/2/:param1/:param2/*param",
+				url: "1/2/hello/world/3/4",
+				params: ["hello", "world", "3/4"]
+			}, {
+				urlExp: "1/2/*param1/:param2",
+				url: "1/2/hello/world/3/4",
+				params: ["hello/world/3", "4"]
+			}, {
+				urlExp: "book-:title/page-:number",
+				url: "book-do androids dream of electric sheep/page-303",
+				params: ["do androids dream of electric sheep", "303"]
+			}, {
+				urlExp: "book::title/page::number",
+				url: "book:do androids dream of electric sheep/page:303",
+				params: ["do androids dream of electric sheep", "303"]
+			}];
+		
+		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+			backboneFauxServer.addRoute("testRoute", tests[i].urlExp);
+			matchingRoute = backboneFauxServer.getMatchingRoute(tests[i].url);
+			ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + tests[i].params);
+		}
+	});
+
+	test("Later routes take precedence over earlier routes", function () {
+		var earlierHandler = function () {},
+			laterHandler = function () {};
+		backboneFauxServer.addRoute("testRoute1", "some/url", "POST", earlierHandler);
+		backboneFauxServer.addRoute("testRoute2", "some/(other/)?url", "POST", laterHandler);
+		strictEqual(backboneFauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler);
 	});
 
 
