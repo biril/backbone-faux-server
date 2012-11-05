@@ -61,27 +61,39 @@
 		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE" },
 		
 		// Routes
-		routes = {},
+		routes = [],
 
 		/**
-		 * Get a route matching the given <URL, HTTP-method> pair. Routes that exactly
-		 *  match the HTTP-method are prefered to match-all routes (those with '*'-method)
+		 * Get a route matching the given <URL, HTTP-method> pair. Routes that exactly match the
+		 *  HTTP-method take precedence over match-all-methods routes (those with httpMethod set
+		 *  to '*'). Matching routes that were defined later take precedence over those that were
+		 *  defined earlier. A returned matching route will contain the additional handlerParams
+		 *  property; an array containing params that are to be passed to the handler as captured
+		 *  when the given URL was matched
 		 * @param  {string} url The URL
 		 * @param  {string} httpMethod The HTTP method
-		 * @return {object} A matching route if one is found, undefined otherwise
+		 * @return {object} A matching route if one is found, null otherwise. Note that
+		 *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
 		 */
 		getMatchingRoute = function (url, httpMethod) {
-			var rName, r, weakMatch, match;
-			for (rName in routes) {
-				if (routes.hasOwnProperty(rName)) {
-					r = routes[rName];
-					if (r.urlExp.test(url)) {
-						if (r.httpMethod === httpMethod) { return r; } // Found a match
-						if (r.httpMethod === "*") { weakMatch = r; } // Found a weak match
+			var i, r, weakMatch, match;
+			for (i = routes.length - 1; i >= 0; --i) { // Iterating from latest to earliest
+				r = routes[i];
+				if (r.urlExp.test(url)) {
+					if (r.httpMethod === httpMethod) { // Found a match ..
+						r = _.clone(r);
+						r.handlerParams = r.urlExp.exec(url).slice(1);
+						return r; // .. so return it. We're done
 					}
+					if (r.httpMethod === "*") { weakMatch = r; } // Found a weak match
 				}
 			}
-			return weakMatch; // Found no match - returning a weak match or undefined
+			if (weakMatch) { // Found a weak match. That's good too ..
+				r = _.clone(weakMatch);
+				r.handlerParams = r.urlExp.exec(url).slice(1);
+				return r; // .. so return it. We're done
+			}
+			return null;
 		},
 
 		// A convenient no-op to reuse
@@ -132,11 +144,11 @@
 			data: data,
 			httpMethod: httpMethod,
 			httpMethodOverride: httpMethodOverride,
-			route: _.clone(route)
+			route: route
 		};
 
 		// Handle
-		result = route.handler.apply(null, [handlerContext].concat(route.urlExp.exec(url).slice(1)));
+		result = route.handler.apply(null, [handlerContext].concat(route.handlerParams));
 
 		// A string result indicates error
 		if (_.isString(result)) { options.error(model, result); }
@@ -155,7 +167,8 @@
 		 *  is read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 		 *  handler for reading this Collection. When a match for the <model-URL, sync-method> pair is not
 		 *  found among defined routes, the native sync (or a custom handler) will be invoked (see
-		 *  backboneFauxServer.setOnNoRoute).
+		 *  backboneFauxServer.setOnNoRoute). Later routes take precedence over earlier routes so in
+		 *  situations where multiple routes match, the one most recently defined will be used.
 		 * @param {string} name The name of the route
 		 * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
 		 *  tested. This is syntactically and functionally analogous to Backbone routes so urlExps may contain
@@ -197,7 +210,15 @@
 		 * @return {object} The faux-server
 		 */
 		addRoute: function (name, urlExp, httpMethod, handler) {
-			routes[name] = {
+			var index = routes.length;
+			_.any(routes, function (r, i) {
+				if (r.name === name) {
+					index = i;
+					return true;
+				}
+			});
+			routes[index] = {
+				name: name,
 				urlExp: _.isRegExp(urlExp) ? urlExp : routeExpToRegExp(urlExp),
 				httpMethod: httpMethod ? httpMethod.toUpperCase() : "*",
 				handler: handler || noOp
@@ -206,14 +227,15 @@
 		},
 		/**
 		 * Add multiple routes to the faux-server
-		 * @param {object} routesToAdd A hash of routes to add. Hash keys should be the route names
-		 *  and each route (nested hash) should contain urlExp, name and handler properties. Also see
-		 *  addRoute()
+		 * @param {object|array} routesToAdd A hash or array of routes to add. When passing a hash, keys should
+		 *  be route names and each route (nested hash) need only contain urlExp, httpMethod, handler. See
+		 *  addRoute().
 		 * @return {object} The faux-server
 		 */
 		addRoutes: function (routesToAdd) {
+			var isArray = _.isArray(routesToAdd);
 			_.each(routesToAdd, function (r, rName) {
-				this.addRoute(rName, r.urlExp, r.httpMethod, r.handler);
+				this.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
 			}, this);
 			return this; // Chain
 		},
@@ -223,7 +245,7 @@
 		 * @return {object} The faux-server
 		 */
 		removeRoute: function (routeName) {
-			if (routes[routeName]) { delete routes[routeName]; }
+			routes = _.reject(routes, function (r) { return r.name === routeName; });
 			return this; // Chain
 		},
 		/**
@@ -231,7 +253,7 @@
 		 * @return {object} The faux-server
 		 */
 		removeRoutes: function () {
-			routes = {};
+			routes = [];
 			return this; // Chain
 		},
 		/**
@@ -241,8 +263,8 @@
 		 *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
 		 */
 		getRoute: function (routeName) {
-			var route = routes[routeName];
-			return !route ? null : _.clone(route);
+			var route = _.find(routes, function (r) { return r.name === routeName; });
+			return route ? _.clone(route) : null;
 		},
 		/**
 		 *
