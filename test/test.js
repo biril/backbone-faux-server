@@ -1,4 +1,4 @@
-/*global module, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, backboneFauxServer:true */
+/*global module, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer:true */
 (function () {
 	"use strict";
 
@@ -13,45 +13,45 @@
 		}
 	});
 
-	test("BFS is exposed as the backboneFauxServer global", function () {
-		ok(backboneFauxServer);
+	test("Faux-server is exposed as the fauxServer global", function () {
+		ok(fauxServer);
 	});
 
-	test("noConflict removes BFS from global scope and returns it", function () {
-		var bfs = backboneFauxServer,
-			noConflictBfs = backboneFauxServer.noConflict(),
-			previousBfs = backboneFauxServer;
+	test("noConflict removes the faux-server from global scope and returns it", function () {
+		var fs = fauxServer,
+			noConflictFs = fauxServer.noConflict(),
+			previousFs = fauxServer;
 
-		strictEqual(bfs, noConflictBfs, "BFS is returned");
-		notStrictEqual(bfs, previousBfs, "BFS is removed from global scope");
+		strictEqual(fs, noConflictFs, "Faux-server is returned");
+		notStrictEqual(fs, previousFs, "Faux-server is removed from global scope");
 
-		// Reinstate BFS in global scope (or other tests will fail)
-		backboneFauxServer = noConflictBfs;
+		// Reinstate faux-server in global scope (or other tests will fail)
+		fauxServer = noConflictFs;
 	});
 
 	test("Routes are added and removed", function () {
 		var h = function () {};
 
-		backboneFauxServer.addRoute("testRoute1", "", "", h);
-		backboneFauxServer.addRoutes({
+		fauxServer.addRoute("testRoute1", "", "", h);
+		fauxServer.addRoutes({
 			"testRoute2": { urlExp: "", httpMethod: "", handler: h },
 			"testRoute3": { urlExp: "", httpMethod: "PUT", handler: h }
 		});
 
-		ok(backboneFauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
-		ok(backboneFauxServer.getRoute("testRoute2"), "_addRoutes_ adds routes");
-		ok(backboneFauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
+		ok(fauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
+		ok(fauxServer.getRoute("testRoute2"), "_addRoutes_ adds routes");
+		ok(fauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
 
-		backboneFauxServer.addRoute("testRoute3", "override", "POST", h);
-		strictEqual(backboneFauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
+		fauxServer.addRoute("testRoute3", "override", "POST", h);
+		strictEqual(fauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
 
-		backboneFauxServer.removeRoute("testRoute2");
-		ok(!backboneFauxServer.getRoute("testRoute2"), "_removeRoute_ removes route");
+		fauxServer.removeRoute("testRoute2");
+		ok(!fauxServer.getRoute("testRoute2"), "_removeRoute_ removes route");
 
-		backboneFauxServer.removeRoutes();
+		fauxServer.removeRoutes();
 
-		ok(!backboneFauxServer.getRoute("testRoute1"), "_removeRoutes_ removes routes");
-		ok(!backboneFauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
+		ok(!fauxServer.getRoute("testRoute1"), "_removeRoutes_ removes routes");
+		ok(!fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
 	});
 
 	test("URL-expressions match", function () {
@@ -92,8 +92,8 @@
 			}];
 		
 		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-			backboneFauxServer.addRoute("testRoute", tests[i].urlExp);
-			matchingRoute = backboneFauxServer.getMatchingRoute(tests[i].url);
+			fauxServer.addRoute("testRoute", tests[i].urlExp);
+			matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
 			ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
 			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + tests[i].params);
 		}
@@ -102,9 +102,9 @@
 	test("Later routes take precedence over earlier routes", function () {
 		var earlierHandler = function () {},
 			laterHandler = function () {};
-		backboneFauxServer.addRoute("testRoute1", "some/url", "POST", earlierHandler);
-		backboneFauxServer.addRoute("testRoute2", "some/(other/)?url", "POST", laterHandler);
-		strictEqual(backboneFauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler);
+		fauxServer.addRoute("testRoute1", "some/url", "POST", earlierHandler);
+		fauxServer.addRoute("testRoute2", "some/(other/)?url", "POST", laterHandler);
+		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler);
 	});
 
 
@@ -138,7 +138,7 @@
 		teardown: function () {
 			delete this.Book;
 			delete this.Books;
-			backboneFauxServer.removeRoutes();
+			fauxServer.removeRoutes();
 			Backbone.emulateHTTP = false;
 		}
 	});
@@ -147,7 +147,7 @@
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
-		backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+		fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
 			ok(true, "POST-handler is called");
 			ok(context, "_context_ is passed to POST-handler");
 			deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
@@ -174,7 +174,7 @@
 		// We've created a book of id 0123456789 and we'll be fetching it. The retBookAttrs hash
 		//  holds the supposed attributes of the book so we'll be returning these from the GET-handler
 		
-		backboneFauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
+		fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
 			ok(true, "GET-handler is called");
 			ok(context, "_context_ is passed to GET-handler");
 			strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
@@ -197,7 +197,7 @@
 		//  The retBooksAttrs is an array of attributes hashes for the supposed models in the collection
 		//  so we'll be returning that from the GET-handler
 		
-		backboneFauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
+		fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
 			ok(true, "GET-handler is called");
 			ok(context, "_context_ is passed to GET-handler");
 			strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
@@ -215,7 +215,7 @@
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 
-		backboneFauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
 			ok(true, "PUT-handler is called");
 			ok(context, "_context_ is passed to PUT-handler");
 			deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
@@ -235,7 +235,7 @@
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 		
-		backboneFauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function (context, bookId) {
+		fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function (context, bookId) {
 			ok(true, "DELETE-handler is called");
 			ok(context, "_context_ is passed to DELETE-handler");
 			strictEqual(context.httpMethod, "DELETE", "_context.httpMethod_ is set to 'DELETE'");
@@ -252,7 +252,7 @@
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
-		backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+		fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
 			ok(true, "POST-handler is called");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -268,7 +268,7 @@
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 
-		backboneFauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
 			ok(true, "POST-handler is called");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -284,7 +284,7 @@
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 		
-		backboneFauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
+		fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
 			ok(true, "POST-handler is called");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -295,7 +295,7 @@
 	});
 
 	test("Returning a string from any handler is treated as an error", 5, function () {
-		backboneFauxServer.addRoutes({
+		fauxServer.addRoutes({
 			createBook: {
 				urlExp: "library-app/books",
 				httpMethod: "POST",

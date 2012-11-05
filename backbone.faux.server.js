@@ -6,7 +6,7 @@
  *  route's handler is invoked. Implement handlers directly in JS to test the expected behaviour of
  *  your app, work with dummy data, support persistance using local-storage, etc. When / if you
  *  choose to move to a real server, switching to Backbone's native, ajax-based sync is as simple
- *  as calling backboneFauxServer.enable(false)
+ *  as calling fauxServer.enable(false)
  */
 (function (root, createModule) {
 	"use strict";
@@ -19,8 +19,7 @@
 		return;
 	}
 
-	// A global 'define' method with an 'amd' property signifies the
-	//  presence of an AMD loader
+	// A global 'define' method with an 'amd' property signifies the presence of an AMD loader
 	if (typeof define === "function" && define.amd) {
 		define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
 			return createModule(root, exports, _, Backbone);
@@ -29,14 +28,14 @@
 	}
 
 	// Browser environment, without a module-framework
-	root.backboneFauxServer = createModule(root, {}, _, Backbone);
+	root.fauxServer = createModule(root, {}, _, Backbone);
 
-}(this, function (root, backboneFauxServer, _, Backbone) {
+}(this, function (root, fauxServer, _, Backbone) {
 	"use strict";
 
-	// Save a reference to the previous value of 'backboneFauxServer', so that it
+	// Save a reference to the previous value of 'fauxServer', so that it
 	//  can be restored later on, if 'noConflict' is used
-	var previousBackboneFauxServer = root.backboneFauxServer,
+	var previousFauxServer = root.fauxServer,
 
 		nativeSync = Backbone.sync, // Save a reference to the native sync method
 
@@ -155,7 +154,7 @@
 		else { options.success(result); }
 	};
 
-	return _.extend(backboneFauxServer, {
+	return _.extend(fauxServer, {
 		/**
 		 * Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL
 		 *  & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific
@@ -167,7 +166,7 @@
 		 *  is read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 		 *  handler for reading this Collection. When a match for the <model-URL, sync-method> pair is not
 		 *  found among defined routes, the native sync (or a custom handler) will be invoked (see
-		 *  backboneFauxServer.setOnNoRoute). Later routes take precedence over earlier routes so in
+		 *  fauxServer.setOnNoRoute). Later routes take precedence over earlier routes so in
 		 *  situations where multiple routes match, the one most recently defined will be used.
 		 * @param {string} name The name of the route
 		 * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
@@ -305,12 +304,12 @@
 		},
 	
 		/**
-		 * Run in noConflict mode, setting the global 'backboneFauxServer' variable to to its
+		 * Run in noConflict mode, setting the global 'fauxServer' variable to to its
 		 *  previous value
 		 * @return {object} The faux-server
 		 */
 		noConflict: function () {
-			root.backboneFauxServer = previousBackboneFauxServer;
+			root.fauxServer = previousFauxServer;
 			return this; // Chain
 		}
 	});

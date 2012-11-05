@@ -9,12 +9,12 @@ overrides Backbone's native sync so that whenever a Model (or Collection) is syn
 method being used form a pair that matches a defined route, the route's handler is invoked. Implement handlers in JS to
 test the expected behaviour of your app, work with dummy data, support persistence using local-storage, etc. When / if
 you choose to move to a real server, switching back to Backbone's native, ajax-based sync is as simple as calling
-`backboneFauxServer.enable(false)`.
+`fauxServer.enable(false)`.
 
 Usage
 -----
 
-Backbone-faux-server ('BFS' onwards) will be exposed as a Global, CommonJS module or AMD module depending on the
+Backbone-faux-server will be exposed as a Global, a CommonJS module or an AMD module depending on the
 detected environment.
 
 * When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
@@ -24,25 +24,25 @@ detected environment.
     <script type="text/javascript" src="backbone.faux.server.js"></script>
     ```
 
-    and BFS will be exposed as the global `backboneFauxServer`:
+    and faux-server will be exposed as the global `fauxServer`:
 
     ```javascript
-    console.log("working with version " + backboneFauxServer.getVersion());
+    console.log("working with version " + fauxServer.getVersion());
     ```
 
 * `require` when working *with CommonJS* (e.g. Node.js)
 
     ```javascript
-    var backboneFauxServer = require("./backbone.faux.server.js");
-    console.log("working with version " + backboneFauxServer.getVersion());
+    var fauxServer = require("./backbone.faux.server.js");
+    console.log("working with version " + fauxServer.getVersion());
     ```
 
 * Or list as a dependency when working *with an AMD loader* (e.g. require.js)
 
     ```javascript
     // Your module
-    define(["backbone.faux.server"], function (backboneFauxServer) {
-    	console.log("working with version " + backboneFauxServer.getVersion());
+    define(["backbone.faux.server"], function (fauxServer) {
+    	console.log("working with version " + fauxServer.getVersion());
     });
     ```
 
@@ -63,9 +63,9 @@ var Books = Backbone.Collection.extend({
 
 Note that the `url` property is used, as it normally would in any scenario involving a remote server.
 
-Continue by defining routes on the BFS, to handle model syncing. Every route defines a mapping from a Model(or
-Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific handler
-(callback):
+Continue by defining routes on the faux-server, to handle model syncing. Every route defines a mapping from a
+Model(or Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific
+handler (callback):
 
 `<model-URL, sync-method> → handler`
 
@@ -73,7 +73,7 @@ For example, to handle the creation of a Book, define a route that maps the `<"l
 handler, like so:
 
 ```javascript
-backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
 	// Every handler receives a 'context' parameter. Use context.data (a hash of Book attributes)
 	//  to create the Book entry in your persistence layer. Return attributes of created Book.
 	//  Something along the lines of:
@@ -83,8 +83,8 @@ backboneFauxServer.addRoute("createBook", "library-app/books", "POST", function 
 });
 ```
 
-The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is prety
-straightforward in the preceding example but note that the URL may also be specified as a matching expression, simillar
+The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is pretty
+straightforward in the preceding example but note that the URL may also be specified as a matching expression, similar
 to those used on [Backbone routes](http://backbonejs.org/#Router-routes). So URL-expressions may contain parameter
 parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`, which can match any
 number of URL components. The values captured by params and splats will be passed as parameters to the given handler
@@ -95,7 +95,7 @@ Define more routes to handle updating, reading and deleting Models. The `addRout
 routes to handle all actions (create, read, update and delete) for the preceding Book example:
 
 ```javascript
-backboneFauxServer.addRoutes({
+fauxServer.addRoutes({
 	createBook: {
 		urlExp: "library-app/books",
 		httpMethod: "POST",
@@ -142,12 +142,10 @@ Reference
 
 ### Methods
 
-#### addRoute
-```javascript
-addRoute (name, urlExp, httpMethod, handler)
-```
-Add a route to the BFS. Every route defines a mapping from a Model(or Collection)-URL & sync-method (as defined in the
-context of HTTP (POST, GET, PUT, DELETE)) to some specific handler (callback):
+#### addRoute (name, urlExp, httpMethod, handler)
+
+Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL & sync-method (as
+defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific handler (callback):
 
 `<model-URL, sync-method> → handler`
 
@@ -169,7 +167,7 @@ routes so in situations where multiple routes match, the one most recently defin
 	route's handler (both the URL-expression and the method should match for the handler to be invoked). `httpMethod`
 	may also be set to '*' to create a match-all-methods handler; one that will be invoked whenever `urlExp` matches
 	the model's (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
-	the same effect. In the scope of a math-all-mmethods handler, the HTTP method currently being handled may be
+	the same effect. In the scope of a match-all-methods handler, the HTTP method currently being handled may be
 	acquired by querying the `context` parameter for `context.httpMethod`. Note that when `Backbone.emulateHTTP` is
 	set to true, 'create', 'update' and 'delete' are all mapped to POST so `context.httpMethod` will be set to POST
 	for all these methods. However, in this case, the true HTTP method being handled may be acquired by querying the
@@ -185,7 +183,7 @@ routes so in situations where multiple routes match, the one most recently defin
     * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on 'create' (POST) or
        'update' (PUT).
     * `context.httpMethod`: The HTTP Method (POST, GET, PUT, DELETE) that is currently being handled by the handler.
-    * `context.httpMethodOverride`: The true HTTP Method (POST, GET, PUT, DELETE) that is currently being handled
+    * `context.httpMethodOverride`: The true HTTP method (POST, GET, PUT, DELETE) that is currently being handled
        when `Backbone.emulateHTTP` is set to true. The equivalent of
        [Backbone's](http://backbonejs.org/#Sync-emulateHTTP) `X-HTTP-Method-Override` header.
     * `context.route`: The route that is currently being handled by the handler.
@@ -196,11 +194,9 @@ routes so in situations where multiple routes match, the one most recently defin
     updated on the client) need to be included in returned hashes. Return nothing after handling a DELETE. On failure,
     return any string (presumably a custom error messsage, an HTTP status code that indicates failure, etc).
 
-#### addRoutes
-```javascript
-addRoutes (routes)
-```
-Add multiple routes to the BFS.
+#### addRoutes (routes)
+
+Add multiple routes to the faux-server.
 * `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and each route (nested
 hash) need only contain `urlExp`, `httpMethod` and `handler`. See
 [addRoute](https://github.com/biril/backbone-faux-server#addroute).
@@ -215,27 +211,21 @@ native sync will be invoked - call this method to provide a custom handler which
     parameter to set the default native sync behaviour. The handler should have the same signature as Backbone's sync.
     That is, `function (method, model, [options])`
 
-#### enable
-```javascript
-enable (shouldEnable)
-```
-Enable or disable the BFS. When disabled, syncing is performed by the native Backbone sync method. Handy for easily
-toggling between mock / real server
-* `shouldEnable`: Indicates whether the BFS should be enabled or disabled. Set to true or ommit altogether to enable, set
-    to false to disable
+#### enable (shouldEnable)
 
-#### getVersion
-```javascript
-getVersion ()
-```
-Get current version of BFS
+Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync method. Handy for
+easily toggling between mock / real server
+* `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit altogether to enable the faux-server,
+	set to false to disable
 
-#### noConflict
-```javascript
-noConflict ()
-```
-Run in no-conflict mode, setting the global `backboneFauxServer` variable to to its previous value. Returns a reference
-to the BFS
+#### getVersion ()
+
+Get the faux-server version
+
+#### noConflict ()
+
+Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Returns a reference
+to the faux-server
 
 License
 -------
