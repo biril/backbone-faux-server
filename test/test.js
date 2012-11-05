@@ -29,6 +29,31 @@
 		backboneFauxServer = noConflictBfs;
 	});
 
+	test("Routes are added and removed", function () {
+		var h = function () {};
+
+		backboneFauxServer.addRoute("testRoute1", "", "", h);
+		backboneFauxServer.addRoutes({
+			"testRoute2": { urlExp: "", httpMethod: "", handler: h },
+			"testRoute3": { urlExp: "", httpMethod: "PUT", handler: h }
+		});
+
+		ok(backboneFauxServer.getRoute("testRoute1"), "addRoute adds route");
+		ok(backboneFauxServer.getRoute("testRoute2"), "addRoutes adds routes");
+		ok(backboneFauxServer.getRoute("testRoute3"), "addRoutes adds routes");
+
+		backboneFauxServer.addRoute("testRoute3", "override", "POST", h);
+		strictEqual(backboneFauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
+
+		backboneFauxServer.removeRoute("testRoute2");
+		ok(!backboneFauxServer.getRoute("testRoute2"), "removeRoute removes route");
+
+		backboneFauxServer.removeRoutes();
+
+		ok(!backboneFauxServer.getRoute("testRoute1"), "removeRoutes removes routes");
+		ok(!backboneFauxServer.getRoute("testRoute3"), "removeRoutes removes routes");
+	});
+
 
 	//
 	module("Sync", {
