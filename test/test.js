@@ -1,10 +1,10 @@
-/*global module, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer:true */
+/*global QUnit, module, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer:true */
 (function () {
 	"use strict";
 
 
 	//
-	module("Basics", {
+	QUnit.module("Basics", {
 		setup: function () {
 			// Nada
 		},
@@ -109,7 +109,7 @@
 
 
 	//
-	module("Sync", {
+	QUnit.module("Sync", {
 		setup: function () {
 			var Book = Backbone.Model.extend({
 					defaults: {
