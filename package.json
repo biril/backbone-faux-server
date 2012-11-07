@@ -9,15 +9,22 @@
     "type": "git",
     "url": "https://github.com/biril/backbone-faux-server"
   },
+  "bugs": "https://github.com/biril/backbone-faux-server/issues",
   "keywords": [
     "util",
     "server",
     "dummy",
     "backbone"
   ],
-  "dependencies" : {
-    "underscore" :  "1.4.x",
-    "backbone"   :  "0.9.x"
+  "dependencies": {
+    "underscore": "1.4.x",
+    "backbone": "0.9.x"
+  },
+  "devDependencies": {
+    "qunit": "0.5.x"
+  },
+  "scripts": {
+    "test": "node ./test/testrunner.js"
   },
   "license": "MIT",
   "engines": {
