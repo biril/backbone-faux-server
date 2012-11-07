@@ -1,4 +1,4 @@
-Backbone Faux Server v0.2.0
+Backbone Faux Server v0.3.0
 ===========================
 
 A (tiny) framework for easily mocking-up a server when working with
