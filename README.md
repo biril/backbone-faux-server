@@ -1,6 +1,9 @@
 Backbone Faux Server v0.3.0
 ===========================
 
+[![Build Status](https://travis-ci.org/biril/backbone-faux-server.png)](https://travis-ci.org/biril/backbone-faux-server)
+
+
 A (tiny) framework for easily mocking-up a server when working with
 [Backbone.js](https://github.com/documentcloud/backbone)
 
