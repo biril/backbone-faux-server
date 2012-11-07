@@ -1,12 +1,8 @@
 /**
- * A (tiny) framework for easily mocking-up a server when working with Backbone.js. Define any
- *  number of routes that map <model-URL, sync-method> pairs to custom handlers (callbacks).
- *  Faux-server overrides Backbone's native sync so that whenever a Model (or Collection) is synced
- *  and its URL along with the sync method being used form a pair that matches a defined route, the
- *  route's handler is invoked. Implement handlers directly in JS to test the expected behaviour of
- *  your app, work with dummy data, support persistance using local-storage, etc. When / if you
- *  choose to move to a real server, switching to Backbone's native, ajax-based sync is as simple
- *  as calling fauxServer.enable(false)
+ * Backbone Faux Server v0.2.0
+ * https://github.com/biril/backbone-faux-server
+ * Licensed under the MIT License.
+ * Copyright (c) 2012 Alex Lambiris
  */
 (function (root, createModule) {
 	"use strict";
