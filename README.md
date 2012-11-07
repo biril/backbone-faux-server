@@ -1,5 +1,5 @@
-Backbone Faux Server
-====================
+Backbone Faux Server v0.2.0
+===========================
 
 A (tiny) framework for easily mocking-up a server when working with
 [Backbone.js](https://github.com/documentcloud/backbone)
@@ -233,7 +233,7 @@ Get route of given name.
 * `name`: Name of route to acquire.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a copy and cannot
 	be modified to alter faux-server's behaviour
-	
+
 #### setOnNoRoute (handler)
 
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>` pair. By default the
