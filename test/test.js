@@ -1,7 +1,6 @@
-/*global QUnit, module, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer:true */
+/*global QUnit, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer */
 (function () {
 	"use strict";
-
 
 	//
 	QUnit.module("Basics", {
@@ -11,22 +10,6 @@
 		teardown: function () {
 			// Nada
 		}
-	});
-
-	test("Faux-server is exposed as the fauxServer global", function () {
-		ok(fauxServer);
-	});
-
-	test("noConflict removes the faux-server from global scope and returns it", function () {
-		var fs = fauxServer,
-			noConflictFs = fauxServer.noConflict(),
-			previousFs = fauxServer;
-
-		strictEqual(fs, noConflictFs, "Faux-server is returned");
-		notStrictEqual(fs, previousFs, "Faux-server is removed from global scope");
-
-		// Reinstate faux-server in global scope (or other tests will fail)
-		fauxServer = noConflictFs;
 	});
 
 	test("Routes are added and removed", function () {
