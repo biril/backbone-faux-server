@@ -39,7 +39,7 @@ detected environment.
     console.log("working with version " + fauxServer.getVersion());
     ```
     
-    (remember to `amd install` dependencies beforehand - see package.json)
+    (`amd install` Backbone & Underscore dependencies beforehand - see package.json)
 
 * Or list as a dependency when working *with an AMD loader* (e.g. require.js)
 
@@ -50,8 +50,8 @@ detected environment.
     });
     ```
 
-    (use AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
-    [Underscore](https://github.com/amdjs/underscore))
+    (AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
+    [Underscore](https://github.com/amdjs/underscore) are available)
 
 Define Backbone Models and Collections as you normally would:
 
@@ -147,7 +147,10 @@ fauxServer.addRoutes({
 Testing
 -------
 
-A QUnit test suite is provided. To run the tests open test/index.html in a browser.
+The test suite may be run in a browser or on the command line. To run in a browser simply open test/index.html. The
+command line version runs on Node.js and depends on [node-qunit](https://github.com/kof/node-qunit) (`npm install`
+to get it, along with Backbone and Underscore). To run the tests on the command line either `make test` or
+`npm test`.
 
 Reference
 ---------
