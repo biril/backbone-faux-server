@@ -82,12 +82,18 @@
 		}
 	});
 
-	test("Later routes take precedence over earlier routes", function () {
+	test("Later routes take precedence over earlier routes (but not when they're a weaker match)", function () {
 		var earlierHandler = function () {},
-			laterHandler = function () {};
+			laterHandler = function () {},
+			weaklyMatchedHandler = function () {};
+
 		fauxServer.addRoute("testRoute1", "some/url", "POST", earlierHandler);
 		fauxServer.addRoute("testRoute2", "some/(other/)?url", "POST", laterHandler);
-		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler);
+		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler, "Later route takes precendence");
+
+		// Test a later-but-weaker route
+		fauxServer.addRoute("testRoute3", "some/(other/)?url", "*", weaklyMatchedHandler);
+		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler, "But not when a weaker match");
 	});
 
 
@@ -122,6 +128,7 @@
 			delete this.Book;
 			delete this.Books;
 			fauxServer.removeRoutes();
+			fauxServer.setDefaultHandler();
 			Backbone.emulateHTTP = false;
 			Backbone.setDomLibrary({
 				ajax: function () {
@@ -234,7 +241,7 @@
 		book.destroy(); // Delete
 	});
 
-	test("A POST-handler is called when creating Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler called when creating Model and Backbone.emulateHTTP is true", 4, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook();
@@ -250,7 +257,7 @@
 		book.save(); // Create
 	});
 
-	test("A POST-handler (instead of PUT) is called when updating Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler (instead of PUT) called when updating Model and Backbone.emulateHTTP is true", 4, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook("0123456789");
@@ -266,7 +273,7 @@
 		book.save(); // Update
 	});
 
-	test("A POST-handler (instead of DELETE) is called when destroying Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler (instead of DELETE) called when destroying Model and Backbone.emulateHTTP is true", 4, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook("0123456789");
@@ -282,7 +289,7 @@
 		book.destroy(); // Delete
 	});
 
-	test("Syncing performed by native sync iff no route matches", 2, function () {
+	test("Syncing performed by native sync iff no route matches and no default-handler defined", 2, function () {
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
@@ -293,7 +300,7 @@
 		book.save();
 
 		fauxServer.addRoute("createBook", "library-app/books", "*", function () {
-			ok(true, "Handler is called when route matches");
+			ok(true, "Handler called when route matches");
 		});
 
 		Backbone.setDomLibrary({ // This better not be called now
@@ -303,7 +310,30 @@
 		book.save();
 	});
 
-	test("Returning a string from any handler is treated as an error", 5, function () {
+	test("Syncing performed by default-handler iff no route matches and default-handler defined", 2, function () {
+		var book = this.createDummyBook();
+		book.urlRoot = "library-app/books";
+
+		fauxServer.setDefaultHandler(function (context) { // Add a default handler
+			ok(true, "Default-handler called");
+		});
+
+		Backbone.setDomLibrary({ // This better not be called
+			ajax: function () { ok(false, "Fail: Native sync called when default-handler defined"); }
+		});
+
+		book.save();
+
+		fauxServer.setDefaultHandler(); // Remove default handler
+
+		Backbone.setDomLibrary({
+			ajax: function () { ok(true, "Native sync called when no default-handler defined"); }
+		});
+
+		book.save();
+	});
+
+	test("Returning a string from any handler signals an error", 5, function () {
 		fauxServer.addRoutes({
 			createBook: {
 				urlExp: "library-app/books",
@@ -393,5 +423,4 @@
 
 		book.save();
 	});
-
 }());

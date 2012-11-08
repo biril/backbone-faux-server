@@ -38,9 +38,11 @@
 		// Indicates whether the faux-server is currently enabled
 		isEnabled = true,
 
-		// A handler that should be invoked when no matching route is found for some
-		//  <model-URL, sync-method> pair. The native sync by default
-		onNoRoute = nativeSync,
+		// The default-route, that is to say, a route that contains the default handler if one
+		//  is defined. The default handler is invoked when no matching route is found for some
+		//  <model-URL, sync-method> pair and may be defined by setDefaultHandler. A null value
+		//  for the default-route signifies the absence of a default handler
+		defaultRoute = null,
 
 		// Convert a route string (containing params and splats) into a regular expression
 		routeExpToRegExp = (function () {
@@ -105,6 +107,7 @@
 			data = null,
 			route = null,
 			url = null,
+			handler = null,
 			handlerContext = null,
 			result = null;
 
@@ -119,10 +122,11 @@
 			throw new Error("A 'url' property or function must be specified");
 		}
 
-		route = getMatchingRoute(url, httpMethod); // Find route for given URL
+		route = getMatchingRoute(url, httpMethod) || defaultRoute; // Find route for given URL
 
-		// If route is not found
-		if (!route) { return onNoRoute.call(model, crudMethod, model, options); }
+		if (!route) { // A matching route was not found ..
+			return nativeSync.call(model, crudMethod, model, options); // .. so fall back to native sync
+		}
 
 		// Ensure that we have the appropriate request data. A data property whithin options overrides
 		//  the Model / Collection data. Additionally, Model / Collection data should only be provided
@@ -262,21 +266,26 @@
 			return route ? _.clone(route) : null;
 		},
 		/**
-		 *
+		 * Get a route matching the given <URL, HTTP-method> pair. See closed-over getMatchingRoute
 		 */
 		getMatchingRoute: getMatchingRoute,
 		/**
-		 * Set a handler to be invoked when no route is matched to the current
-		 *  <model-URL, sync-method> pair. By default the native sync will be invoked -
-		 *  call this method to provide a custom handler which overrides this behaviour.
+		 * Set a handler to be invoked when no route is matched to the current <model-URL, sync-method>
+		 *  pair. By default the native sync will be invoked - use this method to provide a custom handler
+		 *  which overrides this behaviour.
 		 * @param {any} handler A handler to be invoked when no route is matched to the current
-		 *  <model-URL, sync-method>. Ommit the parameter to set the default native sync behaviour.
-		 *  The handler should have the same signature as Backbone's sync. That is,
-		 *  function (method, model, [options])
+		 *  <model-URL, sync-method>. Ommit the parameter to set the native sync behaviour. See addRoute
+		 *  for handler's signature and semantics. Note that a default-handler isn't part of a route, so
+		 *  the context.route parameter will not be valid.
 		 * @return {object} The faux-server
 		 */
-		setOnNoRoute: function (handler) {
-			onNoRoute = _.isFunction(handler) ? handler : nativeSync;
+		setDefaultHandler: function (handler) {
+			defaultRoute = !handler ? null : {
+				name: "",
+				urlExp: "",
+				handler: handler,
+				handlerParams: []
+			};
 			return this; // Chain
 		},
 		/**
@@ -300,8 +309,7 @@
 		},
 	
 		/**
-		 * Run in noConflict mode, setting the global 'fauxServer' variable to to its
-		 *  previous value
+		 * Run in noConflict mode, setting the global 'fauxServer' variable to to its previous value
 		 * @return {object} The faux-server
 		 */
 		noConflict: function () {

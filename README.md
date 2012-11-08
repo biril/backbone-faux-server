@@ -222,7 +222,7 @@ defined will be used.
 
 Add multiple routes to the faux-server.
 * `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and each route (nested
-hash) need only contain `urlExp`, `httpMethod` and `handler`. Also see `addRoute`.
+	hash) need only contain `urlExp`, `httpMethod` and `handler`. Also see `addRoute`.
 
 #### removeRoute (name)
 
@@ -240,13 +240,13 @@ Get route of given name.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a copy and cannot
 	be modified to alter faux-server's behaviour
 
-#### setOnNoRoute (handler)
+#### setDefaultHandler (handler)
 
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>` pair. By default the
-native sync will be invoked - call this method to provide a custom handler which overrides this behaviour.
+native sync will be invoked - use this method to provide a custom handler which overrides this behaviour.
 * `handler`: A handler to be invoked when no route is matched to the current `<model-URL, sync-method>`. Ommit the
-    parameter to set the default native sync behaviour. The handler should have the same signature as Backbone's sync.
-    That is, `function (method, model, [options])`
+	parameter to set the native sync behaviour. See `addRoute` for handler's signature and semantics. Note that a
+	default-handler isn't part of a route, so the `context.route` parameter will not be valid.
 
 #### enable (shouldEnable)
 
@@ -262,7 +262,7 @@ Get the faux-server version
 #### noConflict ()
 
 Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Returns a reference
-to the faux-server
+to the faux-server.
 
 License
 -------
