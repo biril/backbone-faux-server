@@ -72,6 +72,10 @@
 				urlExp: "book::title/page::number",
 				url: "book:do androids dream of electric sheep/page:303",
 				params: ["do androids dream of electric sheep", "303"]
+			}, {
+				urlExp: /\/?this\/is\/an?\/([^\/]+)\/([^\/]+)\/?/,
+				url: "is/this/is/a/regular/expression/?",
+				params: ["regular", "expression"]
 			}];
 		
 		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
@@ -138,8 +142,9 @@
 		}
 	});
 
-	test("POST-handler functions as expected when saving a new Model", 7, function () {
-		var book = this.createDummyBook();
+	test("POST-handler functions as expected when saving a new Model", 8, function () {
+		var createdBookId = "0123456789",
+			book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
 		fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
@@ -147,22 +152,22 @@
 			ok(context, "_context_ is passed to POST-handler");
 			deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
+			strictEqual(context.url, book.urlRoot, "_context.url_ is set to 'Model-URL'");
 			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
 
-			return { id: "0123456789", creationTime: "now" };
+			return { id: createdBookId, creationTime: "now" };
 		});
 
 		book.save(); // Create
 
-		strictEqual(book.id, "0123456789", "id returned by POST-handler is set on Model");
+		strictEqual(book.id, createdBookId, "id returned by POST-handler is set on Model");
 		strictEqual(book.get("creationTime"), "now", "Attributes returned by POST-handler are set on Model");
 	});
 
-	test("GET-handler functions as expected when fetching a Model", 6, function () {
-		var book = new this.Book({
-				id: "0123456789"
-			}),
-			retBookAttrs = this.createDummyBook("0123456789").toJSON();
+	test("GET-handler functions as expected when fetching a Model", 7, function () {
+		var fetchedBookId = "0123456789",
+			book = new this.Book({ id: fetchedBookId }),
+			retBookAttrs = this.createDummyBook(fetchedBookId).toJSON();
 
 		book.urlRoot = "library-app/books";
 
@@ -173,8 +178,9 @@
 			ok(true, "GET-handler is called");
 			ok(context, "_context_ is passed to GET-handler");
 			strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
+			strictEqual(context.url, book.urlRoot + "/" + fetchedBookId, "_context.url_ is set to 'Model-URL/id'");
 			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
-			strictEqual(bookId, "0123456789", "_bookId_ is passed to GET-handler and set to id of book being fetched");
+			strictEqual(bookId, fetchedBookId, "_bookId_ is passed to GET-handler and set to id of book being fetched");
 
 			return retBookAttrs;
 		});
@@ -184,7 +190,7 @@
 		deepEqual(book.toJSON(), retBookAttrs, "Attributes returned by GET-handler are set on Model");
 	});
 
-	test("GET-handler functions as expected when fetching a Collection", 5, function () {
+	test("GET-handler functions as expected when fetching a Collection", 6, function () {
 		var books = new this.Books(),
 			retBooksAttrs = [this.createDummyBook("one").toJSON(), this.createDummyBook("two").toJSON()];
 
@@ -196,6 +202,7 @@
 			ok(true, "GET-handler is called");
 			ok(context, "_context_ is passed to GET-handler");
 			strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
+			strictEqual(context.url, books.url, "_context.url_ is set to 'Collection-URL'");
 			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
 
 			return retBooksAttrs;
@@ -206,8 +213,9 @@
 		deepEqual(books.toJSON(), retBooksAttrs, "Model attributes returned by GET-handler are set on Collection Models");
 	});
 
-	test("PUT-handler functions as expected when saving a Model which is not new (has an id)", 7, function () {
-		var book = this.createDummyBook("0123456789");
+	test("PUT-handler functions as expected when saving a Model which is not new (has an id)", 8, function () {
+		var updatedBookId = "0123456789",
+			book = this.createDummyBook(updatedBookId);
 		book.urlRoot = "library-app/books";
 
 		fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
@@ -215,8 +223,9 @@
 			ok(context, "_context_ is passed to PUT-handler");
 			deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
 			strictEqual(context.httpMethod, "PUT", "_context.httpMethod_ is set to 'PUT'");
+			strictEqual(context.url, book.urlRoot + "/" + updatedBookId, "_context.url_ is set to 'Model-URL/id'");
 			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
-			strictEqual(bookId, "0123456789", "_bookId_ is passed to PUT-handler and set to id of book being updated");
+			strictEqual(bookId, updatedBookId, "_bookId_ is passed to PUT-handler and set to id of book being updated");
 
 			return { modificationTime: "now" };
 		});
@@ -226,16 +235,18 @@
 		strictEqual(book.get("modificationTime"), "now", "Attributes returned by PUT-handler are set on Model");
 	});
 
-	test("DELETE-handler functions as expected when destroying a Model", 5, function () {
-		var book = this.createDummyBook("0123456789");
+	test("DELETE-handler functions as expected when destroying a Model", 6, function () {
+		var deletedBookId = "0123456789",
+			book = this.createDummyBook(deletedBookId);
 		book.urlRoot = "library-app/books";
 		
 		fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function (context, bookId) {
 			ok(true, "DELETE-handler is called");
 			ok(context, "_context_ is passed to DELETE-handler");
 			strictEqual(context.httpMethod, "DELETE", "_context.httpMethod_ is set to 'DELETE'");
+			strictEqual(context.url, book.urlRoot + "/" + deletedBookId, "_context.url_ is set to 'Model-URL/id'");
 			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
-			strictEqual(bookId, "0123456789", "_bookId_ is passed to DELETE-handler and set to id of book being deleted");
+			strictEqual(bookId, deletedBookId, "_bookId_ is passed to DELETE-handler and set to id of book being deleted");
 		});
 
 		book.destroy(); // Delete

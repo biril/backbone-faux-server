@@ -44,13 +44,12 @@
 		//  for the default-route signifies the absence of a default handler
 		defaultRoute = null,
 
-		// Convert a route string (containing params and splats) into a regular expression
-		routeExpToRegExp = (function () {
-			var namedParam    = /:\w+/g,
-				splatParam    = /\*\w+/g;
-			return function(route) {
-				route = route.replace(namedParam, "([^\/]+)").replace(splatParam, "(.*?)");
-				return new RegExp("^" + route + "$");
+		// Convert a urlExp string (containing params and splats) into a regular expression
+		makeRegExp = (function () {
+			var p = /:\w+/g, s = /\*\w+/g;
+			return function(exp) {
+				exp = exp.replace(p, "([^\/]+)").replace(s, "(.*?)");
+				return new RegExp("^" + exp + "$");
 			};
 		}()),
 
@@ -101,53 +100,41 @@
 
 		// If faux-server is disabled, fall back to original sync
 		if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
-
-		var httpMethod = crudToHttp[crudMethod],
-			httpMethodOverride,
-			data = null,
-			route = null,
-			url = null,
-			handler = null,
-			handlerContext = null,
-			result = null;
+		var c = { // Handler context
+			data: null,
+			url: null,
+			httpMethod: crudToHttp[crudMethod],
+			route: null
+		},
+		result = null;
 
 		// When emulating HTTP, 'create', 'update' and 'delete' are all mapped to POST.
-		if (Backbone.emulateHTTP && (httpMethod === "POST" || httpMethod === "PUT" || httpMethod === "DELETE")) {
-			httpMethodOverride = httpMethod;
-			httpMethod = "POST";
+		if (Backbone.emulateHTTP && (c.httpMethod === "POST" || c.httpMethod === "PUT" || c.httpMethod === "DELETE")) {
+			c.httpMethodOverride = c.httpMethod;
+			c.httpMethod = "POST";
 		}
 
-		// Ensure that we have a URL
-		if(!(url = options.url || _.result(model, "url"))) {
+		// Ensure that we have a URL (A url property whithin options overrides the Model / Collection URL.)
+		if(!(c.url = options.url || _.result(model, "url"))) {
 			throw new Error("A 'url' property or function must be specified");
 		}
 
-		route = getMatchingRoute(url, httpMethod) || defaultRoute; // Find route for given URL
-
-		if (!route) { // A matching route was not found ..
-			return nativeSync.call(model, crudMethod, model, options); // .. so fall back to native sync
+		// Find route for given URL or fall back to native sync if none found
+		if (!(c.route = getMatchingRoute(c.url, c.httpMethod) || defaultRoute)) {
+			return nativeSync.call(model, crudMethod, model, options);
 		}
 
 		// Ensure that we have the appropriate request data. A data property whithin options overrides
 		//  the Model / Collection data. Additionally, Model / Collection data should only be provided
 		//  to the server when creating or updating
-		if (options.data) { data = options.data; }
+		if (options.data) { c.data = options.data; }
 		else {
 			if (model && crudMethod === "create" || crudMethod === "update") {
-				data = model.toJSON();
+				c.data = model.toJSON();
 			}
 		}
 
-		// Context paramater for the acquired handler
-		handlerContext = {
-			data: data,
-			httpMethod: httpMethod,
-			httpMethodOverride: httpMethodOverride,
-			route: route
-		};
-
-		// Handle
-		result = route.handler.apply(null, [handlerContext].concat(route.handlerParams));
+		result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
 
 		// A string result indicates error
 		if (_.isString(result)) { options.error(model, result); }
@@ -196,6 +183,7 @@
 		 *      'create' (POST) or 'update' (PUT).
 		 *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, DELETE) that is currently being
 		 *      handled by the handler.
+		 *   * {string} context.url The URL that is currently being handled by the handler
 		 *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, DELETE) that is
 		 *      currently being handled when Backbone.emulateHTTP is set to true. The equivalent of
 		 *      Backbone's X-HTTP-Method-Override header (see http://backbonejs.org/#Sync-emulateHTTP).
@@ -218,7 +206,7 @@
 			});
 			routes[index] = {
 				name: name,
-				urlExp: _.isRegExp(urlExp) ? urlExp : routeExpToRegExp(urlExp),
+				urlExp: _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp),
 				httpMethod: httpMethod ? httpMethod.toUpperCase() : "*",
 				handler: handler || noOp
 			};
@@ -309,7 +297,9 @@
 		},
 	
 		/**
-		 * Run in noConflict mode, setting the global 'fauxServer' variable to to its previous value
+		 * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
+		 * Only useful when working in a browser environment without a module-framework as this is the
+		 * only case where fauxServer is exposed globally. Returns a reference to the faux-server.
 		 * @return {object} The faux-server
 		 */
 		noConflict: function () {

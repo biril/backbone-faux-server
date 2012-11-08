@@ -73,14 +73,14 @@ var Books = Backbone.Collection.extend({
 
 Note that the `url` property is used, as it normally would in any scenario involving a remote server.
 
-Continue by defining routes on the faux-server, to handle model syncing. Every route defines a mapping from a
-Model(or Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific
-handler (callback):
+Continue by defining routes on the faux-server, to handle Model syncing as needed. Every route defines a mapping
+from a Model(or Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some
+specific handler (callback):
 
 `<model-URL, sync-method> → handler`
 
-For example, to handle the creation of a Book, define a route that maps the `<"library-app/books", "POST">` pair to a
-handler, like so:
+For example, to handle the creation of a Book (`Books.create(..)`), define a route that maps the
+`<"library-app/books", "POST">` pair to a handler, like so:
 
 ```javascript
 fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
@@ -94,12 +94,13 @@ fauxServer.addRoute("createBook", "library-app/books", "POST", function (context
 ```
 
 The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is pretty
-straightforward in the preceding example but note that the URL may (and usually will) be specified as a matching 
-expression, similar to those used on [Backbone routes](http://backbonejs.org/#Router-routes). So URL-expressions 
-may contain parameter parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`,
-which can match any number of URL components. The values captured by params and splats will be passed as extra
-parameters to the given handler method. The URL-expression may also be a regular expression, in which case all
-values captured by reg-exp capturing groups will be passed as extra parameters to the handler method.
+straightforward in the preceding example - it's the URL of the Books Collection. Note however that the URL may
+(and usually will) be specified as a matching expression, similarly to
+[Backbone routes](http://backbonejs.org/#Router-routes): URL-expressions may contain parameter parts, `:param`,
+which match a single URL component between slashes; and splat parts `*splat`, which can match any number of URL
+components. The values captured by params and splats will be passed as extra parameters to the given handler
+method. The URL-expression may also be a regular expression, in which case all values captured by reg-exp
+capturing groups will be passed as extra parameters to the handler method.
 
 Define more routes to handle updating, reading and deleting Models. The `addRoutes` method is used below to define
 routes to handle all actions (create, read, update and delete) for the preceding Book example:
@@ -164,7 +165,7 @@ be gained by taking a look at the test suit and - of course - the source.
 
 ### Methods
 
-All methods return the faux-server unless otherwise noted
+All methods return the faux-server unless otherwise noted.
 
 #### addRoute (name, urlExp, httpMethod, handler)
 
@@ -207,6 +208,7 @@ defined will be used.
     * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on 'create' (POST) or
        'update' (PUT).
     * `context.httpMethod`: The HTTP Method (POST, GET, PUT, DELETE) that is currently being handled by the handler.
+    * `context.url`: The URL that is currently being handled by the handler.
     * `context.httpMethodOverride`: The true HTTP method (POST, GET, PUT, DELETE) that is currently being handled
        when `Backbone.emulateHTTP` is set to true. The equivalent of
        [Backbone's](http://backbonejs.org/#Sync-emulateHTTP) `X-HTTP-Method-Override` header.
@@ -226,7 +228,7 @@ Add multiple routes to the faux-server.
 
 #### removeRoute (name)
 
-Remove a route of given name.
+Remove the route of given name.
 * `name`: Name of route to remove.
 
 #### removeRoutes ()
@@ -261,8 +263,9 @@ Get the faux-server version
 
 #### noConflict ()
 
-Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Returns a reference
-to the faux-server.
+Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Only useful when working
+in a browser environment without a module-framework as this is the only case where `fauxServer` is exposed globally.
+Returns a reference to the faux-server.
 
 License
 -------
