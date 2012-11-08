@@ -17,8 +17,8 @@ you choose to move to a real server, switching back to Backbone's native, ajax-b
 Usage
 -----
 
-Backbone-faux-server will be exposed as a Global, a CommonJS module or an AMD module depending on the
-detected environment.
+Backbone-faux-server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
+environment.
 
 * When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
 
@@ -53,8 +53,8 @@ detected environment.
     });
     ```
 
-    (AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
-    [Underscore](https://github.com/amdjs/underscore) are available)
+    (you'll probably be using AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
+    [Underscore](https://github.com/amdjs/underscore))
 
 Define Backbone Models and Collections as you normally would:
 
@@ -94,12 +94,12 @@ fauxServer.addRoute("createBook", "library-app/books", "POST", function (context
 ```
 
 The "createBook" parameter simply defines a name for the route. The URL parameter, "library-app/books", is pretty
-straightforward in the preceding example but note that the URL may also be specified as a matching expression, similar
-to those used on [Backbone routes](http://backbonejs.org/#Router-routes). So URL-expressions may contain parameter
-parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`, which can match any
-number of URL components. The values captured by params and splats will be passed as parameters to the given handler
-method. The URL-expression can also be a raw regular expression, in which case all values captured by reg-exp capturing
-groups will be passed as parameters to the handler method.
+straightforward in the preceding example but note that the URL may (and usually will) be specified as a matching 
+expression, similar to those used on [Backbone routes](http://backbonejs.org/#Router-routes). So URL-expressions 
+may contain parameter parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`,
+which can match any number of URL components. The values captured by params and splats will be passed as extra
+parameters to the given handler method. The URL-expression may also be a regular expression, in which case all
+values captured by reg-exp capturing groups will be passed as extra parameters to the handler method.
 
 Define more routes to handle updating, reading and deleting Models. The `addRoutes` method is used below to define
 routes to handle all actions (create, read, update and delete) for the preceding Book example:
@@ -158,7 +158,7 @@ to get it, along with Backbone and Underscore). To run the tests on the command 
 Reference
 ---------
 
-The following list is not exhaustive, but includes all essential parts of the faux-server API. The ommitted
+The following list, while not exhaustive, includes all essential parts of the faux-server API. The ommitted
 bits are there to aid testing and fascilitate fancy stuff you probably won't ever need. Further insight may
 be gained by taking a look at the test suit and - of course - the source.
 
