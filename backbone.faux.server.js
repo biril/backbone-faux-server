@@ -1,5 +1,5 @@
 /**
- * Backbone Faux Server v0.3.0
+ * Backbone Faux Server v0.4.0
  * https://github.com/biril/backbone-faux-server
  * Licensed under the MIT License.
  * Copyright (c) 2012 Alex Lambiris
@@ -100,13 +100,14 @@
 
 		// If faux-server is disabled, fall back to original sync
 		if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
+		
 		var c = { // Handler context
-			data: null,
-			url: null,
-			httpMethod: crudToHttp[crudMethod],
-			route: null
-		},
-		result = null;
+				data: null,
+				url: null,
+				httpMethod: crudToHttp[crudMethod],
+				route: null
+			},
+			result = null;
 
 		// When emulating HTTP, 'create', 'update' and 'delete' are all mapped to POST.
 		if (Backbone.emulateHTTP && (c.httpMethod === "POST" || c.httpMethod === "PUT" || c.httpMethod === "DELETE")) {
@@ -293,7 +294,7 @@
 		 * @return {string} Current version of the library
 		 */
 		getVersion: function () {
-			return "0.3.0";
+			return "0.4.0";
 		},
 	
 		/**
