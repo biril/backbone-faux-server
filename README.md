@@ -49,7 +49,7 @@ environment.
     console.log("working with version " + fauxServer.getVersion());
     ```
     
-    (`amd install` Backbone & Underscore dependencies beforehand - see package.json)
+    (`npm install` Backbone & Underscore dependencies beforehand - see package.json)
 
 * Or list as a dependency when working *with an AMD loader* (e.g. require.js)
 
