@@ -8,16 +8,23 @@ A (tiny) framework for easily mocking-up a server when working with
 [Backbone.js](https://github.com/documentcloud/backbone)
 
 Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers (callbacks). Faux-server
-overrides Backbone's native sync so that whenever a Model (or Collection) is synced and its URL along with the sync
-method being used form a pair that matches a defined route, the route's handler is invoked. Implement handlers in JS to
-test the expected behaviour of your app, work with dummy data, support persistence using local-storage, etc. When / if
-you choose to move to a real server, switching back to Backbone's native, ajax-based sync is as simple as calling
-`fauxServer.enable(false)`.
+overrides (is a drop-in replacement of) Backbone's native sync so that whenever a Model (or Collection) is synced
+and its URL along with the sync method being used form a pair that matches a defined route, the route's handler is
+invoked. Implement handlers in JS to test the expected behaviour of your app, work with dummy data, support
+persistence using local-storage, etc. When / if you choose to move to a real server, switching back to Backbone's
+native, ajax-based sync is as simple as calling `fauxServer.enable(false)`.
+
+Backbone faux server grew out of the author's need to quickly flesh out Backbone prototype apps without having to
+fiddle with a server, a DB, or anything else that would require more than a JS script. Other solutions exist for
+this (such as [Backbone localStorage Adapter](https://github.com/jeromegn/Backbone.localStorage)) but they deviate
+from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence. Backbone faux server
+allows you to handle POSTs, GETs, PUTs and DELETEs *per* Model (or Collection) URL as if you're working on the
+server side. Any functionality written this way, may be ported to a real server in a very straightforward manner.
 
 Usage
 -----
 
-Backbone-faux-server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
+Backbone faux server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
 environment.
 
 * When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
