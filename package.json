@@ -10,11 +10,11 @@
     "url": "https://github.com/biril/backbone-faux-server"
   },
   "bugs": "https://github.com/biril/backbone-faux-server/issues",
+  "license": "MIT",
   "keywords": [
-    "util",
     "server",
-    "dummy",
     "backbone"
+    "util"
   ],
   "dependencies": {
     "underscore": "1.4.x",
@@ -26,8 +26,10 @@
   "scripts": {
     "test": "node ./test/testrunner.js"
   },
-  "license": "MIT",
   "engines": {
     "node": ">=0.8"
+  },
+  "directories": {
+    "test": "test"
   }
 }
