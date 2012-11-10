@@ -12,8 +12,10 @@
   "bugs": "https://github.com/biril/backbone-faux-server/issues",
   "license": "MIT",
   "keywords": [
-    "server",
     "backbone",
+    "test",
+    "mock",
+    "server",
     "util"
   ],
   "dependencies": {
