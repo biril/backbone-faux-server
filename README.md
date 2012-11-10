@@ -21,9 +21,11 @@ from (or at least obscure) Backbone's opinion of Model URLs, REST and their inte
 allows you to handle POSTs, GETs, PUTs and DELETEs *per* Model (or Collection) URL as if you're working on the
 server side. Any functionality written this way, may be ported to a real server in a very straightforward manner.
 
-Usage
------
 
+Set up
+------
+
+`git clone git://github.com/biril/backbone-faux-server` or `npm install backbone-faux-server` to get up an drunning.
 Backbone faux server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
 environment.
 
@@ -62,6 +64,10 @@ environment.
 
     (you'll probably be using AMD-compliant versions of [Backbone](https://github.com/amdjs/backbone) and
     [Underscore](https://github.com/amdjs/underscore))
+
+
+Usage
+-----
 
 Define Backbone Models and Collections as you normally would:
 
@@ -155,6 +161,7 @@ fauxServer.addRoutes({
 }
 ```
 
+
 Testing
 -------
 
@@ -162,6 +169,7 @@ The test suite may be run in a browser or on the command line. To run in a brows
 command line version runs on Node.js and depends on [node-qunit](https://github.com/kof/node-qunit) (`npm install`
 to get it, along with Backbone and Underscore). To run the tests on the command line either `make test` or
 `npm test`.
+
 
 Reference
 ---------
@@ -188,6 +196,7 @@ defined routes in order to find a handler for reading this Collection. When a ma
 pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see `setOnNoRoute`).
 Later routes take precedence over earlier routes so in situations where multiple routes match, the one most recently
 defined will be used.
+
 * `name`: The name of the route
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
     functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
@@ -212,6 +221,7 @@ defined will be used.
     where `context` contains properties `data`, `httpMethod`, `httpMethodOverride`, `route` and `param1`, `param2`, ...
     are parameters deduced from matching the `urlExp` to the Model (or Collection) URL. Specifically, about `context`
     properties:
+
     * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on 'create' (POST) or
        'update' (PUT).
     * `context.httpMethod`: The HTTP Method (POST, GET, PUT, DELETE) that is currently being handled by the handler.
@@ -230,12 +240,14 @@ defined will be used.
 #### addRoutes (routes)
 
 Add multiple routes to the faux-server.
+
 * `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and each route (nested
 	hash) need only contain `urlExp`, `httpMethod` and `handler`. Also see `addRoute`.
 
 #### removeRoute (name)
 
 Remove the route of given name.
+
 * `name`: Name of route to remove.
 
 #### removeRoutes ()
@@ -245,6 +257,7 @@ Remove all defined routes.
 #### getRoute (name)
 
 Get route of given name. 
+
 * `name`: Name of route to acquire.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a copy and cannot
 	be modified to alter faux-server's behaviour
@@ -253,6 +266,7 @@ Get route of given name.
 
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>` pair. By default the
 native sync will be invoked - use this method to provide a custom handler which overrides this behaviour.
+
 * `handler`: A handler to be invoked when no route is matched to the current `<model-URL, sync-method>`. Ommit the
 	parameter to set the native sync behaviour. See `addRoute` for handler's signature and semantics. Note that a
 	default-handler isn't part of a route, so the `context.route` parameter will not be valid.
@@ -261,6 +275,7 @@ native sync will be invoked - use this method to provide a custom handler which 
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync method. Handy for
 easily toggling between mock / real server
+
 * `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit altogether to enable the faux-server,
 	set to false to disable
 
@@ -273,6 +288,7 @@ Get the faux-server version
 Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Only useful when working
 in a browser environment without a module-framework as this is the only case where `fauxServer` is exposed globally.
 Returns a reference to the faux-server.
+
 
 License
 -------
