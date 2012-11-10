@@ -25,7 +25,7 @@ server side. Any functionality written this way, may be ported to a real server 
 Set up
 ------
 
-`git clone git://github.com/biril/backbone-faux-server` or `npm install backbone-faux-server` to get up an drunning.
+`git clone git://github.com/biril/backbone-faux-server` or `npm install backbone-faux-server` to get up and running.
 Backbone faux server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
 environment.
 
