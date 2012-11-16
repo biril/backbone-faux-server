@@ -138,8 +138,17 @@
 		result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
 
 		// A string result indicates error
-		if (_.isString(result)) { options.error(model, result); }
-		else { options.success(result); }
+		var deferred = $.Deferred();
+		if (_.isString(result)) { 
+			options.error(model, result);
+			deferred.reject(result);
+		}
+		else { 
+			options.success(result); 
+			deferred.resolve(result);
+		}
+
+		return deferred.promise();
 	};
 
 	return _.extend(fauxServer, {
