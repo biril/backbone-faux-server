@@ -1,4 +1,4 @@
-/*global QUnit, test, equal, ok, strictEqual, notStrictEqual, deepEqual, Backbone, fauxServer */
+/*global QUnit, test, equal, ok, strictEqual, notStrictEqual, deepEqual, start, stop, Backbone, fauxServer */
 (function () {
 	"use strict";
 
@@ -133,6 +133,7 @@
 			delete this.Books;
 			fauxServer.removeRoutes();
 			fauxServer.setDefaultHandler();
+			fauxServer.setLatency();
 			Backbone.emulateHTTP = false;
 			Backbone.setDomLibrary({
 				ajax: function () {
@@ -433,5 +434,25 @@
 		});
 
 		book.save();
+	});
+
+	test("Latency taken into account when syncing", 1, function () {
+		var latency = 303,
+			t0 = 0,
+			now = function () { return +(new Date()); },
+			book = this.createDummyBook();
+		book.urlRoot = "library-app/books";
+
+		fauxServer.setLatency(latency);
+
+		fauxServer.setDefaultHandler(function () { // Add a default handler
+			var dt = now() - t0;
+			start();
+			ok(dt >= latency, "Handler called after " + dt + " MS");
+		});
+
+		t0 = now();
+		stop();
+		book.fetch();
 	});
 }());

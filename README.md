@@ -271,6 +271,14 @@ native sync will be invoked - use this method to provide a custom handler which 
 	parameter to set the native sync behaviour. See `addRoute` for handler's signature and semantics. Note that a
 	default-handler isn't part of a route, so the `context.route` parameter will not be valid.
 
+#### setLatency (min, max)
+
+Set server's emulated latency (zero by default)
+* `min` Server's emulated latency in MS. Interpreted as the minimum of a range when a `max` value is provided.
+    Ommitting will set to 0
+* `max` Maximum server latency in MS. Specifying this will cause syncing to occur with a random latency in the
+    [min, max] range
+		
 #### enable (shouldEnable)
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync method. Handy for

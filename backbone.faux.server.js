@@ -53,6 +53,9 @@
 			};
 		}()),
 
+		// Server latency
+		latency = 0,
+
 		// Map from CRUD to HTTP-methods
 		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE" },
 		
@@ -107,7 +110,7 @@
 				httpMethod: crudToHttp[crudMethod],
 				route: null
 			},
-			result = null;
+			execHandler = null;
 
 		// When emulating HTTP, 'create', 'update' and 'delete' are all mapped to POST.
 		if (Backbone.emulateHTTP && (c.httpMethod === "POST" || c.httpMethod === "PUT" || c.httpMethod === "DELETE")) {
@@ -135,11 +138,17 @@
 			}
 		}
 
-		result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
+		// An exec-method to actually run the handler and subsequently invoke success / error callbacks
+		execHandler = function () {
+			var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
 
-		// A string result indicates error
-		if (_.isString(result)) { options.error(model, result); }
-		else { options.success(result); }
+			if (_.isString(result)) { options.error(model, result); } // A string result indicates error
+			else { options.success(result); }
+		};
+
+		// Call exec-method *now* if zero-latency, else call later
+		if (!latency) { execHandler(); }
+		else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
 	};
 
 	return _.extend(fauxServer, {
@@ -276,6 +285,18 @@
 				handlerParams: []
 			};
 			return this; // Chain
+		},
+		/**
+		 * Set server's emulated latency
+		 * @param {number} min Server's emulated latency in MS. Interpreted as the minimum of a range
+		 *  when a 'max' value is provided. Ommitting will set to 0
+		 * @param {number} max Maximum server latency in MS. Specifying this parameter will cause
+		 *  syncing to occur with a random latency in the [min, max] range
+		 * @return {object} The faux-server
+		 */
+		setLatency: function (min, max) {
+			latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
+			return this;
 		},
 		/**
 		 * Enable or disable the faux-server. When the faux-server is disabled, syncing is performed
