@@ -274,9 +274,9 @@ native sync will be invoked - use this method to provide a custom handler which 
 #### setLatency (min, max)
 
 Set server's emulated latency (zero by default)
-* `min` Server's emulated latency in MS. Interpreted as the minimum of a range when a `max` value is provided.
+* `min`: Server's emulated latency in ms. Interpreted as the minimum of a range when a `max` value is provided.
     Ommitting will set to 0
-* `max` Maximum server latency in MS. Specifying this will cause syncing to occur with a random latency in the
+* `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random latency in the
     [min, max] range
 		
 #### enable (shouldEnable)

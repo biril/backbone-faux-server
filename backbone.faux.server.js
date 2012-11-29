@@ -288,9 +288,9 @@
 		},
 		/**
 		 * Set server's emulated latency
-		 * @param {number} min Server's emulated latency in MS. Interpreted as the minimum of a range
+		 * @param {number} min Server's emulated latency in ms. Interpreted as the minimum of a range
 		 *  when a 'max' value is provided. Ommitting will set to 0
-		 * @param {number} max Maximum server latency in MS. Specifying this parameter will cause
+		 * @param {number} max Maximum server latency in ms. Specifying this parameter will cause
 		 *  syncing to occur with a random latency in the [min, max] range
 		 * @return {object} The faux-server
 		 */
