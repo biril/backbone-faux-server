@@ -135,11 +135,7 @@
 			fauxServer.setDefaultHandler();
 			fauxServer.setLatency();
 			Backbone.emulateHTTP = false;
-			Backbone.setDomLibrary({
-				ajax: function () {
-					throw "Unexpected call to DOM-library ajax";
-				}
-			});
+			Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
 		}
 	});
 
@@ -305,9 +301,7 @@
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
-		Backbone.setDomLibrary({
-			ajax: function () { ok(true, "Native sync called when no route matches"); }
-		});
+		Backbone.ajax = function () { ok(true, "Native sync called when no route matches"); };
 
 		book.save();
 
@@ -315,9 +309,7 @@
 			ok(true, "Handler called when route matches");
 		});
 
-		Backbone.setDomLibrary({ // This better not be called now
-			ajax: function () { ok(false, "Fail: Native sync called when route matches"); }
-		});
+		Backbone.ajax = function () { ok(false, "Fail: Native sync called when route matches"); };
 
 		book.save();
 	});
@@ -330,17 +322,13 @@
 			ok(true, "Default-handler called");
 		});
 
-		Backbone.setDomLibrary({ // This better not be called
-			ajax: function () { ok(false, "Fail: Native sync called when default-handler defined"); }
-		});
+		Backbone.ajax = function () { ok(false, "Fail: Native sync called when default-handler defined"); }; // This better not be called
 
 		book.save();
 
 		fauxServer.setDefaultHandler(); // Remove default handler
 
-		Backbone.setDomLibrary({
-			ajax: function () { ok(true, "Native sync called when no default-handler defined"); }
-		});
+		Backbone.ajax = function () { ok(true, "Native sync called when no default-handler defined"); };
 
 		book.save();
 	});
@@ -415,11 +403,7 @@
 		fauxServer.addRoute("createBook", "library-app/books", "*", function () {
 			ok(false, "Fail: Handler called when faux-server disabled");
 		});
-		Backbone.setDomLibrary({
-			ajax: function () {
-				ok(true, "Native sync called when faux-server disabled");
-			}
-		});
+		Backbone.ajax = function () { ok(true, "Native sync called when faux-server disabled"); };
 
 		book.save();
 
@@ -427,11 +411,7 @@
 		fauxServer.addRoute("createBook", "library-app/books", "*", function () {
 			ok(true, "Handler called when faux-server re-enabled");
 		});
-		Backbone.setDomLibrary({
-			ajax: function () {
-				ok(false, "Fail: Native sync called when faux-server re-enabled");
-			}
-		});
+		Backbone.ajax = function () { ok(false, "Fail: Native sync called when faux-server re-enabled"); };
 
 		book.save();
 	});
