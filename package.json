@@ -20,10 +20,10 @@
   ],
   "dependencies": {
     "underscore": "1.4.x",
-    "backbone": "0.9.x"
+    "backbone": "0.9.9"
   },
   "devDependencies": {
-    "qunit": "0.5.x"
+    "qunit": "1.10.x"
   },
   "scripts": {
     "test": "node ./test/testrunner.js"
