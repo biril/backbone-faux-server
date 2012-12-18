@@ -29,7 +29,7 @@ Set up
 Backbone faux server will be exposed as a Global, a CommonJS module or an AMD module depending on the detected
 environment.
 
-* When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js
+* When working in a *browser environment, without a module-framework,* include backbone.faux.server.js after backbone.js:
 
     ```html
     ...
@@ -44,16 +44,16 @@ environment.
     console.log("working with version " + fauxServer.getVersion());
     ```
 
-* `require` when working *with CommonJS* (e.g. Node.js)
+* `require` when working *with CommonJS* (e.g. Node.js). Assuming BFS is `npm install`ed:
 
     ```javascript
-    var fauxServer = require("./backbone.faux.server.js");
+    var fauxServer = require("backbone-faux-server");
     console.log("working with version " + fauxServer.getVersion());
     ```
     
-    (`npm install` Backbone & Underscore dependencies beforehand - see package.json)
+    (see Caveats for issues related to `npm install`ing Backbone along with BFS)
 
-* Or list as a dependency when working *with an AMD loader* (e.g. require.js)
+* Or list as a dependency when working *with an AMD loader* (e.g. require.js):
 
     ```javascript
     // Your module
@@ -184,18 +184,18 @@ All methods return the faux-server unless otherwise noted.
 
 #### addRoute (name, urlExp, httpMethod, handler)
 
-Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL & sync-method (as
-defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific handler (callback):
+Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL & sync-method (an
+HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
 
 `<model-URL, sync-method> → handler`
 
 So every time a Model is created, read, updated or deleted, its URL and the the sync method being used will be tested
 against defined routes in order to find a handler for creating, reading, updating or deleting this Model. The same
-applies to reading Collections. Everytime a Collection is read, its URL (and the 'read' method) will be tested against
+applies to reading Collections. Whenever a Collection is read, its URL (and the 'read' method) will be tested against
 defined routes in order to find a handler for reading this Collection. When a match for the `<model-URL, sync-method>`
-pair is not found among defined routes, the native sync (or a custom handler) will be invoked (see `setOnNoRoute`).
-Later routes take precedence over earlier routes so in situations where multiple routes match, the one most recently
-defined will be used.
+pair is not found among defined routes, the native sync will be invoked (this may be overriden - see 
+`fauxServer.setDefaultHandler`). Later routes take precedence over earlier routes so in situations where multiple
+routes match, the one most recently defined will be used.
 
 * `name`: The name of the route
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
@@ -204,15 +204,15 @@ defined will be used.
     match any number of URL components. The values captured by params and splats will be passed as parameters to the
     given handler method. The `urlExp` can also be a raw regular expression, in which case all values captured by
     reg-exp capturing groups will be passed as parameters to the given handler method.
-* `httpMethod`: The sync method, as defined in the context of HTTP (POST, GET, PUT, DELETE), that should trigger the
+* `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE), that should trigger the
 	route's handler (both the URL-expression and the method should match for the handler to be invoked). `httpMethod`
 	may also be set to '*' to create a match-all-methods handler; one that will be invoked whenever `urlExp` matches
 	the model's (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
 	the same effect. In the scope of a match-all-methods handler, the HTTP method currently being handled may be
 	acquired by querying the `context` parameter for `context.httpMethod`. Note that when `Backbone.emulateHTTP` is
-	set to true, 'create', 'update' and 'delete' are all mapped to POST so `context.httpMethod` will be set to POST
-	for all these methods. However, in this case, the true HTTP method being handled may be acquired by querying the
-	handler's `context` for `context.httpMethodOverride`.
+	set to true, 'create', 'update', 'patch' and 'delete' are all mapped to POST so `context.httpMethod` will be set
+	to POST for all these methods. However, in this case, the true HTTP method being handled may be acquired by
+	querying the handler's `context` for `context.httpMethodOverride`.
 * `handler`: The handler to be invoked when both route's URL-expression and route's method match. A do-nothing handler
 	will be used if one is not provided. Its signature should be
     
@@ -223,19 +223,21 @@ defined will be used.
     properties:
 
     * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on 'create' (POST) or
-       'update' (PUT).
-    * `context.httpMethod`: The HTTP Method (POST, GET, PUT, DELETE) that is currently being handled by the handler.
+       'update' (PUT) or 'patch' (PATCH). In the specific case of PATCH, `context.data` may only contain a _subset_ of
+       Model's attributes.
+    * `context.httpMethod`: The HTTP Method (POST, GET, PUT, PATCH or DELETE) that is currently being handled by the
+       handler.
     * `context.url`: The URL that is currently being handled by the handler.
-    * `context.httpMethodOverride`: The true HTTP method (POST, GET, PUT, DELETE) that is currently being handled
-       when `Backbone.emulateHTTP` is set to true. The equivalent of
+    * `context.httpMethodOverride`: The true HTTP method (POST, GET, PUT, PATCH or DELETE) that is currently being
+       handled when `Backbone.emulateHTTP` is set to true. The equivalent of
        [Backbone's](http://backbonejs.org/#Sync-emulateHTTP) `X-HTTP-Method-Override` header.
     * `context.route`: The route that is currently being handled by the handler.
     
     On success, the handler should return created Model attributes after handling a POST and updated Model attributes
-    after handling a PUT. Return Model attributes after handling a GET or an array of Model attributes after handling
-    a GET that refers to a collection. Note that only attributes that have been changed on the server (and should be
-    updated on the client) need to be included in returned hashes. Return nothing after handling a DELETE. On failure,
-    return any string (presumably a custom error messsage, an HTTP status code that indicates failure, etc).
+    after handling a PUT or PATCH. Return Model attributes after handling a GET or an array of Model attributes after
+    handling a GET that refers to a collection. Note that only attributes that have been changed on the server (and
+    should be updated on the client) need to be included in returned hashes. Return nothing after handling a DELETE.
+    On failure, return any string (presumably a custom error messsage, an HTTP status code that indicates failure, etc).
 
 #### addRoutes (routes)
 
@@ -298,6 +300,9 @@ Run in no-conflict mode, setting the global `fauxServer` variable to to its prev
 in a browser environment without a module-framework as this is the only case where `fauxServer` is exposed globally.
 Returns a reference to the faux-server.
 
+Caveats / WTF
+-------------
+...
 
 License
 -------

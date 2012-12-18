@@ -232,6 +232,37 @@
 		strictEqual(book.get("modificationTime"), "now", "Attributes returned by PUT-handler are set on Model");
 	});
 
+	test("PATCH-handler functions as expected when saving a Model which is not new (has an id)", 10, function () {
+		var updatedBookId = "0123456789",
+			book = this.createDummyBook(updatedBookId);
+		book.urlRoot = "library-app/books";
+
+		// Test patching when no 'changed attributes' are given (expecting complete model data)
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+			ok(true, "PATCH-handler is called (when patching without 'changed attributes')");
+			ok(context, "_context_ is passed to PATCH-handler");
+			deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
+			strictEqual(context.httpMethod, "PATCH", "_context.httpMethod_ is set to 'PATCH'");
+			strictEqual(context.url, book.urlRoot + "/" + updatedBookId, "_context.url_ is set to 'Model-URL/id'");
+			strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
+			strictEqual(bookId, updatedBookId, "_bookId_ is passed to PATCH-handler and set to id of book being updated");
+
+			return { modificationTime: "now" };
+		});
+
+		book.save(null, { patch: true }); // Patching without any 'changed attributes'
+
+		strictEqual(book.get("modificationTime"), "now", "Attributes returned by PATCH-handler are set on Model");
+
+		// Test patching with some specific 'changed attributes' (expecting only changed attributes)
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+			ok(true, "PATCH-handler is called (when patching witH some specific 'changed attributes')");
+			deepEqual(context.data, { author: "Me" }, "_context.data_ is set and equals 'changed attributes'");
+		});
+
+		book.save({ author: "Me" }, { patch: true }); // Patching with some specific 'changed attributes'
+	});
+
 	test("DELETE-handler functions as expected when destroying a Model", 6, function () {
 		var deletedBookId = "0123456789",
 			book = this.createDummyBook(deletedBookId);
@@ -279,6 +310,22 @@
 		});
 
 		book.save(); // Update
+	});
+
+	test("A POST-handler (instead of PATCH) called when updating Model and Backbone.emulateHTTP is true", 4, function () {
+		Backbone.emulateHTTP = true;
+
+		var book = this.createDummyBook("0123456789");
+		book.urlRoot = "library-app/books";
+
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+			ok(true, "POST-handler is called");
+			ok(context, "_context_ is passed to POST-handler");
+			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
+			strictEqual(context.httpMethodOverride, "PATCH", "_context.httpMethodOverride_ is set to 'PATCH'");
+		});
+
+		book.save(null, { patch: true }); // Update
 	});
 
 	test("A POST-handler (instead of DELETE) called when destroying Model and Backbone.emulateHTTP is true", 4, function () {
@@ -333,7 +380,7 @@
 		book.save();
 	});
 
-	test("Returning a string from any handler signals an error", 5, function () {
+	test("Returning a string from any handler signals an error", 6, function () {
 		fauxServer.addRoutes({
 			createBook: {
 				urlExp: "library-app/books",
@@ -353,6 +400,11 @@
 			updateBook: {
 				urlExp: "library-app/books/:id",
 				httpMethod: "PUT",
+				handler: function () { return "Some error occured"; }
+			},
+			patchBook: {
+				urlExp: "library-app/books/:id",
+				httpMethod: "PATCH",
 				handler: function () { return "Some error occured"; }
 			},
 			deleteBook: {
@@ -382,6 +434,11 @@
 
 		book.save(null, { // Update
 			error: function () { ok(true, "True when updating a Model (a PUT-handler)"); }
+		});
+
+		book.save(null, { // Update (by patching)
+			patch: true,
+			error: function () { ok(true, "True when patching a Model (a PATCH-handler)"); }
 		});
 
 		book.destroy({ // Delete

@@ -56,8 +56,8 @@
 		// Server latency
 		latency = 0,
 
-		// Map from CRUD to HTTP-methods
-		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE" },
+		// Map from CRUD (+ patch) to HTTP-methods
+		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE", "patch": "PATCH" },
 		
 		// Routes
 		routes = [],
@@ -95,6 +95,24 @@
 			return null;
 		},
 
+		// Get the data that should be sent to the server during a sync. This depends on
+		//  the sync-method being used and any options that may have been given
+		getRequestData = function (httpMethod, model, options) {
+			// A data property whithin options overrides any Model data.
+			if (options.data) { return options.data; }
+
+			// If no Model is given (??) then req data will be undefined no matter what
+			if (!model) { return; }
+
+			// In the specific case of PATCH, a hash of 'changed attributes' is expected within
+			//  options. If no such thing is present then the complete Model representation will
+			//  be used instead
+			if (httpMethod === "PATCH") { return options.attrs || model.toJSON(); }
+
+			// Send the complete Model representation when POSTing or PUTing
+			if (httpMethod === "POST" || httpMethod === "PUT") { return model.toJSON(); }
+		},
+
 		// A convenient no-op to reuse
 		noOp = function () {};
 
@@ -112,8 +130,8 @@
 			},
 			execHandler = null;
 
-		// When emulating HTTP, 'create', 'update' and 'delete' are all mapped to POST.
-		if (Backbone.emulateHTTP && (c.httpMethod === "POST" || c.httpMethod === "PUT" || c.httpMethod === "DELETE")) {
+		// When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
+		if (Backbone.emulateHTTP && c.httpMethod !== "GET") {
 			c.httpMethodOverride = c.httpMethod;
 			c.httpMethod = "POST";
 		}
@@ -128,15 +146,8 @@
 			return nativeSync.call(model, crudMethod, model, options);
 		}
 
-		// Ensure that we have the appropriate request data. A data property whithin options overrides
-		//  the Model / Collection data. Additionally, Model / Collection data should only be provided
-		//  to the server when creating or updating
-		if (options.data) { c.data = options.data; }
-		else {
-			if (model && crudMethod === "create" || crudMethod === "update") {
-				c.data = model.toJSON();
-			}
-		}
+		// Ensure that we have the appropriate request data.
+		c.data = getRequestData(c.httpMethod, model, options);
 
 		// An exec-method to actually run the handler and subsequently invoke success / error callbacks
 		execHandler = function () {
@@ -154,56 +165,57 @@
 	return _.extend(fauxServer, {
 		/**
 		 * Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL
-		 *  & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some specific
+		 *  & sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific
 		 *  handler (callback):
 		 *  <model-URL, sync-method> -> handler
-		 *  So every time a Model is created, read, updated or deleted, its URL and the the sync method being
+		 *  So any time a Model is created, read, updated or deleted, its URL and the the sync method being
 		 *  used will be tested against defined routes in order to find a handler for creating, reading,
-		 *  updating or deleting this Model. The same applies to reading Collections. Everytime a Collection
+		 *  updating or deleting this Model. The same applies to reading Collections. Whenever a Collection
 		 *  is read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 		 *  handler for reading this Collection. When a match for the <model-URL, sync-method> pair is not
-		 *  found among defined routes, the native sync (or a custom handler) will be invoked (see
-		 *  fauxServer.setOnNoRoute). Later routes take precedence over earlier routes so in
-		 *  situations where multiple routes match, the one most recently defined will be used.
+		 *  found among defined routes, the native sync will be invoked (this may be overriden - see
+		 *  fauxServer.setDefaultHandler). Later routes take precedence over earlier routes so in
+		 *  setups where multiple routes match, the one most recently defined will be used.
 		 * @param {string} name The name of the route
 		 * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
 		 *  tested. This is syntactically and functionally analogous to Backbone routes so urlExps may contain
 		 *  parameter parts, ':param', which match a single URL component between slashes; and splat parts
 		 *  '*splat', which can match any number of URL components. The values captured by params and splats
 		 *  will be passed as parameters to the given handler method. (see http://backbonejs.org/#Router-routes).
-		 *  The urlExp can also be a raw regular expression, in which case all values captured by reg-exp
+		 *  The urlExp can also be a regular expression, in which case all values captured by reg-exp
 		 *  capturing groups will be passed as parameters to the given handler method.
-		 * @param {string} [httpMethod="*"] The sync method, as defined in the context of HTTP (POST, GET, PUT,
-		 *  DELETE), that should trigger the route's handler (both the URL-expression and the method should
+		 * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)),
+		 *  that should trigger the route's handler (both the URL-expression and the method should
 		 *  match for the handler to be invoked). httpMethod may also be set to '*' to create a
 		 *  match-all-methods handler; one that will be invoked whenever urlExp matches the model's
 		 *  (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
-		 *  the same effect. In the scope of a math-all-mmethods handler, the HTTP method currently being
+		 *  the same effect. In the scope of a match-all-methods handler, the HTTP method currently being
 		 *  handled may be acquired by querying the context parameter for context.httpMethod. Note that when
-		 *  Backbone.emulateHTTP is set to true, 'create', 'update' and 'delete' are all mapped to POST so
-		 *  context.httpMethod will be set to POST for all these methods. However, in this case, the true HTTP
-		 *  method being handled may be acquired by querying the handler's context for context.httpMethodOverride.
+		 *  Backbone.emulateHTTP is set to true, 'create', 'update', 'delete' and 'patch' are all mapped to POST
+		 *  so context.httpMethod will be set to POST for all these methods. However, in this case, the true HTTP
+		 *  method may be acquired by querying the handler's context for context.httpMethodOverride.
 		 * @param {function} [handler=no-op] The handler to be invoked when both route's URL and route's method
 		 *  match. A do-nothing handler will be used if one is not provided. Its signature should be
 		 *  function (context, [param1, [param2, ...]])
-		 *  where context contains properties data, httpMethod, httpMethodOverrde, route and param1, param2, ...
+		 *  where context contains properties data, httpMethod, httpMethodOverride, route and param1, param2, ...
 		 *  are parameters deduced from matching the urlExp to the Model (or Collection) URL. Specifically, about
 		 *  context properties:
 		 *   * {any} context.data Attributes of the Model (or Collection) being proccessed. Valid only on
-		 *      'create' (POST) or 'update' (PUT).
-		 *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, DELETE) that is currently being
-		 *      handled by the handler.
+		 *      'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of PATCH, context.data
+		 *      may only contain a _subset_ of Model's attributes.
+		 *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, PATCH, DELETE) that is currently
+		 *      being handled by the handler.
 		 *   * {string} context.url The URL that is currently being handled by the handler
-		 *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, DELETE) that is
+		 *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, PATCH, DELETE) that is
 		 *      currently being handled when Backbone.emulateHTTP is set to true. The equivalent of
 		 *      Backbone's X-HTTP-Method-Override header (see http://backbonejs.org/#Sync-emulateHTTP).
 		 *   * {object} context.route The route that is currently being handled by the handler.
-		 *  On success: Return created Model attributes after handling a POST and updated Model attributes after
-		 *  handling a PUT. Return Model attributes after handling a GET or an array of Model attributes after
-		 *  handling a GET that refers to a collection. Note that only attributes that have been changed on the
-		 *  server (and should be updated on the client) need to be included in returned hashes. Return nothing
-		 *  after handling a DELETE. On failure: Return any string (presumably a custom error messsage, an HTTP
-		 *  status code that indicates failure, etc).
+		 *  On success: Return created Model attributes after handling a POST or updated Model attributes after
+		 *  handling a PUT or PATCH. Return Model attributes after handling a GET or an array of Model attributes
+		 *  after handling a GET that refers to a collection. Note that only attributes that have been changed on
+		 *  the server (and should be updated on the client) need to be included in returned hashes. Return
+		 *  nothing after handling a DELETE. On failure: Return any string (presumably a custom error messsage,
+		 *  an HTTP status code that indicates failure, etc).
 		 * @return {object} The faux-server
 		 */
 		addRoute: function (name, urlExp, httpMethod, handler) {
