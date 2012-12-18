@@ -131,7 +131,7 @@
 			execHandler = null;
 
 		// When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
-		if (Backbone.emulateHTTP && c.httpMethod !== "GET") {
+		if ((Backbone.emulateHTTP || options.emulateHTTP) && c.httpMethod !== "GET") {
 			c.httpMethodOverride = c.httpMethod;
 			c.httpMethod = "POST";
 		}
@@ -185,15 +185,15 @@
 		 *  The urlExp can also be a regular expression, in which case all values captured by reg-exp
 		 *  capturing groups will be passed as parameters to the given handler method.
 		 * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)),
-		 *  that should trigger the route's handler (both the URL-expression and the method should
-		 *  match for the handler to be invoked). httpMethod may also be set to '*' to create a
-		 *  match-all-methods handler; one that will be invoked whenever urlExp matches the model's
-		 *  (or collection's) URL _regardless_ of method. Omitting the parameter or setting to falsy values has
-		 *  the same effect. In the scope of a match-all-methods handler, the HTTP method currently being
-		 *  handled may be acquired by querying the context parameter for context.httpMethod. Note that when
-		 *  Backbone.emulateHTTP is set to true, 'create', 'update', 'delete' and 'patch' are all mapped to POST
-		 *  so context.httpMethod will be set to POST for all these methods. However, in this case, the true HTTP
-		 *  method may be acquired by querying the handler's context for context.httpMethodOverride.
+		 *  that should trigger the route's handler (both the URL-expression and the method should match for the
+		 *  handler to be invoked). httpMethod may also be set to '*' to create a match-all-methods handler; one
+		 *  that will be invoked whenever urlExp matches the model's (or collection's) URL _regardless_ of method.
+		 *  Omitting the parameter or setting to falsy values has the same effect. In the scope of a
+		 *  match-all-methods handler, the HTTP method currently being handled may be acquired by querying the
+		 *  context parameter for context.httpMethod. Note that when Backbone.emulateHTTP is set to true or
+		 *  emulateHTTP is passed as an inline option during sync, 'create', 'update', 'delete' and 'patch' will
+		 *  all be mapped to POST. In this case context.httpMethod will be set to POST and the true HTTP method
+		 *  may beacquired by querying the handler's context for context.httpMethodOverride.
 		 * @param {function} [handler=no-op] The handler to be invoked when both route's URL and route's method
 		 *  match. A do-nothing handler will be used if one is not provided. Its signature should be
 		 *  function (context, [param1, [param2, ...]])

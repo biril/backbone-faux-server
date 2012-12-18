@@ -280,14 +280,16 @@
 		book.destroy(); // Delete
 	});
 
-	test("A POST-handler called when creating Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler called when creating Model and emulateHTTP is true", 4, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
+		// A POST-handler is called for 'create' regardless of the value of emulateHTTP.
+		//  Still, we want to make sure that context.httpMethodOverride is there, and set to POST
 		fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
-			ok(true, "POST-handler is called");
+			ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
 			strictEqual(context.httpMethodOverride, "POST", "_context.httpMethodOverride_ is set to 'POST'");
@@ -296,52 +298,73 @@
 		book.save(); // Create
 	});
 
-	test("A POST-handler (instead of PUT) called when updating Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler (instead of PUT) called when updating Model and emulateHTTP is true", 5, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 
 		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
-			ok(true, "POST-handler is called");
+			ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
 			strictEqual(context.httpMethodOverride, "PUT", "_context.httpMethodOverride_ is set to 'PUT'");
 		});
 
 		book.save(); // Update
+
+		// Also test with emulateHTTP as an inline option during update
+		Backbone.emulateHTTP = false;
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
+		});
+		book.save(null, { emulateHTTP: true });
 	});
 
-	test("A POST-handler (instead of PATCH) called when updating Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler (instead of PATCH) called when updating Model and emulateHTTP is true", 5, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 
 		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
-			ok(true, "POST-handler is called");
+			ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
 			strictEqual(context.httpMethodOverride, "PATCH", "_context.httpMethodOverride_ is set to 'PATCH'");
 		});
 
-		book.save(null, { patch: true }); // Update
+		book.save(null, { patch: true }); // Patch
+
+		// Also test with emulateHTTP as an inline option during patch
+		Backbone.emulateHTTP = false;
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
+		});
+		book.save(null, { emulateHTTP: true, patch: true });
 	});
 
-	test("A POST-handler (instead of DELETE) called when destroying Model and Backbone.emulateHTTP is true", 4, function () {
+	test("A POST-handler (instead of DELETE) called when destroying Model and emulateHTTP is true", 5, function () {
 		Backbone.emulateHTTP = true;
 
 		var book = this.createDummyBook("0123456789");
 		book.urlRoot = "library-app/books";
 		
 		fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
-			ok(true, "POST-handler is called");
+			ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
 			ok(context, "_context_ is passed to POST-handler");
 			strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
 			strictEqual(context.httpMethodOverride, "DELETE", "_context.httpMethodOverride_ is set to 'DELETE'");
 		});
 
 		book.destroy(); // Delete
+
+		// Also test with emulateHTTP as an inline option during delete
+		Backbone.emulateHTTP = false;
+		fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
+			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
+		});
+		book.destroy({ emulateHTTP: true });
 	});
 
 	test("Syncing performed by native sync iff no route matches and no default-handler defined", 2, function () {
