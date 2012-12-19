@@ -2,6 +2,15 @@
 (function () {
 	"use strict";
 
+	// Helper
+	var dumpArray = function (array) {
+		var i, l, d = [];
+		for (i = 0, l = array.length; i < l; ++i) {
+			d.push(array[i] === undefined ? "_undefined_" : array[i]);
+		}
+		return d.join(", ");
+	};
+
 	//
 	QUnit.module("Basics", {
 		setup: function () {
@@ -37,7 +46,23 @@
 		ok(!fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
 	});
 
-	test("URL-expressions match", function () {
+	test("URL-expressions match (regular expressions)", function () {
+		var matchingRoute = null, i, numOfTests,
+			tests = [{
+				urlExp: /\/?this\/is\/an?\/([^\/]+)\/([^\/]+)\/?/,
+				url: "is/this/is/a/regular/expression/?",
+				params: ["regular", "expression"]
+			}];
+
+		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+			fauxServer.addRoute("testRoute", tests[i].urlExp);
+			matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+			ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
+		}
+	});
+
+	test("URL-expressions match (named params & splats)", function () {
 		var matchingRoute = null, i, numOfTests,
 			tests = [{
 				urlExp: "some/url",
@@ -79,25 +104,77 @@
 				urlExp: "file/*path",
 				url: "file/nested/folder/file.txt",
 				params: ["nested/folder/file.txt"]
-			}, {
-				urlExp: "docs/:section(/:subsection)",
-				url: "docs/faq",
-				params: ["faq"]
-			}, {
-				urlExp: "docs/:section(/:subsection)",
-				url: "docs/faq/installing",
-				params: ["faq", "installing"]
-			}, {
-				urlExp: /\/?this\/is\/an?\/([^\/]+)\/([^\/]+)\/?/,
-				url: "is/this/is/a/regular/expression/?",
-				params: ["regular", "expression"]
 			}];
 		
 		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
 			fauxServer.addRoute("testRoute", tests[i].urlExp);
 			matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
 			ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
-			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + tests[i].params);
+			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
+		}
+	});
+
+	test("URL-expressions match (optional parts)", function () {
+		var matchingRoute = null, i, numOfTests,
+			tests = [{
+				urlExp: "docs/:section(/:subsection)",
+				url: "docs/faq",
+				params: ["faq", undefined]
+			}, {
+				urlExp: "docs/:section(/:subsection)",
+				url: "docs/faq/installing",
+				params: ["faq", "installing"]
+			}, {
+				urlExp: "docs/:section(/:subsection)(/:subsubsection)",
+				url: "docs/faq",
+				params: ["faq", undefined, undefined]
+			}, {
+				urlExp: "docs/:section(/:subsection)(/:subsubsection)",
+				url: "docs/faq/installing",
+				params: ["faq", "installing", undefined]
+			}, {
+				urlExp: "docs/:section(/:subsection)(/:subsubsection)",
+				url: "docs/faq/installing/macos",
+				params: ["faq", "installing", "macos"]
+			}, {
+				urlExp: "docs/(maybe/):id",
+				url: "docs/1",
+				params: ["1"]
+			}, {
+				urlExp: "docs/(maybe/):id",
+				url: "docs/maybe/1",
+				params: ["1"]
+			}, {
+				urlExp: "#/##/###/(something/)else",
+				url: "#/##/###/else",
+				params: []
+			}, {
+				urlExp: "#/##/###/(something/)else",
+				url: "#/##/###/something/else",
+				params: []
+			}, {
+				urlExp: "#/##/###/(:something/)else",
+				url: "#/##/###/else",
+				params: [undefined]
+			}, {
+				urlExp: "#/##/###/(:something/)else",
+				url: "#/##/###/anything/else",
+				params: ["anything"]
+			}, {
+				urlExp: "#/##/###/(###:something/)else",
+				url: "#/##/###/else",
+				params: [undefined]
+			}, {
+				urlExp: "#/##/###/(###:something/)else",
+				url: "#/##/###/###anything/else",
+				params: ["anything"]
+			}];
+			
+		for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+			fauxServer.addRoute("testRoute", tests[i].urlExp);
+			matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+			ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+			deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
 		}
 	});
 
