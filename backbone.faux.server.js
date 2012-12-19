@@ -346,7 +346,7 @@
 		 * @return {string} Current version of the library
 		 */
 		getVersion: function () {
-			return "0.5.3";
+			return "0.5.3"; // Keep in sync with package.json
 		},
 	
 		/**

@@ -201,9 +201,10 @@ routes match, the one most recently defined will be used.
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is syntactically and
     functionally analogous to [Backbone routes](http://backbonejs.org/#Router-routes) so `urlExp`s may contain
     parameter parts, `:param`, which match a single URL component between slashes; and splat parts `*splat`, which can
-    match any number of URL components. The values captured by params and splats will be passed as parameters to the
-    given handler method. The `urlExp` can also be a raw regular expression, in which case all values captured by
-    reg-exp capturing groups will be passed as parameters to the given handler method.
+    match any number of URL components. Parentheses may also be used to denote optional parts. The values captured by
+    params and splats will be passed as parameters to the given handler method. The `urlExp` can also be a regular
+    expression, in which case all values captured by reg-exp capturing groups will be passed as parameters to the
+    given handler method.
 * `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE), that should trigger the
 	route's handler (both the URL-expression and the method should match for the handler to be invoked). `httpMethod`
 	may also be set to '*' to create a match-all-methods handler; one that will be invoked whenever `urlExp` matches
@@ -302,7 +303,11 @@ Returns a reference to the faux-server.
 
 Caveats / WTF
 -------------
-...
+* When working with Node.js and npm be sure to `npm install backbone` _before_ `npm install`ing BFS. Installing in
+    reverse order will cause BFS to fail due to Node's
+    [module caching caveats](http://nodejs.org/api/modules.html#modules_module_caching_caveats).
+* `npm install`ing with the `--dev` switch will fail
+    [due to node-qunit](https://github.com/kof/node-qunit/issues/41).
 
 License
 -------
