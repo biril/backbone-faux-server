@@ -43,8 +43,7 @@
 				urlExp: "some/url",
 				url: "some/url",
 				params: []
-			},
-			{
+			}, {
 				urlExp: "1/2/:param1/:param2/3/4",
 				url: "1/2/hello/world/3/4",
 				params: ["hello", "world"]
@@ -73,6 +72,22 @@
 				url: "book:do androids dream of electric sheep/page:303",
 				params: ["do androids dream of electric sheep", "303"]
 			}, {
+				urlExp: "search/:query/p:page",
+				url: "search/obama/p2",
+				params: ["obama", "2"]
+			}, {
+				urlExp: "file/*path",
+				url: "file/nested/folder/file.txt",
+				params: ["nested/folder/file.txt"]
+			}, {
+				urlExp: "docs/:section(/:subsection)",
+				url: "docs/faq",
+				params: ["faq"]
+			}, {
+				urlExp: "docs/:section(/:subsection)",
+				url: "docs/faq/installing",
+				params: ["faq", "installing"]
+			}, {
 				urlExp: /\/?this\/is\/an?\/([^\/]+)\/([^\/]+)\/?/,
 				url: "is/this/is/a/regular/expression/?",
 				params: ["regular", "expression"]
@@ -91,12 +106,12 @@
 			laterHandler = function () {},
 			weaklyMatchedHandler = function () {};
 
-		fauxServer.addRoute("testRoute1", "some/url", "POST", earlierHandler);
-		fauxServer.addRoute("testRoute2", "some/(other/)?url", "POST", laterHandler);
+		fauxServer.addRoute("testRoute1", /some\/url/, "POST", earlierHandler);
+		fauxServer.addRoute("testRoute2", /some\/(other\/)?url/, "POST", laterHandler);
 		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler, "Later route takes precendence");
 
 		// Test a later-but-weaker route
-		fauxServer.addRoute("testRoute3", "some/(other/)?url", "*", weaklyMatchedHandler);
+		fauxServer.addRoute("testRoute3", /some\/(other\/)?url/, "*", weaklyMatchedHandler);
 		strictEqual(fauxServer.getMatchingRoute("some/url", "POST").handler, laterHandler, "But not when a weaker match");
 	});
 

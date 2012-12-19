@@ -46,9 +46,12 @@
 
 		// Convert a urlExp string (containing params and splats) into a regular expression
 		makeRegExp = (function () {
-			var p = /:\w+/g, s = /\*\w+/g;
+			var e = /[\-{}\[\]+?.,\\\^$|#\s]/g, // To escape special chars before converting to regexp
+				p = /:\w+/g,                    // Named param
+				s = /\*\w+/g,                   // Splat param
+				o = /\((.*?)\)/g;               // Optional part
 			return function(exp) {
-				exp = exp.replace(p, "([^\/]+)").replace(s, "(.*?)");
+				exp = exp.replace(e, "\\$&").replace(o, "(?:$1)?").replace(p, "([^\/]+)").replace(s, "(.*?)");
 				return new RegExp("^" + exp + "$");
 			};
 		}()),
