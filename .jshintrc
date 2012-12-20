@@ -1,0 +1,15 @@
+{
+    "curly":true,     // Always require curly braces around blocks in loops and conditionals
+    "eqeqeq":true,    // Prohibit the use of == and != in favor of === and !==. 
+    "forin":true,     // Requires all for in loops to filter object's items using hasOwnProperty
+    "immed":true,     // Prohibit the use of immediate function invocations without wrapping them in parentheses
+    "latedef":true,   // Prohibit the use of variables before they're defined
+    "newcap":true,    // Require capitalized constructor function names
+    "undef":true,     // Prohibit the use of variables that have not been declared
+    "strict":true,    // Requires all functions to begin with EcmaScript 5's "use strict" directive. (prohibits global)
+    "trailing":true,  // No trailing whitespace 
+    "onevar":true,    // Allows only one var statement per function
+    "smarttabs":true, // Suppresses warnings about mixed tabs and spaces when the latter are used for alignmnent only
+    "noarg":true,     // Prohibits the use of arguments.caller and arguments.callee
+    "expr":true       // Suppresses warnings about the use of expressions in place of assignments or function calls.
+}
