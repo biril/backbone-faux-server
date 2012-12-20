@@ -1,4 +1,4 @@
-/*global QUnit, test, equal, ok, strictEqual, notStrictEqual, deepEqual, start, stop, Backbone, fauxServer */
+/*global QUnit, test, ok, strictEqual, deepEqual, start, stop, Backbone, fauxServer */
 (function () {
 	"use strict";
 
@@ -347,7 +347,7 @@
 		strictEqual(book.get("modificationTime"), "now", "Attributes returned by PATCH-handler are set on Model");
 
 		// Test patching with some specific 'changed attributes' (expecting only changed attributes)
-		fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context) {
 			ok(true, "PATCH-handler is called (when patching witH some specific 'changed attributes')");
 			deepEqual(context.data, { author: "Me" }, "_context.data_ is set and equals 'changed attributes'");
 		});
@@ -407,7 +407,7 @@
 
 		// Also test with emulateHTTP as an inline option during update
 		Backbone.emulateHTTP = false;
-		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
 			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
 		});
 		book.save(null, { emulateHTTP: true });
@@ -430,7 +430,7 @@
 
 		// Also test with emulateHTTP as an inline option during patch
 		Backbone.emulateHTTP = false;
-		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+		fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
 			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
 		});
 		book.save(null, { emulateHTTP: true, patch: true });
@@ -453,7 +453,7 @@
 
 		// Also test with emulateHTTP as an inline option during delete
 		Backbone.emulateHTTP = false;
-		fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
+		fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function () {
 			ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
 		});
 		book.destroy({ emulateHTTP: true });
@@ -480,7 +480,7 @@
 		var book = this.createDummyBook();
 		book.urlRoot = "library-app/books";
 
-		fauxServer.setDefaultHandler(function (context) { // Add a default handler
+		fauxServer.setDefaultHandler(function () { // Add a default handler
 			ok(true, "Default-handler called");
 		});
 

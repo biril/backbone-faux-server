@@ -1,7 +1,7 @@
 /**
  * Backbone Faux Server v0.6.1
  * https://github.com/biril/backbone-faux-server
- * Licensed under the MIT License.
+ * Licensed under the MIT License
  * Copyright (c) 2012 Alex Lambiris
  */
 /*global exports, define, require, _, Backbone, setTimeout */
@@ -94,7 +94,7 @@
 		 *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
 		 */
 		getMatchingRoute = function (url, httpMethod) {
-			var i, r, weakMatch, match;
+			var i, r, weakMatch;
 			for (i = routes.length - 1; i >= 0; --i) { // Iterating from latest to earliest
 				r = routes[i];
 				if (r.urlExp.test(url)) {
