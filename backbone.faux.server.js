@@ -4,6 +4,7 @@
  * Licensed under the MIT License.
  * Copyright (c) 2012 Alex Lambiris
  */
+/*global exports, define, require, _, Backbone, setTimeout */
 (function (root, createModule) {
 	"use strict";
 
