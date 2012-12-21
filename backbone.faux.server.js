@@ -48,25 +48,16 @@
 		// Convert a urlExp string (containing params and splats) into a regular expression
 		makeRegExp = (function () {
 			var e = /[\-{}\[\]+?.,\\\^$|#\s]/g, // To escape special chars before converting to reg-exp
-				p = /:\w+/g,                    // Named param
-				s = /\*\w+/g,                   // Splat param
 				o = /\((.*?)\)/g,               // Optional part
-				t = /\(##(.*?)\)/g;             // Temp - see below
-
-			// The string '##',is *not* included in given (post-escape) exp. This will be used
-			//  as a (temp) no-capture token in place of '?:', thus avoiding the erroneous
-			//  creation of named-param tokens in the urlExp during the following urlExp-to-regExp
-			//  transformation. During the final step of the transformation (after named-params
-			//  have been parsed and replaced by their reg-exp equivalent) the temp no-capture
-			//  token will be replaced with '?:'
-			// do { noCapture += "#"; } while (exp.indexOf(noCapture) !== -1);
+				p = /(\(\?)?:\w+/g,             // Named param (+ extra capturing parens for opt-part detection)
+				s = /\*\w+/g;                   // Splat param
 
 			return function(exp) {
 				exp = exp.replace(e, "\\$&")
-				         .replace(o, "(##$1)?")
-				         .replace(p, "([^\/]+)")
-				         .replace(s, "(.*?)")
-				         .replace(t, "(?:$1)");
+				         .replace(o, "(?:$1)?")
+				         // don't confuse (regex-equivalent-subsituted) optional parts with named params
+				         .replace(p, function (match, isOptPart) { return isOptPart ? match : "([^\/]+)"; })
+				         .replace(s, "(.*?)");
 
 				return new RegExp("^" + exp + "$");
 			};
