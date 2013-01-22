@@ -9,7 +9,7 @@
 	"use strict";
 
 	// Export faux-server module depending on current environment:
-	
+
 	// A global 'exports' object signifies CommonJS environment
 	if (typeof exports !== "undefined") {
 		createModule(root, exports, require("underscore"), require("backbone"));
@@ -68,7 +68,7 @@
 
 		// Map from CRUD (+ patch) to HTTP-methods
 		crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE", "patch": "PATCH" },
-		
+
 		// Routes
 		routes = [],
 
@@ -131,7 +131,7 @@
 
 		// If faux-server is disabled, fall back to original sync
 		if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
-		
+
 		var c = { // Handler context
 				data: null,
 				url: null,
@@ -164,7 +164,7 @@
 			var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
 
 			if (_.isString(result)) { options.error(model, result); } // A string result indicates error
-			else { options.success(result); }
+			else { options.success(model, result, options); }
 		};
 
 		// Call exec-method *now* if zero-latency, else call later
@@ -339,7 +339,7 @@
 		getVersion: function () {
 			return "0.6.2"; // Keep in sync with package.json
 		},
-	
+
 		/**
 		 * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
 		 * Only useful when working in a browser environment without a module-framework as this is the
