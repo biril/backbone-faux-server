@@ -495,69 +495,159 @@
 		book.save();
 	});
 
-	test("Returning a string from any handler signals an error", 6, function () {
+	test("Syncing triggers 'request' event", 6, function () {
 		fauxServer.addRoutes({
-			createBook: {
-				urlExp: "library-app/books",
-				httpMethod: "POST",
-				handler: function () { return "Some error occured"; }
-			},
-			readBook: {
-				urlExp: "library-app/books/:id",
-				httpMethod: "GET",
-				handler: function () { return "Some error occured"; }
-			},
-			readBooks: {
-				urlExp: "library-app/books",
-				httpMethod: "GET",
-				handler: function () { return "Some error occured"; }
-			},
-			updateBook: {
-				urlExp: "library-app/books/:id",
-				httpMethod: "PUT",
-				handler: function () { return "Some error occured"; }
-			},
-			patchBook: {
-				urlExp: "library-app/books/:id",
-				httpMethod: "PATCH",
-				handler: function () { return "Some error occured"; }
-			},
-			deleteBook: {
-				urlExp: "library-app/books/:id",
-				httpMethod: "DELETE",
-				handler: function () { return "Some error occured"; }
-			}
+			createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
+			readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
+			readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
+			updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT" },
+			patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH" },
+			deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE" }
 		});
 
 		var book = this.createDummyBook(),
 			books = new this.Books();
 		book.urlRoot = "library-app/books";
 
+		// Expect this to be called 5 times, one for each book-Model-sync op
+		book.on("request", function () { ok(true, "'request' event triggered on Model"); });
+
+		// Expect this to be called just once, for the books-Collection-sync op
+		books.on("request", function () { ok(true, "'request' event triggered on Collection"); });
+
+		book.save();                      // Create
+		book.set({ id: "0123456789" });
+		book.fetch();                     // Read Model
+		books.fetch();                    // Read Collection
+		book.save();                      // Update
+		book.save(null, { patch: true }); // Update (by patching)
+		book.destroy();                   // Delete
+	});
+
+
+	test("Returning non-string from any handler invokes success handler & triggers 'sync' event", 12, function () {
+		// Adding routes without defining a handler => implicitly defining a def do-nothing handler
+		//  which returns undefined
+		fauxServer.addRoutes({
+			createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
+			readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
+			readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
+			updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT" },
+			patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH" },
+			deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE" }
+		});
+
+		var book = this.createDummyBook(),
+			books = new this.Books();
+		book.urlRoot = "library-app/books";
+
+
+		// Expect this to be called 5 times, one for each book-Model-sync op
+		book.on("sync", function () { ok(true, "'sync' event triggered on Model"); });
+
+		// Expect this to be called just once, for the books-Collection-sync op
+		books.on("sync", function () { ok(true, "'sync' event triggered on Collection"); });
+
+
 		book.save(null, { // Create
-			error: function () { ok(true, "True when saving a new Model (a POST-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when saving a new Model (a POST-handler)");
+			}
 		});
 
 		book.set({ id: "0123456789" });
 
 		book.fetch({ // Read Model
-			error: function () { ok(true, "True when fetching a Model (a GET-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when fetching a Model (a GET-handler)");
+			}
 		});
 
 		books.fetch({ // Read Collection
-			error: function () { ok(true, "True when fetching a Collection (a GET-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when fetching a Collection (a GET-handler)");
+			}
 		});
 
 		book.save(null, { // Update
-			error: function () { ok(true, "True when updating a Model (a PUT-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when updating a Model (a PUT-handler)");
+			}
 		});
 
 		book.save(null, { // Update (by patching)
 			patch: true,
-			error: function () { ok(true, "True when patching a Model (a PATCH-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when patching a Model (a PATCH-handler)");
+			}
 		});
 
 		book.destroy({ // Delete
-			error: function () { ok(true, "True when destroying a Model (a DELETE-handler)"); }
+			success: function (model, xhr, options) {
+				ok(true, "Success handler called when destroying a Model (a DELETE-handler)");
+			}
+		});
+	});
+
+	test("Returning a string from any handler invokes error handler & signals 'error' event)", 12, function () {
+		fauxServer.addRoutes({
+			createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Some error occured on create"; } },
+			readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Some error occured on read model"; } },
+			readBooks:  { urlExp: "library-app/books",     httpMethod: "GET",    handler: function () { return "Some error occured on read collection"; } },
+			updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT",    handler: function () { return "Some error occured on update"; } },
+			patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH",  handler: function () { return "Some error occured on update (by patching)"; } },
+			deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE", handler: function () { return "Some error occured on delete"; } }
+		});
+
+		var book = this.createDummyBook(),
+			books = new this.Books();
+		book.urlRoot = "library-app/books";
+
+
+		// Expect this to be called 5 times, one for each book-Model-sync op
+		book.on("error", function () { ok(true, "'error' event triggered on Model"); });
+		
+		// Expect this to be called just once, for the books-Collection-sync op
+		books.on("error", function () { ok(true, "'error' event triggered on Collection"); }); // Expect this to be called 1 time
+
+
+		book.save(null, { // Create
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when saving a new Model (a POST-handler)");
+			}
+		});
+
+		book.set({ id: "0123456789" });
+
+		book.fetch({ // Read Model
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when fetching a Model (a GET-handler)");
+			}
+		});
+
+		books.fetch({ // Read Collection
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when fetching a Collection (a GET-handler)");
+			}
+		});
+
+		book.save(null, { // Update
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when updating a Model (a PUT-handler)");
+			}
+		});
+
+		book.save(null, { // Update (by patching)
+			patch: true,
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when patching a Model (a PATCH-handler)");
+			}
+		});
+
+		book.destroy({ // Delete
+			error: function (model, xhr, options) {
+				ok(true, "Error handler called when destroying a Model (a DELETE-handler)");
+			}
 		});
 	});
 
