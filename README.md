@@ -1,4 +1,4 @@
-Backbone Faux Server v0.7.0
+Backbone Faux Server v0.8.0
 ===========================
 
 [![Build Status](https://travis-ci.org/biril/backbone-faux-server.png)](https://travis-ci.org/biril/backbone-faux-server)
