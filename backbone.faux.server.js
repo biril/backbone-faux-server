@@ -160,21 +160,13 @@
 		c.data = getRequestData(c.httpMethod, model, options);
 
 		// An exec-method to actually run the handler and subsequently invoke success / error
-		//  callbacks and dispatch related events
+		//  callbacks. (the releavant 'success' or 'error' event will be triggered by backbone)
 		execHandler = function () {
 			var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
-
-			if (_.isString(result)) { // A string result indicates error
-				if (options.error) { options.error(model, null, options); }
-				model.trigger("error", model, null, options);
-			}
-			else {
-				options.success(model, result, options);
-				model.trigger("sync", model, result, options);
-			}
+			options[_.isString(result) ? "error" : "success"](result);
 		};
 
-		model.trigger('request', model, null, options);
+		model.trigger("request", model, null, options);
 
 		// Call exec-method *now* if zero-latency, else call later
 		if (!latency) { execHandler(); }
