@@ -18,8 +18,8 @@ Backbone faux server grew out of the author's need to quickly flesh out Backbone
 fiddle with a server, a DB, or anything else that would require more than a JS script. Other solutions exist for
 this (such as [Backbone localStorage Adapter](https://github.com/jeromegn/Backbone.localStorage)) but they deviate
 from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence. Backbone faux server
-allows you to handle POSTs, GETs, PUTs and DELETEs *per* Model (or Collection) URL as if you're working on the
-server side. Any functionality written this way, may be ported to a real server in a very straightforward manner.
+permits handling POSTs, GETs, PUTs and DELETEs *per* Model (or Collection) URL as if you're working on the
+server side. Functionality written this way, may be ported to a real server in a very straightforward manner.
 
 
 Set up
@@ -87,8 +87,8 @@ var Books = Backbone.Collection.extend({
 Note that the `url` property is used, as it normally would in any scenario involving a remote server.
 
 Continue by defining routes on the faux-server, to handle Model syncing as needed. Every route defines a mapping
-from a Model(or Collection)-URL & sync-method (as defined in the context of HTTP (POST, GET, PUT, DELETE)) to some
-specific handler (callback):
+from a Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH, DELETE)) to some specific
+handler (callback):
 
 `<model-URL, sync-method> → handler`
 
@@ -167,8 +167,7 @@ Testing
 
 The test suite may be run in a browser or on the command line. To run in a browser simply open test/index.html. The
 command line version runs on Node.js and depends on [node-qunit](https://github.com/kof/node-qunit) (`npm install`
-to get it, along with Backbone and Underscore). To run the tests on the command line either `make test` or
-`npm test`.
+to get it, along with Backbone). To run the tests on the command line either `make test` or `npm test`.
 
 
 Reference
@@ -308,6 +307,9 @@ Caveats / WTF
     [module caching caveats](http://nodejs.org/api/modules.html#modules_module_caching_caveats).
 * `npm install`ing with the `--dev` switch will fail
     [due to node-qunit](https://github.com/kof/node-qunit/issues/41).
+* The current version of BFS is tested against and intended to work with Backbone 1.0. Check out
+    [BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) if you need to work with a previous
+    version (such as 0.9.10).
 
 License
 -------
