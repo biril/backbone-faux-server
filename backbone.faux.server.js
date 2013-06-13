@@ -27,13 +27,29 @@
     // Browser environment, without a module-framework
     root.fauxServer = createModule(root, {}, _, Backbone);
 
+    /**
+     * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
+     * Only useful when working in a browser environment without AMD module-framework as this is
+     * the only case where fauxServer is exposed globally. Returns a reference to the faux-server
+     * @return {object} The faux-server
+     */
+    root.fauxServer.noConflict = (function () {
+        var previousFauxServer = root.fauxServer;
+        return function () {
+
+            // Save a reference to the previous value of 'fauxServer', so that it can be restored
+            //  later on, if 'noConflict' is used
+            var fauxServer = root.fauxServer;
+            root.fauxServer = previousFauxServer;
+            fauxServer.noConflict = function () { return fauxServer; };
+            return fauxServer;
+        };
+    }());
+
 }(this, function (root, fauxServer, _, Backbone) {
     "use strict";
 
-    // Save a reference to the previous value of 'fauxServer', so that it
-    //  can be restored later on, if 'noConflict' is used
-    var previousFauxServer = root.fauxServer,
-
+    var
         // Save a reference to the native sync method
         nativeSync = Backbone.sync,
 
@@ -340,17 +356,6 @@
          */
         getVersion: function () {
             return "0.8.1"; // Keep in sync with package.json
-        },
-
-        /**
-         * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
-         * Only useful when working in a browser environment without a module-framework as this is the
-         * only case where fauxServer is exposed globally. Returns a reference to the faux-server.
-         * @return {object} The faux-server
-         */
-        noConflict: function () {
-            root.fauxServer = previousFauxServer;
-            return this; // Chain
         }
     });
 }));
