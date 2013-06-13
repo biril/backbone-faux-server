@@ -4,49 +4,66 @@
 //     Licensed under the MIT License
 //     Copyright (c) 2012 Alex Lambiris
 
-/*global exports, define, require, _, Backbone, setTimeout */
+/*global exports, define, global, require, _, Backbone */
 (function (root, createModule) {
     "use strict";
 
-    // Export faux-server module depending on current environment:
+    // Detect current environment. Faux-server will be exposed as module / global depending on that
+    var env = (function () {
+            // A global 'exports' object signifies CommonJS-like enviroments that support
+            //  module.exports, e.g. Node
+            if (typeof exports === "object") { return "CommonJS"; }
 
-    // A global 'exports' object signifies CommonJS environment
-    if (typeof exports !== "undefined") {
-        createModule(exports, require("underscore"), require("backbone"));
-        return;
-    }
+            // A global 'define' method with an 'amd' property signifies the presence of an AMD
+            //  loader (require.js, curl.js)
+            if (typeof define === "function" && define.amd) { return "AMD"; }
 
-    // A global 'define' method with an 'amd' property signifies the presence of an AMD loader
-    if (typeof define === "function" && define.amd) {
-        define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
-            return createModule(exports, _, Backbone);
+            return "browser";
+        }()),
+        fauxServer = null; // To be defined
+
+    // Support for CommonJS will be specific to node. So if in fact the detected environment is
+    //  'commonJS' we assume the presense of node's 'global' object and set root to it. ('root' is
+    //  already set to 'this' but in the specific case of node, 'this' won't actually capture the
+    //  global context - 'global' is needed)
+    if (env === "CommonJS") { root = global; }
+
+    // Expose as module / global depending on environment
+    switch (env) {
+    case "CommonJS":
+        createModule(root.setTimeout, exports, require("underscore"), require("backbone"));
+        break;
+
+    case "AMD":
+        define(["underscore", "exports"], function (_, exports) {
+            return createModule(root.setTimeout, exports, _, Backbone);
         });
-        return;
-    }
+        break;
 
-    // Browser environment, without a module-framework
-    root.fauxServer = createModule({}, _, Backbone);
+    case "browser":
+        fauxServer = createModule(root.setTimeout, {}, _, Backbone);
 
-    /**
-     * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
-     * Only useful when working in a browser environment without AMD module-framework as this is
-     * the only case where fauxServer is exposed globally. Returns a reference to the faux-server
-     * @return {object} The faux-server
-     */
-    root.fauxServer.noConflict = (function () {
-        var previousFauxServer = root.fauxServer;
-        return function () {
+        // Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
+        //  Only useful when working in a browser environment without a module-framework as this is
+        //  the only case where fauxServer is exposed globally. Returns a reference to fauxServer
+        fauxServer.noConflict = (function() {
 
             // Save a reference to the previous value of 'fauxServer', so that it can be restored
             //  later on, if 'noConflict' is used
-            var fauxServer = root.fauxServer;
-            root.fauxServer = previousFauxServer;
-            fauxServer.noConflict = function () { return fauxServer; };
-            return fauxServer;
-        };
-    }());
+            var previousFauxServer = root.fauxServer;
 
-}(this, function (fauxServer, _, Backbone) {
+            // noConflict
+            return function () {
+                root.fauxServer = previousFauxServer;
+                fauxServer.noConflict = function () { return fauxServer; };
+                return fauxServer;
+            };
+        }());
+
+        root.fauxServer = fauxServer;
+    }
+
+}(this, function (setTimeout, fauxServer, _, Backbone) {
     "use strict";
 
     var
