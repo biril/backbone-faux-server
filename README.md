@@ -314,6 +314,6 @@ Caveats / WTF
 License
 -------
 
-Licensed under the MIT License (LICENSE.txt).
+Licensed and freely distributed under the MIT License (LICENSE.txt).
 
-Copyright (c) 2012 Alex Lambiris
+Copyright (c) 2012-2013 Alex Lambiris

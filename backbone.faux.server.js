@@ -1,8 +1,8 @@
 //     Backbone Faux Server v0.8.1
 
 //     https://github.com/biril/backbone-faux-server
-//     Licensed under the MIT License
-//     Copyright (c) 2012 Alex Lambiris
+//     Licensed and freely distributed under the MIT License
+//     Copyright (c) 2012-2013 Alex Lambiris
 
 /*global exports, define, global, require, _, Backbone */
 (function (root, createModule) {
