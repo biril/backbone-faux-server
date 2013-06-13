@@ -12,20 +12,20 @@
 
     // A global 'exports' object signifies CommonJS environment
     if (typeof exports !== "undefined") {
-        createModule(root, exports, require("underscore"), require("backbone"));
+        createModule(exports, require("underscore"), require("backbone"));
         return;
     }
 
     // A global 'define' method with an 'amd' property signifies the presence of an AMD loader
     if (typeof define === "function" && define.amd) {
         define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
-            return createModule(root, exports, _, Backbone);
+            return createModule(exports, _, Backbone);
         });
         return;
     }
 
     // Browser environment, without a module-framework
-    root.fauxServer = createModule(root, {}, _, Backbone);
+    root.fauxServer = createModule({}, _, Backbone);
 
     /**
      * Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
@@ -46,7 +46,7 @@
         };
     }());
 
-}(this, function (root, fauxServer, _, Backbone) {
+}(this, function (fauxServer, _, Backbone) {
     "use strict";
 
     var
