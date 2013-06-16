@@ -550,7 +550,7 @@
 
 
 		book.save(null, { // Create
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when saving a new Model (a POST-handler)");
 			}
 		});
@@ -558,32 +558,32 @@
 		book.set({ id: "0123456789" });
 
 		book.fetch({ // Read Model
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when fetching a Model (a GET-handler)");
 			}
 		});
 
 		books.fetch({ // Read Collection
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when fetching a Collection (a GET-handler)");
 			}
 		});
 
 		book.save(null, { // Update
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when updating a Model (a PUT-handler)");
 			}
 		});
 
 		book.save(null, { // Update (by patching)
 			patch: true,
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when patching a Model (a PATCH-handler)");
 			}
 		});
 
 		book.destroy({ // Delete
-			success: function (model, xhr, options) {
+			success: function () {
 				ok(true, "Success handler called when destroying a Model (a DELETE-handler)");
 			}
 		});
@@ -606,13 +606,13 @@
 
 		// Expect this to be called 5 times, one for each book-Model-sync op
 		book.on("error", function () { ok(true, "'error' event triggered on Model"); });
-		
+
 		// Expect this to be called just once, for the books-Collection-sync op
 		books.on("error", function () { ok(true, "'error' event triggered on Collection"); }); // Expect this to be called 1 time
 
 
 		book.save(null, { // Create
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when saving a new Model (a POST-handler)");
 			}
 		});
@@ -620,32 +620,32 @@
 		book.set({ id: "0123456789" });
 
 		book.fetch({ // Read Model
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when fetching a Model (a GET-handler)");
 			}
 		});
 
 		books.fetch({ // Read Collection
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when fetching a Collection (a GET-handler)");
 			}
 		});
 
 		book.save(null, { // Update
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when updating a Model (a PUT-handler)");
 			}
 		});
 
 		book.save(null, { // Update (by patching)
 			patch: true,
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when patching a Model (a PATCH-handler)");
 			}
 		});
 
 		book.destroy({ // Delete
-			error: function (model, xhr, options) {
+			error: function () {
 				ok(true, "Error handler called when destroying a Model (a DELETE-handler)");
 			}
 		});
