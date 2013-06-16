@@ -81,16 +81,28 @@
 
         // Convert a urlExp string (containing params and splats) into a regular expression
         makeRegExp = (function () {
-            var e = /[\-{}\[\]+?.,\\\^$|#\s]/g, // To escape special chars before converting to reg-exp
-                o = /\((.*?)\)/g,               // Optional part
-                p = /(\(\?)?:\w+/g,             // Named param (+ extra capturing parens for opt-part detection)
-                s = /\*\w+/g;                   // Splat param
+            var
+                // To escape special chars before converting to reg-exp
+                e = /[\-{}\[\]+?.,\\\^$|#\s]/g,
+
+                // Optional part
+                o = /\((.*?)\)/g,
+
+                // Named param (+ extra capturing parens for opt-part detection)
+                p = /(\(\?)?:\w+/g,
+
+                // Splat param
+                s = /\*\w+/g,
+
+                // Don't confuse (regex-equivalent-subsituted) optional parts with named params
+                getReplacementForP = function (match, isOptPart) {
+                    return isOptPart ? match : "([^\/]+)";
+                };
 
             return function(exp) {
                 exp = exp.replace(e, "\\$&")
                          .replace(o, "(?:$1)?")
-                         // don't confuse (regex-equivalent-subsituted) optional parts with named params
-                         .replace(p, function (match, isOptPart) { return isOptPart ? match : "([^\/]+)"; })
+                         .replace(p, getReplacementForP)
                          .replace(s, "(.*?)");
 
                 return new RegExp("^" + exp + "$");
@@ -104,7 +116,13 @@
         latency = 0,
 
         // Map from CRUD (+ patch) to HTTP-methods
-        crudToHttp = { "create": "POST", "read": "GET", "update": "PUT", "delete": "DELETE", "patch": "PATCH" },
+        crudToHttp = {
+            "create": "POST",
+            "read": "GET",
+            "update": "PUT",
+            "delete": "DELETE",
+            "patch": "PATCH"
+        },
 
         // Routes
         routes = [],
@@ -166,12 +184,16 @@
         // If faux-server is disabled, fall back to original sync
         if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
 
-        var c = { // Handler context
+        var
+            // Handler context
+            c = {
                 data: null,
                 url: null,
                 httpMethod: crudToHttp[crudMethod],
                 route: null
             },
+
+            // An exec-method to actually run the appropriate handler. Defined below
             execHandler = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
@@ -180,7 +202,8 @@
             c.httpMethod = "POST";
         }
 
-        // Ensure that we have a URL (A url property whithin options overrides the Model / Collection URL.)
+        // Ensure that we have a URL (A url property whithin options overrides the Model /
+        //  Collection URL.)
         if(!(c.url = options.url || _.result(model, "url"))) {
             throw new Error("A 'url' property or function must be specified");
         }
@@ -194,7 +217,7 @@
         c.data = getRequestData(c.httpMethod, model, options);
 
         // An exec-method to actually run the handler and subsequently invoke success / error
-        //  callbacks. (the releavant 'success' or 'error' event will be triggered by backbone)
+        //  callbacks. (the relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
             var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
             options[_.isString(result) ? "error" : "success"](result);
@@ -209,58 +232,63 @@
 
     return _.extend(fauxServer, {
         /**
-         * Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL
-         *  & sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific
-         *  handler (callback):
+         * Add a route to the faux-server. Every route defines a mapping from a
+         *  Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE))
+         *  to some specific handler (callback):
          *  <model-URL, sync-method> -> handler
-         *  So any time a Model is created, read, updated or deleted, its URL and the the sync method being
-         *  used will be tested against defined routes in order to find a handler for creating, reading,
-         *  updating or deleting this Model. The same applies to reading Collections: Whenever a Collection
-         *  is read, its URL (and the 'read' method) will be tested against defined routes in order to find a
-         *  handler for reading it. When a match for the <model-URL, sync-method> pair is not found
-         *  among defined routes, the native sync will be invoked (this behaviour may be overriden -
-         *  see fauxServer.setDefaultHandler). Later routes take precedence over earlier routes so
-         *  in configurations where multiple routes match, the one most recently defined will be used.
+         *  So any time a Model is created, read, updated or deleted, its URL and the the sync
+         *  method being used will be tested against defined routes in order to find a handler for
+         *  creating, reading, updating or deleting this Model. The same applies to reading
+         *  Collections: Whenever a Collection is read, its URL (and the 'read' method) will be
+         *  tested against defined routes in order to find a handler for reading it. When a match
+         *  for the <model-URL, sync-method> pair is not found among defined routes, the native sync
+         *  will be invoked (this behaviour may be overriden - see fauxServer.setDefaultHandler).
+         *  Later routes take precedence over earlier routes so in configurations where multiple
+         *  routes match, the one most recently defined will be used.
          * @param {string} name The name of the route
-         * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
-         *  tested. This is syntactically and functionally analogous to Backbone routes: urlExps may contain
-         *  parameter parts, ':param', which match a single URL component between slashes; and splat parts
-         *  '*splat', which can match any number of URL components. The values captured by params and splats
-         *  will be passed as parameters to the given handler method. (see http://backbonejs.org/#Router-routes).
-         *  Regular expressions may also be used, in which case all values captured by reg-exp
-         *  capturing groups will be passed as parameters to the given handler method.
-         * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)),
-         *  that should trigger the route's handler (both the URL-expression and the method should match for the
-         *  handler to be invoked). httpMethod may also be set to '*' to create a match-all-methods handler; one
-         *  that will be invoked whenever urlExp matches the model's (or collection's) URL _regardless_ of method.
-         *  Omitting the parameter or setting to a falsy value has the same effect. In the scope of a
-         *  match-all-methods handler, the HTTP method currently being handled may be acquired by querying the
-         *  context parameter for context.httpMethod. Note that when Backbone.emulateHTTP is set to true or
-         *  emulateHTTP is passed as an inline option during sync, 'create', 'update', 'delete' and 'patch' will
-         *  all be mapped to POST. In this case context.httpMethod will be set to POST and the true HTTP method
-         *  may beacquired by querying context.httpMethodOverride.
-         * @param {function} [handler=no-op] The handler to be invoked when both route's URL and route's method
-         *  match. A do-nothing handler will be used if one is not provided. Its signature should be
-         *  function (context, [param1, [param2, ...]])
-         *  where context contains properties data, httpMethod, httpMethodOverride, route and param1, param2, ...
-         *  are parameters deduced from matching the urlExp to the Model (or Collection) URL. Specifically, about
-         *  context properties:
-         *   * {any} context.data Attributes of the Model (or Collection) being proccessed. Valid only on
-         *      'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of PATCH, context.data
-         *      may only contain a _subset_ of Model's attributes.
-         *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, PATCH, DELETE) that is currently
-         *      being handled.
+         * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will
+         *  be tested. This is syntactically and functionally analogous to Backbone routes: urlExps
+         *  may contain parameter parts, ':param', which match a single URL component between
+         *  slashes; and splat parts '*splat', which can match any number of URL components. The
+         *  values captured by params and splats will be passed as parameters to the given handler
+         *  method. (see http://backbonejs.org/#Router-routes). Regular expressions may also be
+         *  used, in which case all values captured by reg-exp capturing groups will be passed as
+         *  parameters to the given handler method.
+         * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or
+         *  DELETE)), that should trigger the route's handler (both the URL-expression and the
+         *  method should match for the handler to be invoked). httpMethod may also be set to '*' to
+         *  create a match-all-methods handler; one that will be invoked whenever urlExp matches the
+         *  model's (or collection's) URL _regardless_ of method. Omitting the parameter or setting
+         *  to a falsy value has the same effect. In the scope of a match-all-methods handler, the
+         *  HTTP method currently being handled may be acquired by querying the context parameter
+         *  for context.httpMethod. Note that when Backbone.emulateHTTP is set to true or
+         *  emulateHTTP is passed as an inline option during sync, 'create', 'update', 'delete' and
+         *  'patch' will all be mapped to POST. In this case context.httpMethod will be set to POST
+         *  and the true HTTP method may beacquired by querying context.httpMethodOverride.
+         * @param {function} [handler=no-op] The handler to be invoked when both route's URL and
+         *  route's method match. A do-nothing handler will be used if one is not provided. Its
+         *  signature should be function (context, [param1, [param2, ...]]) where context contains
+         *  properties data, httpMethod, httpMethodOverride, route and param1, param2, ... are
+         *  parameters deduced from matching the urlExp to the Model (or Collection) URL.
+         *  Specifically, about context properties:
+         *   * {any} context.data Attributes of the Model (or Collection) being proccessed. Valid
+         *      only on 'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of
+         *      PATCH, context.data may only contain a _subset_ of Model's attributes.
+         *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, PATCH, DELETE) that is
+         *      currently being handled.
          *   * {string} context.url The URL that is currently being handled.
-         *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, PATCH, DELETE) that is
-         *      currently being handled when Backbone.emulateHTTP is set to true. The equivalent of
-         *      Backbone's X-HTTP-Method-Override header (see http://backbonejs.org/#Sync-emulateHTTP).
+         *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, PATCH,
+         *      DELETE) that is currently being handled when Backbone.emulateHTTP is set to true.
+         *      The equivalent of Backbone's X-HTTP-Method-Override header
+         *      (see http://backbonejs.org/#Sync-emulateHTTP).
          *   * {object} context.route The route that is currently being handled.
-         *  On success: Return created Model attributes after handling a POST or updated Model attributes after
-         *  handling a PUT or PATCH. Return Model attributes after handling a GET or an array of Model attributes
-         *  after handling a GET that refers to a collection. Note that only attributes that have been changed on
-         *  the server (and should be updated on the client) need to be included in returned hashes. Return
-         *  nothing after handling a DELETE. On failure, the handler should return s string (presumably a custom
-         *  error messsage, an HTTP status code that indicates failure, etc).
+         *  On success: Return created Model attributes after handling a POST or updated Model
+         *  attributes after handling a PUT or PATCH. Return Model attributes after handling a GET
+         *  or an array of Model attributes after handling a GET that refers to a collection. Note
+         *  that only attributes that have been changed on the server (and should be updated on the
+         *  client) need to be included in returned hashes. Return nothing after handling a DELETE.
+         *  On failure, the handler should return s string (presumably a custom error messsage, an
+         *  HTTP status code that indicates failure, etc).
          * @return {object} The faux-server
          */
         addRoute: function (name, urlExp, httpMethod, handler) {
@@ -281,9 +309,9 @@
         },
         /**
          * Add multiple routes to the faux-server
-         * @param {object|array} routesToAdd A hash or array of routes to add. When passing a hash, keys should
-         *  be route names and each route (nested hash) need only contain urlExp, httpMethod, handler. See
-         *  addRoute().
+         * @param {object|array} routesToAdd A hash or array of routes to add. When passing a hash,
+         *  keys should be route names and each route (nested hash) need only contain urlExp,
+         *  httpMethod, handler. See addRoute().
          * @return {object} The faux-server
          */
         addRoutes: function (routesToAdd) {
@@ -325,12 +353,13 @@
          */
         getMatchingRoute: getMatchingRoute,
         /**
-         * Set a handler to be invoked when no route is matched to the current <model-URL, sync-method>
-         *  pair. This will override the default behaviour of invoking the native sync.
+         * Set a handler to be invoked when no route is matched to the current
+         *  <model-URL, sync-method> pair. This will override the default behaviour of invoking the
+         *  native sync.
          * @param {any} handler A handler to be invoked when no route is found that matches a given
-         *  <model-URL, sync-method> pair. Ommit the parameter to reset to the default behaviour. See
-         *  addRoute for handler's signature and semantics. Note that a default-handler isn't part of a
-         *  route, so the context.route parameter will not be valid.
+         *  <model-URL, sync-method> pair. Ommit the parameter to reset to the default behaviour.
+         *  See addRoute for handler's signature and semantics. Note that a default-handler isn't
+         *  part of a route, so the context.route parameter will not be valid.
          * @return {object} The faux-server
          */
         setDefaultHandler: function (handler) {
@@ -344,8 +373,8 @@
         },
         /**
          * Set server's emulated latency
-         * @param {number} min Server's emulated latency in ms. Interpreted as the minimum of a range
-         *  when a 'max' value is provided. Ommitting will set to 0
+         * @param {number} min Server's emulated latency in ms. Interpreted as the minimum of a
+         *  range when a 'max' value is provided. Ommitting will set to 0
          * @param {number} max Maximum server latency in ms. Specifying this parameter will cause
          *  syncing to occur with a random latency in the [min, max] range
          * @return {object} The faux-server
