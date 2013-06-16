@@ -215,30 +215,30 @@
          *  <model-URL, sync-method> -> handler
          *  So any time a Model is created, read, updated or deleted, its URL and the the sync method being
          *  used will be tested against defined routes in order to find a handler for creating, reading,
-         *  updating or deleting this Model. The same applies to reading Collections. Whenever a Collection
+         *  updating or deleting this Model. The same applies to reading Collections: Whenever a Collection
          *  is read, its URL (and the 'read' method) will be tested against defined routes in order to find a
-         *  handler for reading this Collection. When a match for the <model-URL, sync-method> pair is not
-         *  found among defined routes, the native sync will be invoked (this may be overriden - see
-         *  fauxServer.setDefaultHandler). Later routes take precedence over earlier routes so in
-         *  setups where multiple routes match, the one most recently defined will be used.
+         *  handler for reading it. When a match for the <model-URL, sync-method> pair is not found
+         *  among defined routes, the native sync will be invoked (this behaviour may be overriden -
+         *  see fauxServer.setDefaultHandler). Later routes take precedence over earlier routes so
+         *  in configurations where multiple routes match, the one most recently defined will be used.
          * @param {string} name The name of the route
          * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will be
-         *  tested. This is syntactically and functionally analogous to Backbone routes so urlExps may contain
+         *  tested. This is syntactically and functionally analogous to Backbone routes: urlExps may contain
          *  parameter parts, ':param', which match a single URL component between slashes; and splat parts
          *  '*splat', which can match any number of URL components. The values captured by params and splats
          *  will be passed as parameters to the given handler method. (see http://backbonejs.org/#Router-routes).
-         *  The urlExp can also be a regular expression, in which case all values captured by reg-exp
+         *  Regular expressions may also be used, in which case all values captured by reg-exp
          *  capturing groups will be passed as parameters to the given handler method.
          * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)),
          *  that should trigger the route's handler (both the URL-expression and the method should match for the
          *  handler to be invoked). httpMethod may also be set to '*' to create a match-all-methods handler; one
          *  that will be invoked whenever urlExp matches the model's (or collection's) URL _regardless_ of method.
-         *  Omitting the parameter or setting to falsy values has the same effect. In the scope of a
+         *  Omitting the parameter or setting to a falsy value has the same effect. In the scope of a
          *  match-all-methods handler, the HTTP method currently being handled may be acquired by querying the
          *  context parameter for context.httpMethod. Note that when Backbone.emulateHTTP is set to true or
          *  emulateHTTP is passed as an inline option during sync, 'create', 'update', 'delete' and 'patch' will
          *  all be mapped to POST. In this case context.httpMethod will be set to POST and the true HTTP method
-         *  may beacquired by querying the handler's context for context.httpMethodOverride.
+         *  may beacquired by querying context.httpMethodOverride.
          * @param {function} [handler=no-op] The handler to be invoked when both route's URL and route's method
          *  match. A do-nothing handler will be used if one is not provided. Its signature should be
          *  function (context, [param1, [param2, ...]])
@@ -249,18 +249,18 @@
          *      'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of PATCH, context.data
          *      may only contain a _subset_ of Model's attributes.
          *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, PATCH, DELETE) that is currently
-         *      being handled by the handler.
-         *   * {string} context.url The URL that is currently being handled by the handler
+         *      being handled.
+         *   * {string} context.url The URL that is currently being handled.
          *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, PATCH, DELETE) that is
          *      currently being handled when Backbone.emulateHTTP is set to true. The equivalent of
          *      Backbone's X-HTTP-Method-Override header (see http://backbonejs.org/#Sync-emulateHTTP).
-         *   * {object} context.route The route that is currently being handled by the handler.
+         *   * {object} context.route The route that is currently being handled.
          *  On success: Return created Model attributes after handling a POST or updated Model attributes after
          *  handling a PUT or PATCH. Return Model attributes after handling a GET or an array of Model attributes
          *  after handling a GET that refers to a collection. Note that only attributes that have been changed on
          *  the server (and should be updated on the client) need to be included in returned hashes. Return
-         *  nothing after handling a DELETE. On failure: Return any string (presumably a custom error messsage,
-         *  an HTTP status code that indicates failure, etc).
+         *  nothing after handling a DELETE. On failure, the handler should return s string (presumably a custom
+         *  error messsage, an HTTP status code that indicates failure, etc).
          * @return {object} The faux-server
          */
         addRoute: function (name, urlExp, httpMethod, handler) {
@@ -326,12 +326,11 @@
         getMatchingRoute: getMatchingRoute,
         /**
          * Set a handler to be invoked when no route is matched to the current <model-URL, sync-method>
-         *  pair. By default the native sync will be invoked - use this method to provide a custom handler
-         *  which overrides this behaviour.
-         * @param {any} handler A handler to be invoked when no route is matched to the current
-         *  <model-URL, sync-method>. Ommit the parameter to set the native sync behaviour. See addRoute
-         *  for handler's signature and semantics. Note that a default-handler isn't part of a route, so
-         *  the context.route parameter will not be valid.
+         *  pair. This will override the default behaviour of invoking the native sync.
+         * @param {any} handler A handler to be invoked when no route is found that matches a given
+         *  <model-URL, sync-method> pair. Ommit the parameter to reset to the default behaviour. See
+         *  addRoute for handler's signature and semantics. Note that a default-handler isn't part of a
+         *  route, so the context.route parameter will not be valid.
          * @return {object} The faux-server
          */
         setDefaultHandler: function (handler) {
