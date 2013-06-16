@@ -14,7 +14,7 @@
     //
     QUnit.module("Basics", {
         setup: function () {
-            // Nada
+            Backbone.$ = undefined;
         },
         teardown: function () {
             // Nada
@@ -215,6 +215,8 @@
                     if (id) { dummyBook.set({ id: id }); }
                     return dummyBook;
                 };
+
+            Backbone.$ = undefined;
 
             this.Book = Book;
             this.Books = Books;
