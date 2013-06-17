@@ -194,7 +194,11 @@
             },
 
             // An exec-method to actually run the appropriate handler. Defined below
-            execHandler = null;
+            execHandler = null,
+
+            // We'll be attempting to crate a deferred and return the underlying promise.
+            //  Defined below
+            deferred = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
         if ((Backbone.emulateHTTP || options.emulateHTTP) && c.httpMethod !== "GET") {
@@ -213,14 +217,28 @@
             return nativeSync.call(model, crudMethod, model, options);
         }
 
-        // Ensure that we have the appropriate request data.
+        // Ensure that we have the appropriate request data
         c.data = getRequestData(c.httpMethod, model, options);
+
+        // Try to create a deferred (and subsequently return the underlying promise). This will be
+        //  possible if Backbone's ajax lib offers a .Deferred method (which is the case for
+        //  jQuery). If this is not possible, then create a poor-man's deferred which just delegates
+        //  to the given success / error handlers (and features no actual underlying promise)
+        if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
+            (deferred = Backbone.$.Deferred()).then(options.success, options.error);
+        } else {
+            deferred = {
+                promise: function () {},
+                resolve: function (value) { options.success(value); },
+                reject: function (reason) { options.error(reason); }
+            };
+        }
 
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (the relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
             var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
-            options[_.isString(result) ? "error" : "success"](result);
+            deferred[_.isString(result) ? "reject" : "resolve"](result);
         };
 
         model.trigger("request", model, null, options);
@@ -228,6 +246,10 @@
         // Call exec-method *now* if zero-latency, else call later
         if (!latency) { execHandler(); }
         else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
+
+        // Return the deferred's underlying promise. If this is a dummy-deferred then .promise()
+        //  will just be undefined
+        return deferred.promise();
     };
 
     return _.extend(fauxServer, {
