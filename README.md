@@ -1,5 +1,5 @@
-Backbone Faux Server v0.8.3
-===========================
+Backbone Faux Server
+====================
 
 [![Build Status](https://travis-ci.org/biril/backbone-faux-server.png)](https://travis-ci.org/biril/backbone-faux-server)
 [![NPM version](https://badge.fury.io/js/backbone-faux-server.png)](http://badge.fury.io/js/backbone-faux-server)
