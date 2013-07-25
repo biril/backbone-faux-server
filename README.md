@@ -55,7 +55,7 @@ detected environment.
     var fauxServer = require("backbone-faux-server");
     console.log("working with version " + fauxServer.getVersion());
     ```
-    
+
     (see Caveats for issues related to `npm install`ing Backbone along with BFS)
 
 * Or list as a dependency when working *with an AMD loader* (e.g. require.js):
@@ -202,11 +202,11 @@ used will be tested against defined routes in order to find a handler for creati
 updating or deleting this Model. The same applies to reading Collections: Whenever a Collection is
 read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 handler for reading it. When a match for the `<model-URL, sync-method>` pair is not found among
-defined routes, the native sync will be invoked (this behaviour may be overriden - see 
+defined routes, the native sync will be invoked (this behaviour may be overriden - see
 `fauxServer.setDefaultHandler`). Later routes take precedence over earlier routes so in
 configurations where multiple routes match, the one most recently defined will be used.
 
-* `name`: The name of the route
+* `name`: The name of the route. Optional
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is
 	syntactically and functionally analogous to
 	[Backbone routes](http://backbonejs.org/#Router-routes): `urlExp`s may contain parameter parts,
@@ -219,13 +219,12 @@ configurations where multiple routes match, the one most recently defined will b
 	trigger the route's handler (both the URL-expression and the method should match for the
 	handler to be invoked). `httpMethod` may also be set to '*' to create a match-all-methods
 	handler; one that will be invoked whenever `urlExp` matches the model's (or collection's) URL
-	_regardless_ of method. Omitting the parameter or setting to a falsy value has the same effect.
-	In the scope of a match-all-methods handler, the HTTP method currently being handled may be
-	acquired by querying the `context` parameter for `context.httpMethod`. Note that when
-	`Backbone.emulateHTTP` is set to true or `emulateHTTP` is passed as an inline option during
-	sync, 'create', 'update', 'patch' and 'delete' will all be mapped to POST. In this case
-	`context.httpMethod` will be set to POST and the true HTTP method being handled may be acquired
-	by querying `context.httpMethodOverride`.
+	_regardless_ of method. Omitting the parameter has the same effect. In the scope of a
+	match-all-methods handler, the HTTP method currently being handled may be acquired by querying
+	the `context` parameter for `context.httpMethod`. Note that when `Backbone.emulateHTTP` is set
+	to true or `emulateHTTP` is passed as an inline option during sync, 'create', 'update', 'patch'
+	and 'delete' will all be mapped to POST. In this case `context.httpMethod` will be set to POST
+	and the true HTTP method being handled may be acquired by querying `context.httpMethodOverride`.
 * `handler`: The handler to be invoked when both route's URL-expression and route's method match. A
 	do-nothing handler will be used if one is not provided. Its signature should be
 
@@ -274,7 +273,7 @@ Remove all defined routes.
 
 #### getRoute (name)
 
-Get route of given name. 
+Get route of given name.
 
 * `name`: Name of route to acquire.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a
@@ -298,7 +297,7 @@ Set server's emulated latency (zero by default)
 	is provided. Ommitting will set to 0.
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
 	latency in the [min, max] range.
-		
+
 #### enable (shouldEnable)
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync

@@ -267,7 +267,7 @@
          *  will be invoked (this behaviour may be overriden - see fauxServer.setDefaultHandler).
          *  Later routes take precedence over earlier routes so in configurations where multiple
          *  routes match, the one most recently defined will be used.
-         * @param {string} name The name of the route
+         * @param {string} name The name of the route. Optional
          * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will
          *  be tested. This is syntactically and functionally analogous to Backbone routes: urlExps
          *  may contain parameter parts, ':param', which match a single URL component between
@@ -280,13 +280,13 @@
          *  DELETE)), that should trigger the route's handler (both the URL-expression and the
          *  method should match for the handler to be invoked). httpMethod may also be set to '*' to
          *  create a match-all-methods handler; one that will be invoked whenever urlExp matches the
-         *  model's (or collection's) URL _regardless_ of method. Omitting the parameter or setting
-         *  to a falsy value has the same effect. In the scope of a match-all-methods handler, the
-         *  HTTP method currently being handled may be acquired by querying the context parameter
-         *  for context.httpMethod. Note that when Backbone.emulateHTTP is set to true or
-         *  emulateHTTP is passed as an inline option during sync, 'create', 'update', 'delete' and
-         *  'patch' will all be mapped to POST. In this case context.httpMethod will be set to POST
-         *  and the true HTTP method may beacquired by querying context.httpMethodOverride.
+         *  model's (or collection's) URL _regardless_ of method. Omitting the parameter has the
+         *  same effect. In the scope of a match-all-methods handler, the HTTP method currently
+         *  being handled may be acquired by querying the context parameter for context.httpMethod.
+         *  Note that when Backbone.emulateHTTP is set to true or emulateHTTP is passed as an inline
+         *  option during sync, 'create', 'update', 'delete' and 'patch' will all be mapped to POST.
+         *  In this case context.httpMethod will be set to POST and the true HTTP method may be
+         *  acquired by querying context.httpMethodOverride.
          * @param {function} [handler=no-op] The handler to be invoked when both route's URL and
          *  route's method match. A do-nothing handler will be used if one is not provided. Its
          *  signature should be function (context, [param1, [param2, ...]]) where context contains
@@ -314,19 +314,73 @@
          * @return {object} The faux-server
          */
         addRoute: function (name, urlExp, httpMethod, handler) {
-            var index = routes.length;
+            var routeIndex = routes.length,
+
+                // Create the route, setting absent arguments to defaults and sanitizing where
+                //  appropriate - note that the only mandatory argument is urlExp
+                route = (function (_args) {
+                    var args = [], i;
+
+                    // Can't trust _args.length. The length property always returns the index of the
+                    //  last array element, plus one. But an element explicitly set to undefined will
+                    //  actually count as the 'last element'
+                    for (i = _args.length - 1; i >= 0; i--) { if (_args[i]) { args[i] = _args[i]; } }
+
+                    switch (args.length) {
+                    case 3: // Missing name, handler or httpMethod
+                        if (_.isFunction(args[2])) { // Missing name or httpMethod
+                            handler = args[2];
+                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name
+                                urlExp = args[0];
+                                httpMethod = args[1];
+                                name = httpMethod + "_" + urlExp;
+                            } else { // Missing httpMethod
+                                httpMethod = "*";
+                            }
+                        } else { // Missing handler
+                            handler = noOp;
+                        }
+                        break;
+                    case 2: // Missing name & httpMethod, httpMethod & handler or name & handler
+                        if (_.isFunction(args[1])) { // Missing name & httpMethod
+                            urlExp = args[0];
+                            handler = args[1];
+                            httpMethod = "*";
+                            name = httpMethod + "_" + urlExp;
+                        } else { // Missing name & handler or httpMethod & handler
+                            handler = noOp;
+                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name & handler
+                                urlExp = args[0];
+                                httpMethod = args[1];
+                                name = httpMethod + "_" + urlExp;
+                            } else { // Missing httpMethod & handler
+                                httpMethod = "*";
+                            }
+                        }
+                        break;
+                    case 1: // Missing name & httpMethod & handler
+                        urlExp = args[0];
+                        httpMethod = "*";
+                        handler = noOp;
+                        name = httpMethod + "_" + urlExp;
+                        break;
+                    }
+                    return {
+                        name: name,
+                        urlExp: _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp),
+                        httpMethod: httpMethod.toUpperCase(),
+                        handler: handler
+                    };
+                }(_.toArray(arguments)));
+
             _.any(routes, function (r, i) {
-                if (r.name === name) {
-                    index = i;
+                if (r.name === route.name) {
+                    routeIndex = i;
                     return true;
                 }
             });
-            routes[index] = {
-                name: name,
-                urlExp: _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp),
-                httpMethod: httpMethod ? httpMethod.toUpperCase() : "*",
-                handler: handler || noOp
-            };
+            routes[routeIndex] = route;
+
             return this; // Chain
         },
         /**

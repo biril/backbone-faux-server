@@ -2,13 +2,16 @@
 (function () {
     "use strict";
 
-    // Helper
+    // Helpers
     var dumpArray = function (array) {
         var i, l, d = [];
         for (i = 0, l = array.length; i < l; ++i) {
             d.push(array[i] === undefined ? "_undefined_" : array[i]);
         }
         return d.join(", ");
+    },
+    isFunction = function (f) {
+        return Object.prototype.toString.call(f) === "[object Function]";
     };
 
     //
@@ -17,16 +20,16 @@
             Backbone.$ = undefined;
         },
         teardown: function () {
-            // Nada
+            fauxServer.removeRoutes();
         }
     });
 
     test("Routes are added and removed", function () {
         var h = function () {}; // No-op
 
-        fauxServer.addRoute("testRoute1", "", "", h);
+        fauxServer.addRoute("testRoute1", "", "*", h);
         fauxServer.addRoutes({
-            "testRoute2": { urlExp: "", httpMethod: "", handler: h },
+            "testRoute2": { urlExp: "", httpMethod: "*", handler: h },
             "testRoute3": { urlExp: "", httpMethod: "PUT", handler: h }
         });
 
@@ -44,6 +47,98 @@
 
         ok(!fauxServer.getRoute("testRoute1"), "_removeRoutes_ removes routes");
         ok(!fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
+    });
+
+    test("Route name may be omitted", function () {
+        var h = function () {}, // No-op
+            url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute(url, "*", h);
+        matchingRoute = fauxServer.getMatchingRoute(url, "*");
+        ok(matchingRoute, "nameless *-route is added");
+
+        fauxServer.removeRoute(matchingRoute.name);
+
+        fauxServer.addRoute(url, "GET", h);
+        matchingRoute = fauxServer.getMatchingRoute(url, "GET");
+        ok(matchingRoute, "nameless GET-route is added");
+    });
+
+    test("Route handler may be omitted", function () {
+        var url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute("route", url, "*");
+        matchingRoute = fauxServer.getRoute("route");
+        ok(matchingRoute && matchingRoute.httpMethod === "*", "no-handler *-route is added");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
+
+        fauxServer.removeRoute("route");
+
+        fauxServer.addRoute("route", url, "GET");
+        matchingRoute = fauxServer.getRoute("route");
+        ok(matchingRoute && matchingRoute.httpMethod === "GET", "no-handler GET-route is added");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
+    });
+
+    test("Route method may be omitted", function () {
+        var h = function () {}, // No-op
+            url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute("route", url, h);
+        matchingRoute = fauxServer.getRoute("route");
+        ok(matchingRoute, "no-method route is added");
+        strictEqual(matchingRoute.httpMethod, "*", "route is assigned the '*' method");
+    });
+
+    test("Route name & method may both be omitted", function () {
+        var h = function () {}, // No-op
+            url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute(url, h);
+        matchingRoute = fauxServer.getMatchingRoute(url, "*");
+        ok(matchingRoute, "nameless, no-method route is added and assigned the '*' method");
+    });
+
+    test("Route name & handler may both be omitted", function () {
+        var url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute(url, "*");
+        matchingRoute = fauxServer.getMatchingRoute(url, "*");
+        ok(matchingRoute, "nameless, no-handler *-route is added");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
+
+        fauxServer.removeRoute(matchingRoute.name);
+
+        fauxServer.addRoute(url, "GET");
+        matchingRoute = fauxServer.getMatchingRoute(url, "GET");
+        ok(matchingRoute, "nameless, no-handler GET-route is added");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
+    });
+
+    test("Route method & handler may both be omitted", function () {
+        var url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute("route", url);
+        matchingRoute = fauxServer.getRoute("route");
+        ok(matchingRoute, "no-handler no-method route is added");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
+        strictEqual(matchingRoute.httpMethod, "*", "route is assigned the '*' method");
+    });
+
+    test("Route name, method & handler may all be omitted", function () {
+        var url = "some/url",
+            matchingRoute = null;
+
+        fauxServer.addRoute(url);
+        matchingRoute = fauxServer.getMatchingRoute(url, "*");
+        ok(matchingRoute, "nameless, no-method, no-handler route is added and assigned the '*' method");
+        ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
     });
 
     test("URL-expressions match (regular expressions)", function () {
