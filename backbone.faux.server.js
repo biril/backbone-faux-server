@@ -499,5 +499,18 @@
         }
     });
 
+    // Attach get, post, put, patch, delete shortcuts to faux-server.
+    //  These all delegate to addRoute
+    _.each(_.values(crudToHttp), function (httpMethod) {
+        fauxServer[httpMethod.toLowerCase()] = function (name, urlExp, handler) {
+            var args = skipUndefinedTail(_.toArray(arguments));
+            // The httpMethod must be inserted into the args, either at tail-position if `handler`
+            //  is missing or just before it if it's present
+            if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
+            else { args.splice(args.length - 2, httpMethod); }
+            return fauxServer.addRoute.apply(null, args);
+        };
+    });
+
     return fauxServer;
 }));

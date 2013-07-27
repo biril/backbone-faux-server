@@ -139,6 +139,33 @@
         ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
     });
 
+    test("Routes may be added with get, post, put, patch, delete", function () {
+        var url = "some/url",
+            routeName = null,
+            routeMethod = null,
+            matchingRoute = null,
+            methods = ["get", "post", "put", "patch", "delete"], i, l;
+
+        for (i = 0, l = methods.length; i < l; ++i) {
+            routeName = "route_" + methods[i];
+            routeMethod = methods[i].toUpperCase();
+
+            fauxServer[methods[i]](routeName, url);
+            matchingRoute = fauxServer.getRoute(routeName);
+            ok(matchingRoute, methods[i] + " adds named route");
+            strictEqual(matchingRoute.httpMethod, routeMethod, "added route is assigned the " + routeMethod + " method");
+
+            fauxServer.removeRoute(routeName);
+
+            // Also try adding unnamed route
+            fauxServer[methods[i]](url);
+            matchingRoute = fauxServer.getMatchingRoute(url, routeMethod);
+            ok(matchingRoute, methods[i] + " adds unnamed " + routeMethod + "-route");
+
+            fauxServer.removeRoute(matchingRoute.name);
+        }
+    });
+
     test("URL-expressions match (regular expressions)", function () {
         var matchingRoute = null, i, numOfTests,
             tests = [{
