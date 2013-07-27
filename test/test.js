@@ -34,8 +34,7 @@
         });
 
         ok(fauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
-        ok(fauxServer.getRoute("testRoute2"), "_addRoutes_ adds routes");
-        ok(fauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
+        ok(fauxServer.getRoute("testRoute2") && fauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
 
         fauxServer.addRoute("testRoute3", "override", "POST", h);
         strictEqual(fauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
@@ -45,8 +44,7 @@
 
         fauxServer.removeRoutes();
 
-        ok(!fauxServer.getRoute("testRoute1"), "_removeRoutes_ removes routes");
-        ok(!fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
+        ok(!fauxServer.getRoute("testRoute1") && !fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
     });
 
     test("Route name may be omitted", function () {
@@ -56,13 +54,13 @@
 
         fauxServer.addRoute(url, "*", h);
         matchingRoute = fauxServer.getMatchingRoute(url, "*");
-        ok(matchingRoute, "nameless *-route is added");
+        ok(matchingRoute, "unnamed *-route is added");
 
         fauxServer.removeRoute(matchingRoute.name);
 
         fauxServer.addRoute(url, "GET", h);
         matchingRoute = fauxServer.getMatchingRoute(url, "GET");
-        ok(matchingRoute, "nameless GET-route is added");
+        ok(matchingRoute, "unnamed GET-route is added");
     });
 
     test("Route handler may be omitted", function () {
@@ -100,7 +98,7 @@
 
         fauxServer.addRoute(url, h);
         matchingRoute = fauxServer.getMatchingRoute(url, "*");
-        ok(matchingRoute, "nameless, no-method route is added and assigned the '*' method");
+        ok(matchingRoute, "unnamed, no-method route is added and assigned the '*' method");
     });
 
     test("Route name & handler may both be omitted", function () {
@@ -109,14 +107,14 @@
 
         fauxServer.addRoute(url, "*");
         matchingRoute = fauxServer.getMatchingRoute(url, "*");
-        ok(matchingRoute, "nameless, no-handler *-route is added");
+        ok(matchingRoute, "unnamed, no-handler *-route is added");
         ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
 
         fauxServer.removeRoute(matchingRoute.name);
 
         fauxServer.addRoute(url, "GET");
         matchingRoute = fauxServer.getMatchingRoute(url, "GET");
-        ok(matchingRoute, "nameless, no-handler GET-route is added");
+        ok(matchingRoute, "unnamed, no-handler GET-route is added");
         ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
     });
 
@@ -137,7 +135,7 @@
 
         fauxServer.addRoute(url);
         matchingRoute = fauxServer.getMatchingRoute(url, "*");
-        ok(matchingRoute, "nameless, no-method, no-handler route is added and assigned the '*' method");
+        ok(matchingRoute, "unnamed, no-method, no-handler route is added and assigned the '*' method");
         ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
     });
 
@@ -688,12 +686,12 @@
 
     test("Returning a string from any handler invokes error handler & signals 'error' event)", 12, function () {
         fauxServer.addRoutes({
-            createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Some error occured on create"; } },
-            readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Some error occured on read model"; } },
-            readBooks:  { urlExp: "library-app/books",     httpMethod: "GET",    handler: function () { return "Some error occured on read collection"; } },
-            updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT",    handler: function () { return "Some error occured on update"; } },
-            patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH",  handler: function () { return "Some error occured on update (by patching)"; } },
-            deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE", handler: function () { return "Some error occured on delete"; } }
+            createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Error on create"; } },
+            readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Error on read model"; } },
+            readBooks:  { urlExp: "library-app/books",     httpMethod: "GET",    handler: function () { return "Error on read collection"; } },
+            updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT",    handler: function () { return "Error on update"; } },
+            patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH",  handler: function () { return "Error on update (by patching)"; } },
+            deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE", handler: function () { return "Error on delete"; } }
         });
 
         var book = this.createDummyBook(),
