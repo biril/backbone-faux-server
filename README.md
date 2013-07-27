@@ -206,7 +206,7 @@ fauxServer
 	}).get("library-app/books/:id", function (context, bookId) {
 		// Return attributes of stored book with id 'bookId'
 
-	}).put(""library-app/books/:id", function (context, bookId) {
+	}).put("library-app/books/:id", function (context, bookId) {
 		// Update stored book with id 'bookId', using attributes in context.data
 		// Return updated attributes
 
