@@ -299,7 +299,7 @@ configurations where multiple routes match, the one most recently defined will b
     should return a string (presumably a custom error messsage, an HTTP status code that indicates
     failure, etc).
 
-#### <httpMethod> (name, urlExp, handler)
+#### &lt;httpMethod&gt; (name, urlExp, handler)
 
 `get`, `post`, `put`, `delete` and `patch` methods which act as shortcuts for calling `addRoute`
 with a specific `httpMethod`. See `addRoute` above for parameter descriptions and further details.
