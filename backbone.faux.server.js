@@ -67,7 +67,20 @@
     "use strict";
 
     var
-        // Save a reference to the native sync method
+        // Helper which clones an array skipping any and all tail-elements which are undefined.
+        //  Array.length can't be trusted when the array contains undefined tail-element(s) which
+        //  are explicitly set: It is always set to the index of the last array element plus one
+        //  and a tail element explicitly set to undefined will in fact count as the 'last
+        //  element'. This can be problematic when counting function arguments in order to
+        //  sanitize, provide defaults, etc
+        skipUndefinedTail = function (array) {
+            var a = [], i = array.length - 1;
+            for (; i >= 0; i--) { if (!_.isUndefined(array[i])) { a[i] = array[i]; } }
+            return a;
+        },
+
+        // Save a reference to the native sync method. Used when no route is matched during syncing
+        //  or faux-server is altogether disabled
         nativeSync = Backbone.sync,
 
         // Indicates whether the faux-server is currently enabled
@@ -75,7 +88,7 @@
 
         // The default-route, that is to say, a route that contains the default handler if one
         //  is defined. The default handler is invoked when no matching route is found for some
-        //  <model-URL, sync-method> pair and may be defined by setDefaultHandler. A null value
+        //  <model-URL, sync-method> pair and may be defined by `setDefaultHandler`. A null value
         //  for the default-route signifies the absence of a default handler
         defaultRoute = null,
 
@@ -115,7 +128,7 @@
         // Server's emulated latency
         latency = 0,
 
-        // Map from CRUD (+ patch) to HTTP-methods
+        // Map from CRUD (+ patch) to HTTP-methods (verbs)
         crudToHttp = {
             "create": "POST",
             "read": "GET",
@@ -129,13 +142,13 @@
 
         /**
          * Get a route matching the given <URL, HTTP-method> pair. Routes that exactly match the
-         *  HTTP-method take precedence over match-all-methods routes (those with httpMethod set
+         *  HTTP-method take precedence over match-all-methods routes (those with `httpMethod` set
          *  to '*'). Matching routes that were defined later take precedence over those that were
          *  defined earlier. A returned matching route will contain the additional handlerParams
-         *  property; an array containing params that are to be passed to the handler as captured
+         *  property: an array containing params that are to be passed to the handler as captured
          *  when the given URL was matched
-         * @param  {string} url The URL
-         * @param  {string} httpMethod The HTTP method
+         * @param  {string} `url` The route URL
+         * @param  {string} `httpMethod` The route HTTP method
          * @return {object} A matching route if one is found, null otherwise. Note that
          *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
          */
@@ -163,10 +176,10 @@
         // Get the data that should be sent to the server during a sync. This depends on
         //  the sync-method being used and any options that may have been given
         getRequestData = function (httpMethod, model, options) {
-            // A data property whithin options overrides any Model data.
+            // A `data` property whithin options overrides any Model data.
             if (options.data) { return options.data; }
 
-            // If no Model is given (??) then req data will be undefined no matter what
+            // If no Model is given (??) then request data will be undefined no matter what
             if (!model) { return; }
 
             // In the specific case of PATCH, a hash of 'changed attributes' is expected within
@@ -196,7 +209,7 @@
             // An exec-method to actually run the appropriate handler. Defined below
             execHandler = null,
 
-            // We'll be attempting to crate a deferred and return the underlying promise.
+            // We'll be attempting to create a deferred and return the underlying promise.
             //  Defined below
             deferred = null;
 
@@ -206,8 +219,8 @@
             c.httpMethod = "POST";
         }
 
-        // Ensure that we have a URL (A url property whithin options overrides the Model /
-        //  Collection URL.)
+        // Ensure that we have a URL (A `url` property whithin options overrides Model /
+        //  Collection URL)
         if(!(c.url = options.url || _.result(model, "url"))) {
             throw new Error("A 'url' property or function must be specified");
         }
@@ -220,10 +233,11 @@
         // Ensure that we have the appropriate request data
         c.data = getRequestData(c.httpMethod, model, options);
 
-        // Try to create a deferred (and subsequently return the underlying promise). This will be
-        //  possible if Backbone's ajax lib offers a .Deferred method (which is the case for
-        //  jQuery). If this is not possible, then create a poor-man's deferred which just delegates
-        //  to the given success / error handlers (and features no actual underlying promise)
+        // Try to create a deferred (and subsequently return the underlying promise). This is only
+        //  possible if Backbone's underlying ajax lib offers a `Deferred` method (which is the
+        //  case for jQuery). If this is not possible, then create a poor-man's deferred which just
+        //  delegates to the given success / error handlers (and features no actual underlying
+        //  promise)
         if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
             (deferred = Backbone.$.Deferred()).then(options.success, options.error);
         } else {
@@ -235,7 +249,7 @@
         }
 
         // An exec-method to actually run the handler and subsequently invoke success / error
-        //  callbacks. (the relevant 'success' or 'error' event will be triggered by backbone)
+        //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
             var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
             deferred[_.isString(result) ? "reject" : "resolve"](result);
@@ -243,16 +257,18 @@
 
         model.trigger("request", model, null, options);
 
-        // Call exec-method *now* if zero-latency, else call later
+        // Call exec-method _now_ if zero-latency, else call later
         if (!latency) { execHandler(); }
         else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
 
-        // Return the deferred's underlying promise. If this is a dummy-deferred then .promise()
+        // Return the deferred's underlying promise. If this is a dummy-deferred then `.promise()`
         //  will just be undefined
         return deferred.promise();
     };
 
-    return _.extend(fauxServer, {
+    // Attach methods to faux-server
+    _.extend(fauxServer, {
+
         /**
          * Add a route to the faux-server. Every route defines a mapping from a
          *  Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE))
@@ -316,16 +332,9 @@
         addRoute: function (name, urlExp, httpMethod, handler) {
             var routeIndex = routes.length,
 
-                // Create the route, setting absent arguments to defaults and sanitizing where
-                //  appropriate - note that the only mandatory argument is urlExp
-                route = (function (_args) {
-                    var args = [], i;
-
-                    // Can't trust _args.length. The length property always returns the index of the
-                    //  last array element, plus one. But an element explicitly set to undefined will
-                    //  actually count as the 'last element'
-                    for (i = _args.length - 1; i >= 0; i--) { if (_args[i]) { args[i] = _args[i]; } }
-
+                // Create the route, setting missing arguments to defaults and sanitizing where
+                //  appropriate - note that the only mandatory argument is `urlExp`
+                route = (function (args) {
                     switch (args.length) {
                     case 3: // Missing name, handler or httpMethod
                         if (_.isFunction(args[2])) { // Missing name or httpMethod
@@ -371,8 +380,10 @@
                         httpMethod: httpMethod.toUpperCase(),
                         handler: handler
                     };
-                }(_.toArray(arguments)));
+                }(skipUndefinedTail(_.toArray(arguments))));
 
+            // If a route of given name is already present then overwrite it with this one.
+            //  Otherwise just append the new route
             _.any(routes, function (r, i) {
                 if (r.name === route.name) {
                     routeIndex = i;
@@ -383,6 +394,7 @@
 
             return this; // Chain
         },
+
         /**
          * Add multiple routes to the faux-server
          * @param {object|array} routesToAdd A hash or array of routes to add. When passing a hash,
@@ -397,6 +409,7 @@
             }, this);
             return this; // Chain
         },
+
         /**
          * Remove route of given name
          * @param  {string} routeName Name of route to remove
@@ -406,6 +419,7 @@
             routes = _.reject(routes, function (r) { return r.name === routeName; });
             return this; // Chain
         },
+
         /**
          * Remove all previously defined routes
          * @return {object} The faux-server
@@ -414,6 +428,7 @@
             routes = [];
             return this; // Chain
         },
+
         /**
          * Get route of specified name
          * @param  {string} routeName Name of route to acquire
@@ -424,10 +439,12 @@
             var route = _.find(routes, function (r) { return r.name === routeName; });
             return route ? _.clone(route) : null;
         },
+
         /**
          * Get a route matching the given <URL, HTTP-method> pair. See closed-over getMatchingRoute
          */
         getMatchingRoute: getMatchingRoute,
+
         /**
          * Set a handler to be invoked when no route is matched to the current
          *  <model-URL, sync-method> pair. This will override the default behaviour of invoking the
@@ -447,6 +464,7 @@
             };
             return this; // Chain
         },
+
         /**
          * Set server's emulated latency
          * @param {number} min Server's emulated latency in ms. Interpreted as the minimum of a
@@ -459,6 +477,7 @@
             latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
             return this; // Chain
         },
+
         /**
          * Enable or disable the faux-server. When the faux-server is disabled, syncing is performed
          *  by the native Backbone sync method. Handy for easily toggling between mock / real server
@@ -479,4 +498,6 @@
             return "0.8.5"; // Keep in sync with package.json
         }
     });
+
+    return fauxServer;
 }));
