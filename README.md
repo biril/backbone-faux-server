@@ -170,6 +170,52 @@ fauxServer.addRoutes({
 }
 ```
 
+Route names can be useful for querying and / or removing earlier defined routes. However, this is
+often unecessary and route names may be skipped in most route declarations. (They're mandatory as
+keys when passing a hash of routes to `addRoutes`.) Coming back to the earlier "createBook" example,
+the route name may be skipped like so:
+
+```javascript
+fauxServer.addRoute("library-app/books", "POST", function (context) {
+	// Create book ..
+});
+```
+
+Moreover, faux-server exposes `get`, `post`, `put`, `delete` and `patch` methods as shortcuts for
+calling `addRoute` with a specific `httpMethod`. Thus, the preceding POST-route addition may be
+rewritten as
+
+```javascript
+fauxServer.post("library-app/books", function (context) {
+	// Create book ..
+});
+```
+
+Similarly, an alternative, more compact syntax for the preceding `addRoutes` example would be:
+
+```javascript
+fauxServer
+	.post("library-app/books", function (context) {
+		// Create book using attributes in context.data
+		// Save to persistence layer
+		// Return attributes of newly created book
+
+	}).get("library-app/books", function (context) {
+		// Return array of stored book attributes
+
+	}).get("library-app/books/:id", function (context, bookId) {
+		// Return attributes of stored book with id 'bookId'
+
+	}).put(""library-app/books/:id", function (context, bookId) {
+		// Update stored book with id 'bookId', using attributes in context.data
+		// Return updated attributes
+
+	}).delete("library-app/books/:id", function (context, bookId) {
+		// Delete stored book of id 'bookId'
+	});
+}
+```
+
 
 Testing
 -------
@@ -253,13 +299,17 @@ configurations where multiple routes match, the one most recently defined will b
     should return a string (presumably a custom error messsage, an HTTP status code that indicates
     failure, etc).
 
+#### <httpMethod> (name, urlExp, handler)
+
+`get`, `post`, `put`, `delete` and `patch` methods which act as shortcuts for calling `addRoute`
+with a specific `httpMethod`. See `addRoute` above for parameter descriptions and further details.
+
 #### addRoutes (routes)
 
 Add multiple routes to the faux-server.
 
 * `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and
-	each route (nested hash) need only contain `urlExp`, `httpMethod` and `handler`. Also see
-	`addRoute`.
+	each route (nested hash) need only contain `urlExp`, `httpMethod` and `handler`.
 
 #### removeRoute (name)
 
