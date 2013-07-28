@@ -342,7 +342,6 @@
                             if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name
                                 urlExp = args[0];
                                 httpMethod = args[1];
-                                name = httpMethod + "_" + urlExp;
                             } else { // Missing httpMethod
                                 httpMethod = "*";
                             }
@@ -355,13 +354,11 @@
                             urlExp = args[0];
                             handler = args[1];
                             httpMethod = "*";
-                            name = httpMethod + "_" + urlExp;
                         } else { // Missing name & handler or httpMethod & handler
                             handler = noOp;
                             if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name & handler
                                 urlExp = args[0];
                                 httpMethod = args[1];
-                                name = httpMethod + "_" + urlExp;
                             } else { // Missing httpMethod & handler
                                 httpMethod = "*";
                             }
@@ -371,13 +368,14 @@
                         urlExp = args[0];
                         httpMethod = "*";
                         handler = noOp;
-                        name = httpMethod + "_" + urlExp;
                         break;
                     }
+                    httpMethod = httpMethod.toUpperCase();
+                    urlExp = _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp);
                     return {
-                        name: name,
-                        urlExp: _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp),
-                        httpMethod: httpMethod.toUpperCase(),
+                        name: name || _.uniqueId(httpMethod + "_" + urlExp + "_"),
+                        urlExp: urlExp,
+                        httpMethod: httpMethod,
                         handler: handler
                     };
                 }(skipUndefinedTail(_.toArray(arguments))));
