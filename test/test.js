@@ -139,16 +139,16 @@
         ok(isFunction(matchingRoute.handler), "route is assigned a default handler");
     });
 
-    test("Routes may be added with get, post, put, patch, delete", function () {
+    test("Routes may be added with get, post, put, patch, del", function () {
         var url = "some/url",
             routeName = null,
             routeMethod = null,
             matchingRoute = null,
-            methods = ["get", "post", "put", "patch", "delete"], i, l;
+            methods = ["get", "post", "put", "patch", "del"], i, l;
 
         for (i = 0, l = methods.length; i < l; ++i) {
             routeName = "route_" + methods[i];
-            routeMethod = methods[i].toUpperCase();
+            routeMethod = methods[i] === "del" ? "DELETE" : methods[i].toUpperCase();
 
             fauxServer[methods[i]](routeName, url);
             matchingRoute = fauxServer.getRoute(routeName);

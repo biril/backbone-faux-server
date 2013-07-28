@@ -181,7 +181,7 @@ fauxServer.addRoute("library-app/books", "POST", function (context) {
 });
 ```
 
-Moreover, faux-server exposes `get`, `post`, `put`, `delete` and `patch` methods as shortcuts for
+Moreover, faux-server exposes `get`, `post`, `put`, `del` and `patch` methods as shortcuts for
 calling `addRoute` with a specific `httpMethod`. Thus, the preceding POST-route addition may be
 rewritten as
 
@@ -210,7 +210,7 @@ fauxServer
 		// Update stored book with id 'bookId', using attributes in context.data
 		// Return updated attributes
 
-	}).delete("library-app/books/:id", function (context, bookId) {
+	}).del("library-app/books/:id", function (context, bookId) {
 		// Delete stored book of id 'bookId'
 	});
 }
@@ -301,7 +301,7 @@ configurations where multiple routes match, the one most recently defined will b
 
 #### &lt;httpMethod&gt; (name, urlExp, handler)
 
-`get`, `post`, `put`, `delete` and `patch` methods which act as shortcuts for calling `addRoute`
+`get`, `post`, `put`, `del` and `patch` methods which act as shortcuts for calling `addRoute`
 with a specific `httpMethod`. See `addRoute` above for parameter descriptions and further details.
 
 #### addRoutes (routes)

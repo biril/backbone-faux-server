@@ -499,10 +499,11 @@
         }
     });
 
-    // Attach get, post, put, patch, delete shortcuts to faux-server.
+    // Attach `get`, `post`, `put`, `patch` and `delete` methods to faux-server.
     //  These all delegate to addRoute
     _.each(_.values(crudToHttp), function (httpMethod) {
-        fauxServer[httpMethod.toLowerCase()] = function (name, urlExp, handler) {
+        var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
+        fauxServer[method] = function (name, urlExp, handler) {
             var args = skipUndefinedTail(_.toArray(arguments));
             // The httpMethod must be inserted into the args, either at tail-position if `handler`
             //  is missing or just before it if it's present
