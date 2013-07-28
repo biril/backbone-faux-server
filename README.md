@@ -236,7 +236,7 @@ insight may be gained by taking a look at the test suit and - of course - the so
 
 All methods return the faux-server unless otherwise noted.
 
-#### addRoute (name, urlExp, httpMethod, handler)
+#### addRoute ([name], urlExp, [httpMethod], [handler])
 
 Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL &
 sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
@@ -252,7 +252,8 @@ defined routes, the native sync will be invoked (this behaviour may be overriden
 `fauxServer.setDefaultHandler`). Later routes take precedence over earlier routes so in
 configurations where multiple routes match, the one most recently defined will be used.
 
-* `name`: The name of the route. Optional
+* `name`: Name of this route. Optional. A named route may be queried and / or removed by its name
+    (see `getRoute` / `removeRoute`) and will replace an earlier defined route of same name.
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is
 	syntactically and functionally analogous to
 	[Backbone routes](http://backbonejs.org/#Router-routes): `urlExp`s may contain parameter parts,
@@ -263,14 +264,14 @@ configurations where multiple routes match, the one most recently defined will b
 	reg-exp capturing groups will be passed as parameters to the given handler method.
 * `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE), that should
 	trigger the route's handler (both the URL-expression and the method should match for the
-	handler to be invoked). `httpMethod` may also be set to '*' to create a match-all-methods
-	handler; one that will be invoked whenever `urlExp` matches the model's (or collection's) URL
-	_regardless_ of method. Omitting the parameter has the same effect. In the scope of a
-	match-all-methods handler, the HTTP method currently being handled may be acquired by querying
-	the `context` parameter for `context.httpMethod`. Note that when `Backbone.emulateHTTP` is set
-	to true or `emulateHTTP` is passed as an inline option during sync, 'create', 'update', 'patch'
-	and 'delete' will all be mapped to POST. In this case `context.httpMethod` will be set to POST
-	and the true HTTP method being handled may be acquired by querying `context.httpMethodOverride`.
+	handler to be invoked). `httpMethod` may also be set to '*' or ommitted to create a
+	match-all-methods handler: One that will be invoked whenever `urlExp` matches the model's (or
+	collection's) URL _regardless_ of method. In the scope of a match-all-methods handler, the HTTP
+	method currently being handled may be acquired by querying the `context` parameter for
+	`context.httpMethod`. Note that when `Backbone.emulateHTTP` is set to true or `emulateHTTP` is
+	passed as an inline option during sync, 'create', 'update', 'patch' and 'delete' will all be
+	mapped to POST. In this case `context.httpMethod` will be set to POST and the true HTTP method
+	being handled may be acquired by querying `context.httpMethodOverride`.
 * `handler`: The handler to be invoked when both route's URL-expression and route's method match. A
 	do-nothing handler will be used if one is not provided. Its signature should be
 
@@ -299,7 +300,7 @@ configurations where multiple routes match, the one most recently defined will b
     should return a string (presumably a custom error messsage, an HTTP status code that indicates
     failure, etc).
 
-#### &lt;httpMethod&gt; (name, urlExp, handler)
+#### &lt;httpMethod&gt; ([name], urlExp, [handler])
 
 `get`, `post`, `put`, `del` and `patch` methods which act as shortcuts for calling `addRoute`
 with a specific `httpMethod`. See `addRoute` above for parameter descriptions and further details.
@@ -329,7 +330,7 @@ Get route of given name.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a
 	copy and cannot be modified to alter faux-server's behaviour.
 
-#### setDefaultHandler (handler)
+#### setDefaultHandler ([handler])
 
 Set a handler to be invoked when no route is matched to the current `<model-URL, sync-method>`
 pair. This will override the default behaviour of invoking the native sync.
@@ -339,7 +340,7 @@ pair. This will override the default behaviour of invoking the native sync.
 	`addRoute` for handler's signature and semantics. Note that a default-handler isn't part of a
 	route, so the `context.route` parameter will not be valid.
 
-#### setLatency (min, max)
+#### setLatency (min, [max])
 
 Set server's emulated latency (zero by default)
 
@@ -348,13 +349,13 @@ Set server's emulated latency (zero by default)
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
 	latency in the [min, max] range.
 
-#### enable (shouldEnable)
+#### enable ([shouldEnable])
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync
 method. Handy for easily toggling between mock / real server.
 
-* `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit altogether to enable
-	the faux-server, set to false to disable.
+* `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit to enable the
+	faux-server, set to false to disable.
 
 #### getVersion ()
 
