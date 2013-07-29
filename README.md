@@ -91,7 +91,7 @@ var Books = Backbone.Collection.extend({
 ```
 
 Note that the `url` property is used, as it normally would in any scenario involving a remote
-server.
+resources.
 
 Continue by defining routes, to handle Model syncing as needed. Every route defines a mapping from
 a Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH, DELETE)) to some
@@ -107,8 +107,8 @@ fauxServer.addRoute("createBook", "library-app/books", "POST", function (context
 	// Every handler receives a 'context' parameter. Use context.data (a hash of Book attributes)
 	//  to create the Book entry in your persistence layer. Return attributes of created Book.
 	//  Something along the lines of:
-	context.data.id = newId(); // Almost certainly, you'll have to create an id
-	books.push(context.data); // Save to persistence layer
+	context.data.id = newId(); // You'll probably want to assign an id to the new book
+	books.push(context.data);  // Save to persistence layer
 	return context.data;
 });
 ```
@@ -220,7 +220,7 @@ fauxServer
 Testing
 -------
 
-The test suite may be run in a browser (test/index.html) or on the command line, by running
+The QUnit test suite may be run in a browser (test/index.html) or on the command line, by running
 `make test` or `npm test`. The command line version runs on Node and depends on
 [node-qunit](https://github.com/kof/node-qunit) so an `npm install` is required beforehand.
 
@@ -230,11 +230,11 @@ Reference
 
 The following list, while not exhaustive, includes all essential parts of the BFS API. The ommitted
 bits are there to aid testing and fascilitate fancy stuff you probably won't ever need. Further
-insight may be gained by taking a look at the test suit and - of course - the source.
+insight may be gained by taking a look at the test suite and - of course - the source.
 
 ### Methods
 
-All methods return the faux-server unless otherwise noted.
+All methods return the faux-server instance unless otherwise noted.
 
 #### addRoute ([name], urlExp, [httpMethod], [handler])
 
