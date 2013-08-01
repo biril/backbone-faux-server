@@ -28,23 +28,32 @@
         var h = function () {}; // No-op
 
         fauxServer.addRoute("testRoute1", "", "*", h);
+        ok(fauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
+
         fauxServer.addRoutes({
             "testRoute2": { urlExp: "", httpMethod: "*", handler: h },
-            "testRoute3": { urlExp: "", httpMethod: "PUT", handler: h }
+            "testRoute3": { urlExp: "", httpMethod: "*", handler: h }
         });
+        ok(fauxServer.getRoute("testRoute2") && fauxServer.getRoute("testRoute3"), "_addRoutes_ ({}) adds routes");
 
-        ok(fauxServer.getRoute("testRoute1"), "_addRoute_ adds route");
-        ok(fauxServer.getRoute("testRoute2") && fauxServer.getRoute("testRoute3"), "_addRoutes_ adds routes");
+        fauxServer.addRoutes([
+            { name: "testRoute4", urlExp: "", httpMethod: "*", handler: h },
+            { name: "testRoute5", urlExp: "", httpMethod: "*", handler: h }
+        ]);
+        ok(fauxServer.getRoute("testRoute4") && fauxServer.getRoute("testRoute5"), "_addRoutes_ ([]) adds routes");
 
-        fauxServer.addRoute("testRoute3", "override", "POST", h);
-        strictEqual(fauxServer.getRoute("testRoute3").httpMethod, "POST", "Adding route of same name overrides previous");
+        fauxServer.addRoute("testRoute1", "override", "*", h);
+        strictEqual(fauxServer.getRoute("testRoute1").urlExp.toString(), "/^override$/", "Adding route of same name overrides previous");
 
-        fauxServer.removeRoute("testRoute2");
-        ok(!fauxServer.getRoute("testRoute2"), "_removeRoute_ removes route");
+        fauxServer.removeRoute("testRoute1");
+        ok(!fauxServer.getRoute("testRoute1"), "_removeRoute_ removes route");
 
         fauxServer.removeRoutes();
 
-        ok(!fauxServer.getRoute("testRoute1") && !fauxServer.getRoute("testRoute3"), "_removeRoutes_ removes routes");
+        ok(!fauxServer.getRoute("testRoute2") &&
+           !fauxServer.getRoute("testRoute3") &&
+           !fauxServer.getRoute("testRoute4") &&
+           !fauxServer.getRoute("testRoute5"), "_removeRoutes_ removes routes");
     });
 
     test("Route name may be omitted", function () {
