@@ -362,7 +362,7 @@
         }
     });
 
-    test("POST-handler functions as expected when saving a new Model", 8, function () {
+    test("POST-handler invoked with expected context when saving a new Model", 6, function () {
         var createdBookId = "0123456789",
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
@@ -374,7 +374,17 @@
             strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
             strictEqual(context.url, book.urlRoot, "_context.url_ is set to 'Model-URL'");
             strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
+        });
 
+        book.save(); // Create
+    });
+
+    test("POST-handler sets attributes on saved Model", 2, function () {
+        var createdBookId = "0123456789",
+            book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
             return { id: createdBookId, creationTime: "now" };
         });
 
@@ -384,7 +394,25 @@
         strictEqual(book.get("creationTime"), "now", "Attributes returned by POST-handler are set on Model");
     });
 
-    test("GET-handler functions as expected when fetching a Model", 7, function () {
+    test("GET-handler invoked with expected context when fetching a Model", 6, function () {
+        var fetchedBookId = "0123456789",
+            book = new this.Book({ id: fetchedBookId });
+
+        book.urlRoot = "library-app/books";
+
+        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
+            ok(true, "GET-handler is called");
+            ok(context, "_context_ is passed to GET-handler");
+            strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
+            strictEqual(context.url, book.urlRoot + "/" + fetchedBookId, "_context.url_ is set to 'Model-URL/id'");
+            strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
+            strictEqual(bookId, fetchedBookId, "_bookId_ is passed to GET-handler and set to id of book being fetched");
+        });
+
+        book.fetch(); // Read
+    });
+
+    test("GET-handler sets attributes on fetched Model", 1, function () {
         var fetchedBookId = "0123456789",
             book = new this.Book({ id: fetchedBookId }),
             retBookAttrs = this.createDummyBook(fetchedBookId).toJSON();
@@ -395,13 +423,6 @@
         //  holds the supposed attributes of the book so we'll be returning these from the GET-handler
 
         fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
-            ok(true, "GET-handler is called");
-            ok(context, "_context_ is passed to GET-handler");
-            strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
-            strictEqual(context.url, book.urlRoot + "/" + fetchedBookId, "_context.url_ is set to 'Model-URL/id'");
-            strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
-            strictEqual(bookId, fetchedBookId, "_bookId_ is passed to GET-handler and set to id of book being fetched");
-
             return retBookAttrs;
         });
 
@@ -410,7 +431,21 @@
         deepEqual(book.toJSON(), retBookAttrs, "Attributes returned by GET-handler are set on Model");
     });
 
-    test("GET-handler functions as expected when fetching a Collection", 6, function () {
+    test("GET-handler invoked with expected context when fetching a Collection", 5, function () {
+        var books = new this.Books();
+
+        fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
+            ok(true, "GET-handler is called");
+            ok(context, "_context_ is passed to GET-handler");
+            strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
+            strictEqual(context.url, books.url, "_context.url_ is set to 'Collection-URL'");
+            strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
+        });
+
+        books.fetch(); // Read
+    });
+
+    test("GET-handler sets attributes on fetched Collection", 1, function () {
         var books = new this.Books(),
             retBooksAttrs = [this.createDummyBook("one").toJSON(), this.createDummyBook("two").toJSON()];
 
@@ -419,12 +454,6 @@
         //  so we'll be returning that from the GET-handler
 
         fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
-            ok(true, "GET-handler is called");
-            ok(context, "_context_ is passed to GET-handler");
-            strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
-            strictEqual(context.url, books.url, "_context.url_ is set to 'Collection-URL'");
-            strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
-
             return retBooksAttrs;
         });
 
@@ -433,7 +462,7 @@
         deepEqual(books.toJSON(), retBooksAttrs, "Model attributes returned by GET-handler are set on Collection Models");
     });
 
-    test("PUT-handler functions as expected when saving a Model which is not new (has an id)", 8, function () {
+    test("PUT-handler invoked with expected context when updating a Model (saving a Model which has an id)", 7, function () {
         var updatedBookId = "0123456789",
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
@@ -446,7 +475,17 @@
             strictEqual(context.url, book.urlRoot + "/" + updatedBookId, "_context.url_ is set to 'Model-URL/id'");
             strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
             strictEqual(bookId, updatedBookId, "_bookId_ is passed to PUT-handler and set to id of book being updated");
+        });
 
+        book.save(); // Update
+    });
+
+    test("PUT-handler sets attributes on saved (updated) Model", 1, function () {
+        var updatedBookId = "0123456789",
+            book = this.createDummyBook(updatedBookId);
+        book.urlRoot = "library-app/books";
+
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
             return { modificationTime: "now" };
         });
 
@@ -455,7 +494,7 @@
         strictEqual(book.get("modificationTime"), "now", "Attributes returned by PUT-handler are set on Model");
     });
 
-    test("PATCH-handler functions as expected when saving a Model which is not new (has an id)", 10, function () {
+    test("PATCH-handler invoked with expected context when updating a Model (saving a Model which has an id)", 9, function () {
         var updatedBookId = "0123456789",
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
@@ -469,24 +508,35 @@
             strictEqual(context.url, book.urlRoot + "/" + updatedBookId, "_context.url_ is set to 'Model-URL/id'");
             strictEqual(context.httpMethodOverride, undefined, "_context.httpMethodOverride_ is not set");
             strictEqual(bookId, updatedBookId, "_bookId_ is passed to PATCH-handler and set to id of book being updated");
-
-            return { modificationTime: "now" };
         });
 
         book.save(null, { patch: true }); // Patching without any 'changed attributes'
 
-        strictEqual(book.get("modificationTime"), "now", "Attributes returned by PATCH-handler are set on Model");
-
         // Test patching with some specific 'changed attributes' (expecting only changed attributes)
         fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context) {
-            ok(true, "PATCH-handler is called (when patching witH some specific 'changed attributes')");
+            ok(true, "PATCH-handler is called (when patching with some specific 'changed attributes')");
             deepEqual(context.data, { author: "Me" }, "_context.data_ is set and equals 'changed attributes'");
         });
 
         book.save({ author: "Me" }, { patch: true }); // Patching with some specific 'changed attributes'
     });
 
-    test("DELETE-handler functions as expected when destroying a Model", 6, function () {
+    test("PATCH-handler sets attributes on saved (updated) Model", 1, function () {
+        var updatedBookId = "0123456789",
+            book = this.createDummyBook(updatedBookId);
+        book.urlRoot = "library-app/books";
+
+        // Test patching when no 'changed attributes' are given (expecting complete model data)
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+            return { modificationTime: "now" };
+        });
+
+        book.save(null, { patch: true }); // Patching without any 'changed attributes'
+
+        strictEqual(book.get("modificationTime"), "now", "Attributes returned by PATCH-handler are set on Model");
+    });
+
+    test("DELETE-handler invoked with expected context destroying a Model", 6, function () {
         var deletedBookId = "0123456789",
             book = this.createDummyBook(deletedBookId);
         book.urlRoot = "library-app/books";
