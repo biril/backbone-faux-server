@@ -4,7 +4,7 @@
   "author": "biril <alexlambiris@gmail.com>",
   "description": "A (tiny) framework for easily mocking-up a server when working with Backbone.js",
   "contributors": [],
-  "main": "./backbone.faux.server.js",
+  "main": "./backbone-faux-server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/biril/backbone-faux-server"
@@ -27,7 +27,7 @@
   },
   "scripts": {
     "test": "node ./test/testrunner.js",
-    "lint": "jshint --show-non-errors backbone.faux.server.js test/testrunner.js test/test.js"
+    "lint": "jshint --show-non-errors backbone-faux-server.js test/testrunner.js test/test.js"
   },
   "engines": {
     "node": ">=0.8"

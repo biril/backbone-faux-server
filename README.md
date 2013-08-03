@@ -33,13 +33,13 @@ Set up
 up and running. BFS will be exposed as a Global, a CommonJS module or an AMD module depending on the
 detected environment.
 
-* When developing for *the browser, without an AMD module loader*, include backbone.faux.server.js
+* When developing for *the browser, without an AMD module loader*, include backbone-faux-server.js
     after backbone.js:
 
     ```html
     ...
     <script type="text/javascript" src="backbone.js"></script>
-    <script type="text/javascript" src="backbone.faux.server.js"></script>
+    <script type="text/javascript" src="backbone-faux-server.js"></script>
     ...
     ```
 
@@ -62,7 +62,7 @@ detected environment.
 
     ```javascript
     // Your module
-    define(["backbone.faux.server"], function (fauxServer) {
+    define(["backbone-faux-server"], function (fauxServer) {
     	console.log("working with version " + fauxServer.getVersion());
     });
     ```

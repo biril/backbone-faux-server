@@ -17,7 +17,7 @@ qunit.options.deps = [{
 }];
 
 qunit.run({
-    code: { path: absPath("../backbone.faux.server.js"), namespace: "fauxServer" },
+    code: { path: absPath("../backbone-faux-server.js"), namespace: "fauxServer" },
     tests: [absPath("test.js")]
 }, function (error, stats) {
     if (error) {
