@@ -363,8 +363,7 @@
     });
 
     test("POST-handler invoked with expected context when saving a new Model", 6, function () {
-        var createdBookId = "0123456789",
-            book = this.createDummyBook();
+        var book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
         fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
@@ -384,7 +383,7 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
             return { id: createdBookId, creationTime: "now" };
         });
 
@@ -422,7 +421,7 @@
         // We've created a book of id 0123456789 and we'll be fetching it. The retBookAttrs hash
         //  holds the supposed attributes of the book so we'll be returning these from the GET-handler
 
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
+        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
             return retBookAttrs;
         });
 
@@ -453,7 +452,7 @@
         //  The retBooksAttrs is an array of attributes hashes for the supposed models in the collection
         //  so we'll be returning that from the GET-handler
 
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
+        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
             return retBooksAttrs;
         });
 
@@ -485,7 +484,7 @@
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
             return { modificationTime: "now" };
         });
 
@@ -527,7 +526,7 @@
         book.urlRoot = "library-app/books";
 
         // Test patching when no 'changed attributes' are given (expecting complete model data)
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
             return { modificationTime: "now" };
         });
 
