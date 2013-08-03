@@ -497,16 +497,19 @@
         }
     });
 
-    // Attach `get`, `post`, `put`, `patch` and `delete` methods to faux-server.
-    //  These all delegate to addRoute
+    // Attach <httpMethod>(name, urlExp, handler) methods to faux-server (`get`, `post`, `put`,
+    //  `patch` and `delete`). These all delegate to addRoute
     _.each(_.values(crudToHttp), function (httpMethod) {
         var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
-        fauxServer[method] = function (name, urlExp, handler) {
+        fauxServer[method] = function () {
+            // Expecting `name`, `urlExp`, `handler` arguments. Only `urlExp` is mandatory
             var args = skipUndefinedTail(_.toArray(arguments));
-            // The httpMethod must be inserted into the args, either at tail-position if `handler`
-            //  is missing or just before it if it's present
+
+            // The `httpMethod` must be inserted into the args, either at tail-position if
+            //  `handler` is missing or just before it (after `urlExp`) if it's present
             if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
             else { args.splice(args.length - 2, httpMethod); }
+
             return fauxServer.addRoute.apply(null, args);
         };
     });
