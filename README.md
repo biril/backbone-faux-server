@@ -5,7 +5,7 @@ Backbone Faux Server
 [![NPM version](https://badge.fury.io/js/backbone-faux-server.png)](http://badge.fury.io/js/backbone-faux-server)
 
 
-A (tiny) framework for easily mocking-up a server when working with
+A (tiny) framework for mocking up server-side persistence / processing for Backbone.js
 [Backbone.js](https://github.com/documentcloud/backbone)
 
 Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers
@@ -18,12 +18,13 @@ sync is as simple as calling `fauxServer.enable(false)`.
 
 Backbone faux server (henceforth 'BFS') grew out of the author's need to quickly flesh out Backbone
 prototype apps without having to fiddle with a server, a DB, or anything else that would require
-more than a JS script. Other solutions exist for this (such as
+more than a JS script. Similar solutions exist for this (such as
 [Backbone localStorage Adapter](https://github.com/jeromegn/Backbone.localStorage)) but they deviate
-from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence. BFS
-facilitates handling POSTs, GETs, PUTs and DELETEs *per* Model (or Collection) URL as if you're
-working on the server side. Functionality written this way, may be ported to your actual server in a
-very straightforward manner.
+from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence.
+Additionally, BFS doesn't implement some specific persistence scheme but only provides hooks for
+your own custom processing / persistence scheme, facilitating the handling of POSTs, GETs, PUTs and
+DELETEs _per_ resource (Model or Collection URL). Functionality written this way, may be ported to
+the server-side in a very straightforward manner.
 
 
 Set up
@@ -33,7 +34,7 @@ Set up
 up and running. BFS will be exposed as a Global, a CommonJS module or an AMD module depending on the
 detected environment.
 
-* When developing for *the browser, without an AMD module loader*, include backbone-faux-server.js
+* When developing for _the browser, without an AMD module loader_, include backbone-faux-server.js
     after backbone.js:
 
     ```html
@@ -46,28 +47,28 @@ detected environment.
     and the module will be exposed as the global `fauxServer`:
 
     ```javascript
-    console.log("working with version " + fauxServer.getVersion());
+    console.log("fauxServer version: " + fauxServer.getVersion());
     ```
 
-* `require` when working *with CommonJS* (e.g. Node.js). Assuming BFS is `npm install`ed:
+* `require` when working _with CommonJS_ (e.g. Node). Assuming BFS is `npm install`ed:
 
     ```javascript
     var fauxServer = require("backbone-faux-server");
-    console.log("working with version " + fauxServer.getVersion());
+    console.log("fauxServer version: " + fauxServer.getVersion());
     ```
 
     (see Caveats for issues related to `npm install`ing Backbone along with BFS)
 
-* Or list as a dependency when working *with an AMD loader* (e.g. require.js):
+* Or list as a dependency when working _with an AMD loader_ (e.g. require.js):
 
     ```javascript
     // Your module
     define(["backbone-faux-server"], function (fauxServer) {
-    	console.log("working with version " + fauxServer.getVersion());
+    	console.log("fauxServer version: " + fauxServer.getVersion());
     });
     ```
 
-    (you'll probably want to use AMD-compliant versions of
+    (in this case you may want to use AMD-compliant versions of
     [Backbone](https://github.com/amdjs/backbone) and
     [Underscore](https://github.com/amdjs/underscore))
 
@@ -90,8 +91,7 @@ var Books = Backbone.Collection.extend({
 });
 ```
 
-Note that the `url` property is used, as it normally would in any scenario involving a remote
-resources.
+Note that the `url` property is used, as it would in any scenario involving a remote resource.
 
 Continue by defining routes, to handle Model syncing as needed. Every route defines a mapping from
 a Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH, DELETE)) to some
@@ -171,8 +171,8 @@ fauxServer.addRoutes({
 ```
 
 Route names can be useful for querying and / or removing earlier defined routes. However, this is
-often unecessary and route names may be skipped in most route declarations. (They're mandatory as
-keys when passing a hash of routes to `addRoutes`.) Coming back to the earlier "createBook" example,
+often unecessary and route names may be skipped in most declarations. (They're mandatory as keys
+when passing a hash of routes to `addRoutes`.) Coming back to the earlier "createBook" example,
 the route name may be skipped like so:
 
 ```javascript
@@ -222,7 +222,7 @@ Testing
 
 The QUnit test suite may be run in a browser (test/index.html) or on the command line, by running
 `make test` or `npm test`. The command line version runs on Node and depends on
-[node-qunit](https://github.com/kof/node-qunit) so an `npm install` is required beforehand.
+[node-qunit](https://github.com/kof/node-qunit) (`npm install` to fetch it before testing).
 
 
 Reference
@@ -234,7 +234,7 @@ insight may be gained by taking a look at the test suite and - of course - the s
 
 ### Methods
 
-All methods return the faux-server instance unless otherwise noted.
+All methods return the faux-server instance and may be chained, unless otherwise noted.
 
 #### addRoute ([name], urlExp, [httpMethod], [handler])
 
@@ -369,8 +369,8 @@ where `fauxServer` is exposed globally. Returns a reference to the faux-server.
 
 Caveats / WTF
 -------------
-* When working with Node.js and npm be sure to `npm install backbone` _before_ `npm install`ing BFS.
-	Installing in reverse order will cause BFS to fail due to Node's
+* When developing for Node, using npm for dependency management, be sure to `npm install backbone`
+    _before_ `npm install`ing BFS. The opposite will cause BFS to fail due to Node's
     [module caching caveats](http://nodejs.org/api/modules.html#modules_module_caching_caveats).
 * `npm install`ing with the `--dev` switch will fail
     [due to node-qunit](https://github.com/kof/node-qunit/issues/41).
