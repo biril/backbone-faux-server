@@ -8,24 +8,29 @@
 (function (root, createModule) {
     "use strict";
 
-    // Detect current environment. Faux-server will be exposed as module / global depending on that
-    var env = (function () {
-            // A global 'exports' object signifies CommonJS-like enviroments that support
-            //  module.exports, e.g. Node
+
+    var
+        // Detect current environment. Faux-server will be exposed as module / global accordingly
+        env = (function () {
+            // A global `exports` object signifies CommonJS-like enviroments that support
+            //  `module.exports`, e.g. Node
             if (typeof exports === "object") { return "CommonJS"; }
 
-            // A global 'define' method with an 'amd' property signifies the presence of an AMD
+            // A global `define` method with an `amd` property signifies the presence of an AMD
             //  loader (require.js, curl.js)
             if (typeof define === "function" && define.amd) { return "AMD"; }
 
+            // Otherwise we assume running in a browser
             return "browser";
         }()),
-        fauxServer = null; // To be defined
+
+        // The `fauxServer` object to be exposed as module / global
+        fauxServer = null;
 
     // Support for CommonJS will be specific to node. So if in fact the detected environment is
-    //  'commonJS' we assume the presense of node's 'global' object and set root to it. ('root' is
-    //  already set to 'this' but in the specific case of node, 'this' won't actually capture the
-    //  global context - 'global' is needed)
+    //  'commonJS' we assume the presense of node's `global` object and set root to it. (`root` is
+    //  already set to `this` but in the specific case of Node, `this` won't actually capture the
+    //  global context - `global` is needed)
     if (env === "CommonJS") { root = global; }
 
     // Expose as module / global depending on environment
@@ -41,18 +46,19 @@
         break;
 
     case "browser":
-        fauxServer = createModule(root.setTimeout, {}, _, Backbone);
 
-        // Run in no-conflict mode, setting the global fauxServer variable to to its previous value.
-        //  Only useful when working in a browser environment without a module-framework as this is
-        //  the only case where fauxServer is exposed globally. Returns a reference to fauxServer
+        // When running in a browser, the additional `noConflict` method is attached to
+        //  `fauxServer`. This is only meaningful in this specific case where `fauxServer` is
+        //  globally exposed
+        fauxServer = createModule(root.setTimeout, {}, _, Backbone);
         fauxServer.noConflict = (function() {
 
             // Save a reference to the previous value of 'fauxServer', so that it can be restored
             //  later on, if 'noConflict' is used
             var previousFauxServer = root.fauxServer;
 
-            // noConflict
+            // The `noConflict` method: Sets the _global_ `fauxServer` variable to to its previous
+            //  value returning a reference to `fauxServer`
             return function () {
                 root.fauxServer = previousFauxServer;
                 fauxServer.noConflict = function () { return fauxServer; };
@@ -137,7 +143,7 @@
             "patch": "PATCH"
         },
 
-        // Routes
+        // Collection of all defined routes
         routes = [],
 
         /**
@@ -273,29 +279,30 @@
          * Add a route to the faux-server. Every route defines a mapping from a
          *  Model(or Collection)-URL & sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE))
          *  to some specific handler (callback):
-         *  <model-URL, sync-method> -> handler
-         *  So any time a Model is created, read, updated or deleted, its URL and the the sync
-         *  method being used will be tested against defined routes in order to find a handler for
+         *  `<model-URL, sync-method> -> handler`
+         *  So whenever a Model is created, read, updated or deleted, its URL and the the sync
+         *  method being used is tested against defined routes in order to find a handler for
          *  creating, reading, updating or deleting this Model. The same applies to reading
-         *  Collections: Whenever a Collection is read, its URL (and the 'read' method) will be
-         *  tested against defined routes in order to find a handler for reading it. When a match
-         *  for the <model-URL, sync-method> pair is not found among defined routes, the native sync
-         *  will be invoked (this behaviour may be overriden - see fauxServer.setDefaultHandler).
+         *  Collections: Whenever a Collection is read, its URL (and the 'read' method) is tested
+         *  against defined routes in order to find a handler for reading it. When a match for
+         *  the <model-URL, sync-method> pair is not found among defined routes, the native sync
+         *  is invoked (this behaviour may be overriden - see fauxServer.setDefaultHandler).
          *  Later routes take precedence over earlier routes so in configurations where multiple
          *  routes match, the one most recently defined will be used.
          * @param {string} name The name of the route. Optional
          * @param {string|RegExp} urlExp An expression against which, Model(or Collection)-URLs will
          *  be tested. This is syntactically and functionally analogous to Backbone routes: urlExps
          *  may contain parameter parts, ':param', which match a single URL component between
-         *  slashes; and splat parts '*splat', which can match any number of URL components. The
-         *  values captured by params and splats will be passed as parameters to the given handler
-         *  method. (see http://backbonejs.org/#Router-routes). Regular expressions may also be
+         *  slashes; and splat parts '*splat', which can match any number of URL components.
+         *  Parentheses may also be used to denote optional parts.The values captured by params and
+         *  splats will be passed as parameters to the given handler method.
+         *  (see http://backbonejs.org/#Router-routes). Regular expressions may also be
          *  used, in which case all values captured by reg-exp capturing groups will be passed as
          *  parameters to the given handler method.
          * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or
-         *  DELETE)), that should trigger the route's handler (both the URL-expression and the
-         *  method should match for the handler to be invoked). httpMethod may also be set to '*' to
-         *  create a match-all-methods handler; one that will be invoked whenever urlExp matches the
+         *  DELETE)), that should trigger the route's handler. Both the URL-expression and the
+         *  method should match for the handler to be invoked. httpMethod may also be set to '*' to
+         *  create a match-all-methods handler: One that will be invoked whenever urlExp matches the
          *  model's (or collection's) URL _regardless_ of method. Omitting the parameter has the
          *  same effect. In the scope of a match-all-methods handler, the HTTP method currently
          *  being handled may be acquired by querying the context parameter for context.httpMethod.
@@ -305,21 +312,22 @@
          *  acquired by querying context.httpMethodOverride.
          * @param {function} [handler=no-op] The handler to be invoked when both route's URL and
          *  route's method match. A do-nothing handler will be used if one is not provided. Its
-         *  signature should be function (context, [param1, [param2, ...]]) where context contains
-         *  properties data, httpMethod, httpMethodOverride, route and param1, param2, ... are
-         *  parameters deduced from matching the urlExp to the Model (or Collection) URL.
-         *  Specifically, about context properties:
-         *   * {any} context.data Attributes of the Model (or Collection) being proccessed. Valid
+         *  signature should be
+         *  `function (context, [param1, [param2, ...]])`
+         *  where context contains properties `data`, `httpMethod`, `httpMethodOverride`, `route`
+         *  and `param1`, `param2`, ... are parameters derived by matching the `urlExp` to the
+         *  Model (or Collection) URL. Specifically, about context properties:
+         *   * {any} `context.data`: Attributes of the Model (or Collection) being proccessed. Valid
          *      only on 'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of
          *      PATCH, context.data may only contain a _subset_ of Model's attributes.
-         *   * {string} context.httpMethod The HTTP Method (POST, GET, PUT, PATCH, DELETE) that is
-         *      currently being handled.
-         *   * {string} context.url The URL that is currently being handled.
-         *   * {string} context.httpMethodOverride The true HTTP Method (POST, GET, PUT, PATCH,
+         *   * {string} `context.httpMethod`: The HTTP Method (POST, GET, PUT, PATCH, DELETE) that
+         *      is currently being handled.
+         *   * {string} `context.url`: The URL that is currently being handled.
+         *   * {string} `context.httpMethodOverride`: The true HTTP Method (POST, GET, PUT, PATCH,
          *      DELETE) that is currently being handled when Backbone.emulateHTTP is set to true.
-         *      The equivalent of Backbone's X-HTTP-Method-Override header
-         *      (see http://backbonejs.org/#Sync-emulateHTTP).
-         *   * {object} context.route The route that is currently being handled.
+         *      The equivalent of [Backbone's](http://backbonejs.org/#Sync-emulateHTTP)
+         *      X-HTTP-Method-Override header.
+         *   * {object} `context.route`: The route that is currently being handled.
          *  On success: Return created Model attributes after handling a POST or updated Model
          *  attributes after handling a PUT or PATCH. Return Model attributes after handling a GET
          *  or an array of Model attributes after handling a GET that refers to a collection. Note
@@ -336,10 +344,12 @@
                 //  appropriate - note that the only mandatory argument is `urlExp`
                 route = (function (args) {
                     switch (args.length) {
-                    case 3: // Missing name, handler or httpMethod
-                        if (_.isFunction(args[2])) { // Missing name or httpMethod
+
+                    // Missing `name`, `handler` or `httpMethod`
+                    case 3:
+                        if (_.isFunction(args[2])) { // Missing `name` or `httpMethod`
                             handler = args[2];
-                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name
+                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name`
                                 urlExp = args[0];
                                 httpMethod = args[1];
                             } else { // Missing httpMethod
@@ -349,29 +359,35 @@
                             handler = noOp;
                         }
                         break;
-                    case 2: // Missing name & httpMethod, httpMethod & handler or name & handler
-                        if (_.isFunction(args[1])) { // Missing name & httpMethod
+
+                    // Missing `name` & `httpMethod`, `httpMethod` & `handler` or `name` & `handler`
+                    case 2:
+                        if (_.isFunction(args[1])) { // Missing `name` & `httpMethod`
                             urlExp = args[0];
                             handler = args[1];
                             httpMethod = "*";
-                        } else { // Missing name & handler or httpMethod & handler
+                        } else { // Missing `name` & `handler` or `httpMethod` & `handler`
                             handler = noOp;
-                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing name & handler
+                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name` & `handler`
                                 urlExp = args[0];
                                 httpMethod = args[1];
-                            } else { // Missing httpMethod & handler
+                            } else { // Missing `httpMethod` & `handler`
                                 httpMethod = "*";
                             }
                         }
                         break;
-                    case 1: // Missing name & httpMethod & handler
+
+                    // Missing `name` & `httpMethod` & `handler`
+                    case 1:
                         urlExp = args[0];
                         httpMethod = "*";
                         handler = noOp;
                         break;
                     }
+
                     httpMethod = httpMethod.toUpperCase();
                     urlExp = _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp);
+
                     return {
                         name: name || _.uniqueId(httpMethod + "_" + urlExp + "_"),
                         urlExp: urlExp,
@@ -390,7 +406,7 @@
             });
             routes[routeIndex] = route;
 
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -405,7 +421,7 @@
             _.each(routesToAdd, function (r, rName) {
                 this.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
             }, this);
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -415,7 +431,7 @@
          */
         removeRoute: function (routeName) {
             routes = _.reject(routes, function (r) { return r.name === routeName; });
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -424,7 +440,7 @@
          */
         removeRoutes: function () {
             routes = [];
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -460,7 +476,7 @@
                 handler: handler,
                 handlerParams: []
             };
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -473,7 +489,7 @@
          */
         setLatency: function (min, max) {
             latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -485,7 +501,7 @@
          */
         enable: function (shouldEnable) {
             isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
-            return this; // Chain
+            return this;
         },
 
         /**
@@ -498,8 +514,11 @@
     });
 
     // Attach <httpMethod>(name, urlExp, handler) methods to faux-server (`get`, `post`, `put`,
-    //  `patch` and `delete`). These all delegate to addRoute
+    //  `patch` and `del`). These all delegate to addRoute
     _.each(_.values(crudToHttp), function (httpMethod) {
+
+        // All shortcut-methods are named after the relevant HTTP verb except for 'delete' which is
+        //  abbreviated to 'del' in order to avoid reserved word awkwardness
         var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
         fauxServer[method] = function () {
             // Expecting `name`, `urlExp`, `handler` arguments. Only `urlExp` is mandatory

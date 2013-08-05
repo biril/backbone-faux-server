@@ -5,7 +5,7 @@ Backbone Faux Server
 [![NPM version](https://badge.fury.io/js/backbone-faux-server.png)](http://badge.fury.io/js/backbone-faux-server)
 
 
-A (tiny) framework for mocking up server-side persistence / processing for Backbone.js
+A (tiny) framework for mocking up server-side persistence / processing for
 [Backbone.js](https://github.com/documentcloud/backbone)
 
 Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers
@@ -243,12 +243,12 @@ sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific ha
 
 `<model-URL, sync-method> → handler`
 
-So every time a Model is created, read, updated or deleted, its URL and the the sync method being
-used will be tested against defined routes in order to find a handler for creating, reading,
+Whenever a Model is created, read, updated or deleted, its URL and the the sync method being
+used are tested against defined routes in order to find a handler for creating, reading,
 updating or deleting this Model. The same applies to reading Collections: Whenever a Collection is
 read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 handler for reading it. When a match for the `<model-URL, sync-method>` pair is not found among
-defined routes, the native sync will be invoked (this behaviour may be overriden - see
+defined routes, the native sync is invoked (this behaviour may be overriden - see
 `fauxServer.setDefaultHandler`). Later routes take precedence over earlier routes so in
 configurations where multiple routes match, the one most recently defined will be used.
 
@@ -262,9 +262,9 @@ configurations where multiple routes match, the one most recently defined will b
 	The values captured by params and splats will be passed as parameters to the given handler
 	method. Regular expressions may also be used, in which case all values captured by
 	reg-exp capturing groups will be passed as parameters to the given handler method.
-* `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE), that should
-	trigger the route's handler (both the URL-expression and the method should match for the
-	handler to be invoked). `httpMethod` may also be set to '*' or ommitted to create a
+* `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE)), that should
+	trigger the route's handler. Both the URL-expression and the method should match for the
+	handler to be invoked. `httpMethod` may also be set to '*' or ommitted to create a
 	match-all-methods handler: One that will be invoked whenever `urlExp` matches the model's (or
 	collection's) URL _regardless_ of method. In the scope of a match-all-methods handler, the HTTP
 	method currently being handled may be acquired by querying the `context` parameter for
@@ -273,12 +273,12 @@ configurations where multiple routes match, the one most recently defined will b
 	mapped to POST. In this case `context.httpMethod` will be set to POST and the true HTTP method
 	being handled may be acquired by querying `context.httpMethodOverride`.
 * `handler`: The handler to be invoked when both route's URL-expression and route's method match. A
-	do-nothing handler will be used if one is not provided. Its signature should be
+	do-nothing handler will be used if one is not provided. The handler's expected signature is
 
     `function (context, [param1, [param2, ...]])`
 
     where `context` contains properties `data`, `httpMethod`, `httpMethodOverride`, `route` and
-    `param1`, `param2`, ... are parameters deduced from matching the `urlExp` to the Model
+    `param1`, `param2`, ... are parameters derived by matching the `urlExp` to the Model
     (or Collection) URL. Specifically, about `context` properties:
 
     * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on
@@ -309,8 +309,10 @@ with a specific `httpMethod`. See `addRoute` above for parameter descriptions an
 
 Add multiple routes to the faux-server.
 
-* `routes`: A hash or array of routes to add. When passing a hash, keys should be route names and
-	each route (nested hash) need only contain `urlExp`, `httpMethod` and `handler`.
+* `routes`: A hash or array of routes to add. Each route is itself a hash with `name`, `urlExp`,
+    `httpMethod` and `handler` attributes. As is the case with `addRoute`, the only attribute whose
+    presence is mandatory is `urlExp`. Note that when passing a hash of routes, its keys are
+    treated as route names and the `name` attribute should be ommitted.
 
 #### removeRoute (name)
 
