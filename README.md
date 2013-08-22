@@ -374,8 +374,9 @@ Caveats / WTF
 * When developing for Node, using npm for dependency management, be sure to `npm install backbone`
     _before_ `npm install`ing BFS. The opposite will cause BFS to fail due to Node's
     [module caching caveats](http://nodejs.org/api/modules.html#modules_module_caching_caveats).
-* `npm install`ing with the `--dev` switch will fail
-    [due to node-qunit](https://github.com/kof/node-qunit/issues/41).
+* `npm install`ing with the `--dev` switch will fail due to node-qunit
+    [quirk](https://github.com/kof/node-qunit/issues/41). As a solution, `npm install qunit` before
+    installing other devDependencies.
 * The current version of BFS is tested against and intended to work with Backbone 1.0. Check out
     [BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) if you need to work
     with a previous version (such as 0.9.10).
