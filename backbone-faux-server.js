@@ -8,7 +8,6 @@
 (function (root, createModule) {
     "use strict";
 
-
     var
         // Detect current environment. Faux-server will be exposed as module / global accordingly
         env = (function () {
