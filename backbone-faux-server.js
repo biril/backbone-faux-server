@@ -382,6 +382,9 @@
                         httpMethod = "*";
                         handler = noOp;
                         break;
+
+                    case 0:
+                        throw new Error("addRoute: Missing mandatory 'urlExp' argument");
                     }
 
                     httpMethod = httpMethod.toUpperCase();
@@ -522,6 +525,8 @@
         fauxServer[method] = function () {
             // Expecting `name`, `urlExp`, `handler` arguments. Only `urlExp` is mandatory
             var args = skipUndefinedTail(_.toArray(arguments));
+
+            if (!args.length) { throw new Error(method + ": Missing mandatory 'urlExp' argument"); }
 
             // The `httpMethod` must be inserted into the args, either at tail-position if
             //  `handler` is missing or just before it (after `urlExp`) if it's present
