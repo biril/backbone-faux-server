@@ -153,23 +153,41 @@
             routeName = null,
             routeMethod = null,
             matchingRoute = null,
-            methods = ["get", "post", "put", "patch", "del"], i, l;
+            methods = ["get", "post", "put", "patch", "del"],
+            i, l = methods.length,
+            handler = function () {};
 
-        for (i = 0, l = methods.length; i < l; ++i) {
+        for (i = 0; i < l; ++i) {
             routeName = "route_" + methods[i];
             routeMethod = methods[i] === "del" ? "DELETE" : methods[i].toUpperCase();
 
+            // Add named route (no handler)
             fauxServer[methods[i]](routeName, url);
             matchingRoute = fauxServer.getRoute(routeName);
-            ok(matchingRoute, methods[i] + " adds named route");
+            ok(matchingRoute, methods[i] + " adds named route (when no handler given)");
             strictEqual(matchingRoute.httpMethod, routeMethod, "added route is assigned the " + routeMethod + " method");
 
             fauxServer.removeRoute(routeName);
 
-            // Also try adding unnamed route
+            // Add named route (with handler)
+            fauxServer[methods[i]](routeName, url, handler);
+            matchingRoute = fauxServer.getRoute(routeName);
+            ok(matchingRoute, methods[i] + " adds named route (when handler given)");
+            strictEqual(matchingRoute.httpMethod, routeMethod, "added route is assigned the " + routeMethod + " method");
+
+            fauxServer.removeRoute(routeName);
+
+            // Add unnamed route (no handler)
             fauxServer[methods[i]](url);
             matchingRoute = fauxServer.getMatchingRoute(url, routeMethod);
-            ok(matchingRoute, methods[i] + " adds unnamed " + routeMethod + "-route");
+            ok(matchingRoute, methods[i] + " adds unnamed " + routeMethod + "-route (when no handler given)");
+
+            fauxServer.removeRoute(matchingRoute.name);
+
+            // Add unnamed route (with handler)
+            fauxServer[methods[i]](url, handler);
+            matchingRoute = fauxServer.getMatchingRoute(url, routeMethod);
+            ok(matchingRoute, methods[i] + " adds unnamed " + routeMethod + "-route (when handler given)");
 
             fauxServer.removeRoute(matchingRoute.name);
         }

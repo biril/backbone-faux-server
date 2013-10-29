@@ -526,7 +526,7 @@
             // The `httpMethod` must be inserted into the args, either at tail-position if
             //  `handler` is missing or just before it (after `urlExp`) if it's present
             if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
-            else { args.splice(args.length - 2, httpMethod); }
+            else { args.splice(args.length - 1, 0, httpMethod); }
 
             return fauxServer.addRoute.apply(null, args);
         };
