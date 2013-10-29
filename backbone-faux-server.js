@@ -227,7 +227,7 @@
         // Ensure that we have a URL (A `url` property whithin options overrides Model /
         //  Collection URL)
         if(!(c.url = options.url || _.result(model, "url"))) {
-            throw new Error("A 'url' property or function must be specified");
+            throw new Error("sync: Undefined 'url' property or function of Model / Collection");
         }
 
         // Find route for given URL or fall back to native sync if none found
