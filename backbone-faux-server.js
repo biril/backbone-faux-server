@@ -528,7 +528,7 @@
             if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
             else { args.splice(args.length - 1, 0, httpMethod); }
 
-            return fauxServer.addRoute.apply(null, args);
+            return fauxServer.addRoute.apply(this, args);
         };
     });
 
