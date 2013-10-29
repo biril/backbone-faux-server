@@ -715,6 +715,104 @@
         book.destroy({ emulateHTTP: true });
     });
 
+    test("Synced by appropriate handlers for all methods (unnamed handlers added with addRoute)", 5, function () {
+        var book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer
+        .addRoute("library-app/books", "POST", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "POST-handler called");
+                isCalled = true;
+                return { id: "0123456789" };
+            };
+        }()))
+        .addRoute("library-app/books/:id", "GET", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "GET-handler called");
+                isCalled = true;
+            };
+        }()))
+        .addRoute("library-app/books/:id", "PUT", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "PUT-handler called");
+                isCalled = true;
+            };
+        }()))
+        .addRoute("library-app/books/:id", "PATCH", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "PATCH-handler called");
+                isCalled = true;
+            };
+        }()))
+        .addRoute("library-app/books/:id", "DELETE", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "DELETE-handler called");
+                isCalled = true;
+            };
+        }()));
+
+        book.save();    // create
+        book.fetch();   // get
+        book.save();    // update
+        book.save(null, { patch: true });
+        book.destroy(); // delete
+    });
+
+    test("Synced by appropriate handlers for all methods (unnamed handlers added with get, post, etc)", 5, function () {
+        var book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer
+        .post("library-app/books", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "POST-handler called");
+                isCalled = true;
+                return { id: "0123456789" };
+            };
+        }()))
+        .get("library-app/books/:id", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "GET-handler called");
+                isCalled = true;
+            };
+        }()))
+        .put("library-app/books/:id", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "PUT-handler called");
+                isCalled = true;
+            };
+        }()))
+        .patch("library-app/books/:id", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "PATCH-handler called");
+                isCalled = true;
+            };
+        }()))
+        .del("library-app/books/:id", (function () {
+            var isCalled = false;
+            return function () {
+                ok(!isCalled, "DELETE-handler called");
+                isCalled = true;
+            };
+        }()));
+
+        book.save();    // create
+        book.fetch();   // get
+        book.save();    // update
+        book.save(null, { patch: true });
+        book.destroy(); // delete
+    });
+
     test("Syncing performed by native sync iff no route matches and no default-handler defined", 2, function () {
         var book = this.createDummyBook();
         book.urlRoot = "library-app/books";
