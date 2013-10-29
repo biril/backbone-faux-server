@@ -457,6 +457,16 @@
         },
 
         /**
+         * Get route at specified index
+         * @param  {int} routeIndex Index of route to acquire
+         * @return {object} Route at specified index or null if no such route exists. Note that
+         *  the returned route is a copy and cannot be modified to alter faux-server's behaviour
+         */
+        getRouteAt: function (routeIndex) {
+            return routes[routeIndex] ? _.clone(routes[routeIndex]) : null;
+        },
+
+        /**
          * Get a route matching the given <URL, HTTP-method> pair. See closed-over getMatchingRoute
          */
         getMatchingRoute: getMatchingRoute,
