@@ -351,6 +351,7 @@
                             if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name`
                                 urlExp = args[0];
                                 httpMethod = args[1];
+                                name = null;
                             } else { // Missing httpMethod
                                 httpMethod = "*";
                             }
@@ -365,11 +366,13 @@
                             urlExp = args[0];
                             handler = args[1];
                             httpMethod = "*";
+                            name = null;
                         } else { // Missing `name` & `handler` or `httpMethod` & `handler`
                             handler = noOp;
                             if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name` & `handler`
                                 urlExp = args[0];
                                 httpMethod = args[1];
+                                name = null;
                             } else { // Missing `httpMethod` & `handler`
                                 httpMethod = "*";
                             }
@@ -381,6 +384,7 @@
                         urlExp = args[0];
                         httpMethod = "*";
                         handler = noOp;
+                        name = null;
                         break;
 
                     case 0:
