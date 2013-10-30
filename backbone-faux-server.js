@@ -1,4 +1,4 @@
-//     Backbone Faux Server v0.9.2
+//     Backbone Faux Server v0.9.3
 
 //     https://github.com/biril/backbone-faux-server
 //     Licensed and freely distributed under the MIT License
@@ -525,7 +525,7 @@
          * @return {string} Current version of the library
          */
         getVersion: function () {
-            return "0.9.2"; // Keep in sync with package.json
+            return "0.9.3"; // Keep in sync with package.json
         }
     });
 
