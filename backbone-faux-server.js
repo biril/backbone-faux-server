@@ -263,7 +263,7 @@
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
             var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
-            deferred[_.isString(result) ? "reject" : "resolve"](model, result, options);
+            deferred[_.isString(result) ? "reject" : "resolve"](result);
         };
 
         model.trigger("request", model, null, options);
