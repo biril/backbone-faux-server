@@ -253,6 +253,12 @@
             };
         }
 
+         // jQuery Deferred and Zepto ajax requests can be aborted.
+        deferred.abort = function(){ 
+            this.statusText = "abort"; 
+            this.reject(model, this, options); 
+        }
+
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
@@ -266,9 +272,9 @@
         if (!latency) { execHandler(); }
         else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
 
-        // Return the deferred's underlying promise. If this is a dummy-deferred then `.promise()`
-        //  will just be undefined
-        return deferred.promise();
+        // No point in only returning a read-only promise: real life Backbone with jQuery returns the jQuery 
+        // Deferred and Zepto returns the XMLHttpRequest, both of which can be aborted, etc.
+        return deferred;
     };
 
     // Attach methods to faux-server
