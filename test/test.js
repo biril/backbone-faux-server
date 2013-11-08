@@ -879,7 +879,7 @@
     });
 
 
-    test("Returning non-string from any handler invokes success handler & triggers 'sync' event", 12, function () {
+    test("Returning non-string from any handler invokes success callback & triggers 'sync' event", 12, function () {
         // Adding routes without defining a handler => implicitly defining a def do-nothing handler
         //  which returns undefined
         fauxServer.addRoutes({
@@ -943,7 +943,125 @@
         });
     });
 
-    test("Returning a string from any handler invokes error handler & signals 'error' event)", 12, function () {
+    test("Model.fetch() success callback is invoked with (model, response, options) [GET-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            readRouteResponse = { someExtraAttribute: "extraAttribute" };
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Reading the model
+        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+            return readRouteResponse;
+        });
+        book.fetch({
+            someOption: true,
+            success: function (model, response, options) {
+                strictEqual(model, book, "success callback invoked with _model_");
+                deepEqual(response, readRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Collection.fetch() success callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
+        var books = new this.Books(),
+            readRouteResponse = [{ someExtraAttribute: "extraAttribute" }];
+
+        // Reading the collection
+        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+            return readRouteResponse;
+        });
+        books.fetch({
+            someOption: true,
+            success: function (collection, response, options) {
+                strictEqual(collection, books, "success callback invoked with _collection_");
+                deepEqual(response, readRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.save() success callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            createRouteResponse = { id: "0123456789", creationTime: "now", updateTime: "now" };
+        book.urlRoot = "library-app/books";
+
+        // Creating the model
+        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+            return createRouteResponse;
+        });
+        book.save(null, {
+            someOption: true,
+            success: function (model, response, options) {
+                strictEqual(model, book, "success callback invoked with _model_");
+                deepEqual(response, createRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.save() success callback is invoked with (model, response, options) after update [PUT-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            updateRouteResponse = { updateTime: "now" };
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Updating the model
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
+            return updateRouteResponse;
+        });
+        book.save(null, {
+            someOption: true,
+            success: function (model, response, options) {
+                strictEqual(model, book, "success callback invoked with _model_");
+                deepEqual(response, updateRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.save() success callback is invoked with (model, response, options) after update [PATCH-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            updateRouteResponse = { updateTime: "now" };
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Updating the model (by patching)
+        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
+            return updateRouteResponse;
+        });
+        book.save(null, {
+            patch: true,
+            someOption: true,
+            success: function (model, response, options) {
+                strictEqual(model, book, "success callback invoked with _model_");
+                deepEqual(response, updateRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.destroy() success callback is invoked with (model, response, options) [DELETE-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            deleteRouteResponse = { someAttribute: "attribute" };
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Deleting the model
+        fauxServer.addRoute("readBook", "library-app/books/:id", "DELETE", function () {
+            return deleteRouteResponse;
+        });
+        book.destroy({
+            someOption: true,
+            success: function (model, response, options) {
+                strictEqual(model, book, "success callback invoked with _model_");
+                deepEqual(response, deleteRouteResponse, "success callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Returning a string from any handler invokes error callback & signals 'error' event)", 12, function () {
         fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Error on create"; } },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Error on read model"; } },
@@ -1001,6 +1119,103 @@
         book.destroy({ // Delete
             error: function () {
                 ok(true, "Error handler called when destroying a Model (a DELETE-handler)");
+            }
+        });
+    });
+
+    test("Model.fetch() error callback is invoked with (model, response, options) [GET-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            readRouteResponse = "Error on read";
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Reading the model
+        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+            return readRouteResponse;
+        });
+        book.fetch({
+            someOption: true,
+            error: function (model, response, options) {
+                strictEqual(model, book, "error callback invoked with _model_");
+                strictEqual(response, readRouteResponse, "error callback invoked with _response_");
+                ok(options.someOption, "error callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Collection.fetch() error callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
+        var books = new this.Books(),
+            readRouteResponse = "Error on read";
+
+        // Reading the collection
+        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+            return readRouteResponse;
+        });
+        books.fetch({
+            someOption: true,
+            error: function (collection, response, options) {
+                strictEqual(collection, books, "success callback invoked with _collection_");
+                strictEqual(response, readRouteResponse, "error callback invoked with _response_");
+                ok(options.someOption, "success callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.save() error callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            createRouteResponse = "Error on create";
+        book.urlRoot = "library-app/books";
+
+        // Creating the model
+        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+            return createRouteResponse;
+        });
+        book.save(null, {
+            someOption: true,
+            error: function (model, response, options) {
+                strictEqual(model, book, "error callback invoked with _model_");
+                strictEqual(response, createRouteResponse, "error callback invoked with _response_");
+                ok(options.someOption, "error callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.save() error callback is invoked with (model, response, options) after create [PUT-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            updateRouteResponse = "Error on update";
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Creating the model
+        fauxServer.addRoute("createBook", "library-app/books/:id", "PUT", function () {
+            return updateRouteResponse;
+        });
+        book.save(null, {
+            someOption: true,
+            error: function (model, response, options) {
+                strictEqual(model, book, "error callback invoked with _model_");
+                strictEqual(response, updateRouteResponse, "error callback invoked with _response_");
+                ok(options.someOption, "error callback invoked with _options_");
+            }
+        });
+    });
+
+    test("Model.destroy() error callback is invoked with (model, response, options) after create [DELETE-handler]", 3, function () {
+        var book = this.createDummyBook(),
+            deleteRouteResponse = "Error on delete";
+        book.id = "0123456789";
+        book.urlRoot = "library-app/books";
+
+        // Creating the model
+        fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function () {
+            return deleteRouteResponse;
+        });
+        book.destroy({
+            someOption: true,
+            error: function (model, response, options) {
+                strictEqual(model, book, "error callback invoked with _model_");
+                strictEqual(response, deleteRouteResponse, "error callback invoked with _response_");
+                ok(options.someOption, "error callback invoked with _options_");
             }
         });
     });
