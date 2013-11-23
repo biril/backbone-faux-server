@@ -2,7 +2,8 @@
 (function () {
     "use strict";
 
-    QUnit.module("Promise", {
+    //
+    QUnit.module("promise", {
         setup: function () {
             var Book = Backbone.Model.extend({
                     defaults: {
