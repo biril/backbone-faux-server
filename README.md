@@ -34,7 +34,7 @@ Set up
 up and running. BFS will be exposed as a Global, a CommonJS module or an AMD module depending on the
 detected environment.
 
-* When developing for _the browser, without an AMD module loader_, include backbone-faux-server.js
+* When developing for _browsers, without an AMD module loader_, include backbone-faux-server.js
     after backbone.js:
 
     ```html
@@ -44,7 +44,7 @@ detected environment.
     ...
     ```
 
-    and the module will be exposed as the global `fauxServer`:
+    This will export the `fauxServer` global:
 
     ```javascript
     console.log("fauxServer version: " + fauxServer.getVersion());
@@ -57,9 +57,10 @@ detected environment.
     console.log("fauxServer version: " + fauxServer.getVersion());
     ```
 
-    (see Caveats for issues related to `npm install`ing Backbone along with BFS)
+    (see [the Caveats section](#caveats--wtf) for issues related to `npm install`ing Backbone along
+    with BFS)
 
-* Or list as a dependency when working _with an AMD loader_ (e.g. require.js):
+* Or list as a dependency when working _with an AMD loader_ (e.g. RequireJS):
 
     ```javascript
     // Your module
@@ -68,10 +69,21 @@ detected environment.
     });
     ```
 
-    (in this case you may want to use AMD-compliant versions of
-    [Backbone](https://github.com/amdjs/backbone) and
-    [Underscore](https://github.com/amdjs/underscore))
+    Note that the AMD definition of BFS depends on `backbone` and `underscore` so some loader
+    configuration will be required. For RequireJS you may want to use
+    [AMD-compliant versions](https://github.com/amdjs) and configure paths
 
+    ```javascript
+    require.config({
+        baseUrl: "myapp/",
+        paths: {
+            "underscore": "mylibs/underscore",
+            "backbone": "mylibs/backbone"
+        }
+    });
+    ```
+
+    or [shim them](http://requirejs.org/docs/api.html#config-shim).
 
 Usage
 -----
@@ -369,6 +381,7 @@ Run in no-conflict mode, setting the global `fauxServer` variable to to its prev
 useful when working in a browser environment without a module-framework as this is the only case
 where `fauxServer` is exposed globally. Returns a reference to the faux-server.
 
+
 Caveats / WTF
 -------------
 * When developing for Node, using npm for dependency management, be sure to `npm install backbone`
@@ -377,9 +390,10 @@ Caveats / WTF
 * `npm install`ing with the `--dev` switch will fail due to node-qunit
     [quirk](https://github.com/kof/node-qunit/issues/41). As a solution, `npm install qunit` before
     installing other devDependencies.
-* The current version of BFS is tested against and intended to work with Backbone 1.0. Check out
-    [BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) if you need to work
-    with a previous version (such as 0.9.10).
+* The current version of BFS is tested against BB v1.0.0 and will _not_ work with 0.9.x revisions.
+	([BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) is the last known good
+	version for BB &lt;= v0.9.10).
+
 
 License
 -------
