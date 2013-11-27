@@ -363,6 +363,22 @@ Set server's emulated latency (zero by default)
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
 	latency in the [min, max] range.
 
+#### setTransportFactory (transportFactory)
+
+Set server's transport factory
+
+* `transportFactory`: A factory function with signature
+
+	`function (syncOptions, syncContext)`
+
+	invoked _per sync_ (with sync's relevant options and context) to create a new transport.
+
+Transports are deferred-like objects implementing a `resolve` / `reject` / `promise` interface. A
+successful sync will invoke `transport.resolve` while a failed one will invoke `transport.reject`.
+The sync method will always return `transport.promise()`.
+
+See [the Tranport section](#about-transports) for further details.
+
 #### enable ([shouldEnable])
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync
@@ -382,8 +398,97 @@ useful when working in a browser environment without a module-framework as this 
 where `fauxServer` is exposed globally. Returns a reference to the faux-server.
 
 
+Transports
+----------
+
+Backbone is built on minimum assumptions regarding the communication layer and/or persistence
+strategy applications will make use of. Although, more often that not, this is jQuery's `ajax`
+function, you may choose to [use a modified ajax function](http://backbonejs.org/#Sync-ajax) or
+[bypass the sync method](http://backbonejs.org/#Sync) altogether (this is in fact how BFS works).
+Backbone will, generally speaking, abstract this away so that applications may be written on top of
+a normalized layer.
+
+Having said that, specific choices in the method of communication / persistence can affect how
+application code is written in certain ways. As an example consider the case of chaining a `then`
+call after sync:
+
+```javascript
+aModel.save().then(function () {
+	// .. continue after successfully saving the model ..
+});
+```
+
+This works under the assumption that Backbone's `sync` returns a
+[promise](http://promises-aplus.github.io/promises-spec), which is the case when
+the underlying ajax function - the communication layer - does so. Which holds true specifically
+for [jQuery's `ajax`](http://api.jquery.com/jQuery.ajax) but not necessarily for other
+communication layers and/or persistence strategies.
+
+As BFS is itself such a strategy, one that completely bypasses the communication layer, there may
+be cases where application code assumes and makes use of functionality which will not be available
+when the app is run on a faux server. A common problematic example is implementations which rely on
+the creation of `jqXHR` objects when Models are synced: BFS `sync` will attempt to return a jQuery
+promise when that's feasible (when `Backbone.$` is found to be the jQuery object at runtime) or
+just return undefined otherwise - never will it return an actual `jqXHR`. You can compensate for
+that by implementing a custom 'transport'.
+
+Transports are a BFS abstraction intended as a means of mocking the aspects (the API) of an
+application-specific communication layer. It may be helpful to think of the `jqXHR` object as a
+concrete example of a transport - or, to be precise, a transport's promise.
+
+Transports are deferred-like objects implementing a `resolve` / `reject` / `promise` interface. BFS
+will instantiate a new transport on every sync, and return its promise by invoking
+`transport.promise`. When the sync is successful, i.e. when the relevant handler returns a
+non-string value, `transport.resolve` will be called with the handler's returned result. When the
+sync fails, i.e. when the relevant handler returns a string result, `transport.reject` will be
+called with the handler's result. It is the transport's responsibility to subsequently call the
+given success or error callbacks.
+
+To define a custom transport, to be instantiated on every invocation of `sync`, call
+[`fauxServer.setTransportFactory`](#settransportfactory-transportfactory) providing a
+transport-factory function. Implement your custom transport-factory function so that
+* it instantiates and returns a `transport` object with `resolve` / `reject` and `promise` methods.
+   A deferred object is an obvious choice for this (see
+   [jQuery's $.Deferred](http://api.jquery.com/category/deferred-object) or
+   [Q's Q.defer](https://github.com/kriskowal/q#using-deferreds)) but any object with the
+   aforementioned methods is adequate.
+* `transport.resolve` invokes the sync's success callback, `options.success`.
+* `transport.reject` invokes the sync's error callback, `options.error`.
+* `transport.promise` returns an object featuring all properties and methods your implementation
+   requires on the object returned when `sync`ing (`fetch`ing, `save`ing, etc). Think of it as a
+   mocked `jqXHR`.
+
+As a reference, this is (a somewhat simplified version of) the default BFS transport-factory:
+
+```javascript
+// Transport-factory function, invoked _per sync_ (with the relevant options / context)
+//  to instantiate a new transport
+function (syncOptions, syncContext) {
+	// If an underlying ajax lib is defined for Backbone and it features a
+	//  Deferred method (which is precisely the case when Backbone.$ = jQuery)
+	//  then attempt to create a deferred object as a transport
+	if (Backbone.$ && Backbone.$.Deferred) {
+		var deferred = Backbone.$.Deferred();
+		deferred.then(syncOptions.success, syncOptions.error);
+		return deferred;
+	}
+
+	// Otherwise create a poor-man's deferred - an object that implements a
+	//  promise/resolve/reject interface without actual promise semantics:
+	//  resolve and reject just delegate to success and error callbacks while
+	//  promise() returns undefined. This is a good enough transport
+	return {
+		promise: function () {},
+		resolve: function (value) { syncOptions.success(value); },
+		reject: function (reason) { syncOptions.error(reason); }
+	};
+}
+```
+
+
 Caveats / WTF
 -------------
+
 * When developing for Node, using npm for dependency management, be sure to `npm install backbone`
     _before_ `npm install`ing BFS. The opposite will cause BFS to fail due to Node's
     [module caching caveats](http://nodejs.org/api/modules.html#modules_module_caching_caveats).

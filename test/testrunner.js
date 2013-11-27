@@ -23,6 +23,7 @@ qunit.run({
         absPath("test-urlexpmatch.js"),
         absPath("test-handlers.js"),
         absPath("test-eventscallbacks.js"),
+        absPath("test-transportcustom.js"),
         absPath("test-chain.js")
     ]
 }, function (error, stats) {

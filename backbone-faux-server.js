@@ -194,6 +194,35 @@
 
             // Send the complete Model representation when POSTing or PUTing
             if (httpMethod === "POST" || httpMethod === "PUT") { return model.toJSON(); }
+        },
+
+        // Invoked _per sync_ (with the relevant options / context) to create a new transport -
+        //  a deferred-like object implementing a `promise` / `resolve` / `reject` interface. A
+        //  successfull sync will invoke `transport.resolve` while a failed one will invoke
+        //  `transport.reject`. The sync method will always return `transport.promise()`
+        createTransport = function (syncOptions, syncContext) {
+            // If an underlying ajax lib is defined for Backbone (`Backbone.$`) and it features a
+            //  `Deferred` method (which is precisely the case when Backbone.$ = jQuery) then
+            //  attempt to create a 'deferred transport' which will invoke the `success` / `error`
+            //  callbacks when its promise is fulfilled / rejected. Note that sync will return the
+            //  transport's promise _not_ the transport itself
+            if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
+                try {
+                    var deferred = Backbone.$.Deferred();
+                    deferred.then(syncOptions.success, syncOptions.error);
+                    return deferred;
+                } catch (e) {}
+            }
+
+            // Otherwise create a poor-man's deferred - an object that implements a dumb
+            //  `promise` / `resolve` / `reject` interface without actual promise semantics:
+            //  `resolve` and `reject` just delegate to `success` and `error` callbacks while
+            //  `promise` returns an `undefined`. This is a good enough transport
+            return {
+                promise: noOp,
+                resolve: function (value) { syncOptions.success(value); },
+                reject: function (reason) { syncOptions.error(reason); }
+            };
         };
 
     // Modify Backbone's sync to use the faux-server sync method (when appropriate)
@@ -203,7 +232,7 @@
         if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
 
         var
-            // Handler context
+            // Sync context
             c = {
                 data: null,
                 url: null,
@@ -216,7 +245,7 @@
 
             // We'll be attempting to create a deferred and return the underlying promise.
             //  Defined below
-            deferred = null;
+            transport = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
         if ((Backbone.emulateHTTP || options.emulateHTTP) && c.httpMethod !== "GET") {
@@ -238,26 +267,14 @@
         // Ensure that we have the appropriate request data
         c.data = getRequestData(c.httpMethod, model, options);
 
-        // Try to create a deferred (and subsequently return the underlying promise). This is only
-        //  possible if Backbone's underlying ajax lib offers a `Deferred` method (which is the
-        //  case for jQuery). If this is not possible, then create a poor-man's deferred which just
-        //  delegates to the given success / error handlers (and features no actual underlying
-        //  promise)
-        if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
-            (deferred = Backbone.$.Deferred()).then(options.success, options.error);
-        } else {
-            deferred = {
-                promise: function () {},
-                resolve: function (value) { options.success(value); },
-                reject: function (reason) { options.error(reason); }
-            };
-        }
+        // Create a transport for this sync
+        transport = createTransport(options);
 
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
             var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
-            deferred[_.isString(result) ? "reject" : "resolve"](result);
+            transport[_.isString(result) ? "reject" : "resolve"](result);
         };
 
         model.trigger("request", model, null, options);
@@ -266,9 +283,9 @@
         if (!latency) { execHandler(); }
         else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
 
-        // Return the deferred's underlying promise. If this is a dummy-deferred then `.promise()`
-        //  will just be undefined
-        return deferred.promise();
+        // Return the transport's promise. Assuming the default transport-factory implementation
+        //  this may be an actual promise or just undefined
+        return transport.promise();
     };
 
     // Attach methods to faux-server
@@ -505,6 +522,21 @@
          */
         setLatency: function (min, max) {
             latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
+            return this;
+        },
+
+        /*
+         * Set server's transport factory
+         * @param {object} transportFactory A factory function with signature
+         *  `function (syncOptions, syncContext)`
+         *  invoked _per sync_ (with the relevant options / context) to create a new transport - a
+         *  deferred-like object implementing a `promise` / `resolve` / `reject` interface. A
+         *  successfull sync will invoke `transport.resolve` while a failed one will invoke
+         *  `transport.reject` The sync method will always return `transport.promise()`
+         * @return {object} The faux-server
+         */
+        setTransportFactory: function (transportFactory) {
+            createTransport = transportFactory;
             return this;
         },
 

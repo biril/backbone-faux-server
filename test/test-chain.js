@@ -37,6 +37,10 @@
         strictEqual(fauxServer.setDefaultHandler(), fauxServer, "returns faux-server");
     });
 
+    test("setTransportFactory is chainable", function () {
+       strictEqual(fauxServer.setTransportFactory(), fauxServer, "returns faux-server");
+    });
+
     test("setLatency is chainable", function () {
         strictEqual(fauxServer.setLatency(0), fauxServer, "returns faux-server");
     });
