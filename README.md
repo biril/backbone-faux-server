@@ -30,9 +30,15 @@ the server-side in a very straightforward manner.
 Set up
 ------
 
-`git clone git://github.com/biril/backbone-faux-server` or `npm install backbone-faux-server` to get
-up and running. BFS will be exposed as a Global, a CommonJS module or an AMD module depending on the
-detected environment.
+To get Backbone Faux Server
+
+* install with bower, `bower install backbone-faux-server`,
+* install with npm, `npm install backbone-faux-server` or
+* just include [`backbone-faux-server.js`](https://raw.github.com/biril/backbone-faux-server/master/backbone-faux-server.js)
+    in your project.
+
+BFS may be used as an exported global, a CommonJS module or an AMD module depending on the current
+environment:
 
 * When developing for _browsers, without an AMD module loader_, include backbone-faux-server.js
     after backbone.js:

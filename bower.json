@@ -1,0 +1,29 @@
+{
+  "name": "backbone-faux-server",
+  "main": "backbone-faux-server.js",
+  "version": "0.10.0",
+  "homepage": "https://github.com/biril/backbone-faux-server",
+  "authors": [
+    "biril <alexlambiris@gmail.com>"
+  ],
+  "description": "A (tiny) framework for mocking up server-side persistence / processing for Backbone.js",
+  "keywords": [
+    "backbone",
+    "mock",
+    "test",
+    "persistence"
+  ],
+  "dependencies": {
+    "underscore": "1.5.x",
+    "backbone": "1.0.x"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules/",
+    "bower_components/",
+    "test/",
+    "Makefile",
+    "package.json"
+  ]
+}
