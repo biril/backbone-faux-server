@@ -3,7 +3,7 @@ Backbone Faux Server
 
 [![Build Status](https://travis-ci.org/biril/backbone-faux-server.png)](https://travis-ci.org/biril/backbone-faux-server)
 [![NPM version](https://badge.fury.io/js/backbone-faux-server.png)](http://badge.fury.io/js/backbone-faux-server)
-
+[![Bower version](https://badge.fury.io/bo/backbone-faux-server.png)](http://badge.fury.io/bo/backbone-faux-server)
 
 A (tiny) framework for mocking up server-side persistence / processing for
 [Backbone.js](https://github.com/documentcloud/backbone)
@@ -136,10 +136,10 @@ The "createBook" parameter simply defines a name for the route. The URL paramete
 Collection. Note however that the URL may (and usually will) be specified as a matching expression,
 similarly to [Backbone routes](http://backbonejs.org/#Router-routes): URL-expressions may contain
 parameter parts, `:param`, which match a single URL component between slashes; and splat parts
-`*splat`, which can match any number of URL components. The values captured by params and splats
-will be passed as extra parameters to the given handler method. Regular expressions may also be
-used, in which case all values captured by reg-exp capturing groups will be passed as extra
-parameters to the handler method.
+`*splat`, which can match any number of URL components. Optional parts are denoted using
+parentheses. The values captured by params and splats will be passed as extra parameters to the
+given handler method. Regular expressions may also be used, in which case all values captured by
+reg-exp capturing groups will be passed as extra parameters to the handler method.
 
 Define more routes to handle updating, reading and deleting Models. The `addRoutes` method is used
 below to define routes to handle all actions (create, read, update and delete) for the preceding
@@ -209,7 +209,7 @@ fauxServer.post("library-app/books", function (context) {
 });
 ```
 
-Similarly, an alternative, more compact syntax for the preceding `addRoutes` example would be:
+Thus, an alternative, more compact syntax for the preceding `addRoutes` example would be:
 
 ```javascript
 fauxServer
@@ -383,7 +383,7 @@ Transports are deferred-like objects implementing a `resolve` / `reject` / `prom
 successful sync will invoke `transport.resolve` while a failed one will invoke `transport.reject`.
 The sync method will always return `transport.promise()`.
 
-See [the Tranport section](#about-transports) for further details.
+See [the Tranport section](#transports) for further details.
 
 #### enable ([shouldEnable])
 
@@ -453,6 +453,7 @@ given success or error callbacks.
 To define a custom transport, to be instantiated on every invocation of `sync`, call
 [`fauxServer.setTransportFactory`](#settransportfactory-transportfactory) providing a
 transport-factory function. Implement your custom transport-factory function so that
+
 * it instantiates and returns a `transport` object with `resolve` / `reject` and `promise` methods.
    A deferred object is an obvious choice for this (see
    [jQuery's $.Deferred](http://api.jquery.com/category/deferred-object) or
@@ -472,7 +473,7 @@ As a reference, this is (a somewhat simplified version of) the default BFS trans
 function (syncOptions, syncContext) {
 	// If an underlying ajax lib is defined for Backbone and it features a
 	//  Deferred method (which is precisely the case when Backbone.$ = jQuery)
-	//  then attempt to create a deferred object as a transport
+	//  then create and return a deferred object as transport
 	if (Backbone.$ && Backbone.$.Deferred) {
 		var deferred = Backbone.$.Deferred();
 		deferred.then(syncOptions.success, syncOptions.error);
