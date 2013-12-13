@@ -230,6 +230,8 @@
 
         // If faux-server is disabled, fall back to original sync
         if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
+        
+        options = options || {};
 
         var
             // Sync context
