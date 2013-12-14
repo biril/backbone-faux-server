@@ -231,7 +231,10 @@
         // If faux-server is disabled, fall back to original sync
         if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
         
-        options = options || {};
+        _.defaults(options || (options = {}), {
+            emulateHTTP: Backbone.emulateHTTP,
+            emulateJSON: Backbone.emulateJSON
+        });
 
         var
             // Sync context
