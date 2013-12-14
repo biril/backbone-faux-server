@@ -253,7 +253,7 @@
             transport = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
-        if ((Backbone.emulateHTTP || options.emulateHTTP) && c.httpMethod !== "GET") {
+        if (options.emulateHTTP && c.httpMethod !== "GET") {
             c.httpMethodOverride = c.httpMethod;
             c.httpMethod = "POST";
         }
