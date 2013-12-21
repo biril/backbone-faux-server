@@ -22,9 +22,9 @@ more than a JS script. Similar solutions exist for this (such as
 [Backbone localStorage Adapter](https://github.com/jeromegn/Backbone.localStorage)) but they deviate
 from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence.
 Additionally, BFS doesn't implement some specific persistence scheme but only provides hooks for
-your own custom processing / persistence scheme, facilitating the handling of POSTs, GETs, PUTs and
-DELETEs _per_ resource (Model or Collection URL). Functionality written this way, may be ported to
-the server-side in a very straightforward manner.
+your own custom processing / persistence scheme, _per_ HTTP verb, _per_ resource (Model or
+Collection URL). Functionality written this way, may be ported to the server-side in a very
+straightforward manner.
 
 
 Set up
@@ -40,7 +40,7 @@ To get Backbone Faux Server
 BFS may be used as an exported global, a CommonJS module or an AMD module depending on the current
 environment:
 
-* When developing for _browsers, without an AMD module loader_, include backbone-faux-server.js
+* In projects targetting _browsers, without an AMD module loader_, include backbone-faux-server.js
     after backbone.js:
 
     ```html
@@ -235,20 +235,24 @@ fauxServer
 ```
 
 
-Testing
--------
+Testing / Contributing
+----------------------
 
 The QUnit test suite may be run in a browser (test/index.html) or on the command line, by running
 `make test` or `npm test`. The command line version runs on Node and depends on
 [node-qunit](https://github.com/kof/node-qunit) (`npm install` to fetch it before testing).
+
+Contributions are obviously very much appreciated. Please commit your changes on the `dev` branch -
+not `master`. `dev` is always ahead, contains the latest state of the project and is periodically
+merged back to `master` with the appropriate version bump.
 
 
 Reference
 ---------
 
 The following list, while not exhaustive, includes all essential parts of the BFS API. The ommitted
-bits are there to aid testing and fascilitate fancy stuff you probably won't ever need. Further
-insight may be gained by taking a look at the test suite and - of course - the source.
+bits are there to aid testing and fascilitate fancier stuff you probably won't ever need. Further
+insight may be gained by taking a look at the examples, the test suite and - of course - the source.
 
 ### Methods
 
@@ -400,7 +404,7 @@ Get the faux-server version
 #### noConflict ()
 
 Run in no-conflict mode, setting the global `fauxServer` variable to to its previous value. Only
-useful when working in a browser environment without a module-framework as this is the only case
+useful when working in a browser environment without a module-loader as this is the only case
 where `fauxServer` is exposed globally. Returns a reference to the faux-server.
 
 

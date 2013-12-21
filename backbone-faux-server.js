@@ -230,7 +230,7 @@
 
         // If faux-server is disabled, fall back to original sync
         if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
-        
+
         _.defaults(options || (options = {}), {
             emulateHTTP: Backbone.emulateHTTP,
             emulateJSON: Backbone.emulateJSON
@@ -248,8 +248,7 @@
             // An exec-method to actually run the appropriate handler. Defined below
             execHandler = null,
 
-            // We'll be attempting to create a deferred and return the underlying promise.
-            //  Defined below
+            // We'll be creating a transport for this sync / returning the transport's promise
             transport = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
