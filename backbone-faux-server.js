@@ -273,7 +273,7 @@
         c.data = getRequestData(c.httpMethod, model, options);
 
         // Create a transport for this sync
-        transport = createTransport(options);
+        transport = createTransport(options, c);
 
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
