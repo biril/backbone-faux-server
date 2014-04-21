@@ -1,0 +1,22 @@
+{
+  "name": "backbone-faux-server-books-AMD-example",
+  "version": "0.0.1",
+  "authors": [
+    "biril <alexlambiris@gmail.com>"
+  ],
+  "description": "Backbone Faux Server Books-AMD example",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.10",
+    "underscore": "~1.5.2",
+    "jquery": "~2.0.3",
+    "backbone": "~1.0.0",
+    "backbone-faux-server": "~0.10.1"
+  }
+}
