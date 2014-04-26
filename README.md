@@ -258,7 +258,7 @@ insight may be gained by taking a look at the examples, the test suite and - of 
 
 All methods return the faux-server instance and may be chained, unless otherwise noted.
 
-#### addRoute ([name], urlExp, [httpMethod], [handler])
+#### addRoute ([name, ]urlExp[, httpMethod]&#91;, handler&#93;)
 
 Add a route to the faux-server. Every route defines a mapping from a Model(or Collection)-URL &
 sync-method (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
@@ -324,7 +324,7 @@ configurations where multiple routes match, the one most recently defined will b
     should return a string (presumably a custom error messsage, an HTTP status code that indicates
     failure, etc).
 
-#### &lt;httpMethod&gt; ([name], urlExp, [handler])
+#### &lt;httpMethod&gt; ([name, ]urlExp[, handler])
 
 `get`, `post`, `put`, `del` and `patch` methods which act as shortcuts for calling `addRoute`
 with a specific `httpMethod`. See `addRoute` above for parameter descriptions and further details.
@@ -366,7 +366,7 @@ pair. This will override the default behaviour of invoking the native sync.
 	`addRoute` for handler's signature and semantics. Note that a default-handler isn't part of a
 	route, so the `context.route` parameter will not be valid.
 
-#### setLatency (min, [max])
+#### setLatency (min[, max])
 
 Set server's emulated latency (zero by default)
 
