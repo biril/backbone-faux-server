@@ -1,7 +1,7 @@
 {
   "name": "backbone-faux-server",
   "main": "backbone-faux-server.js",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "homepage": "https://github.com/biril/backbone-faux-server",
   "authors": [
     "biril <alexlambiris@gmail.com>"
