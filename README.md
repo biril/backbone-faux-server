@@ -283,7 +283,9 @@ configurations where multiple routes match, the one most recently defined will b
 	can match any number of URL components. Parentheses may also be used to denote optional parts.
 	The values captured by params and splats will be passed as parameters to the given handler
 	method. Regular expressions may also be used, in which case all values captured by
-	reg-exp capturing groups will be passed as parameters to the given handler method.
+	reg-exp capturing groups will be passed as parameters to the given handler method. Note that
+	`:param`s are required to begin with a letter or underscore - those that don't are treated as
+	a fixed part of the URL. The expression `http://example.com:8080` contains _no_ `:param` parts.
 * `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE)), that should
 	trigger the route's handler. Both the URL-expression and the method should match for the
 	handler to be invoked. `httpMethod` may also be set to '*' or ommitted to create a

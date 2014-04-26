@@ -107,7 +107,7 @@
                 o = /\((.*?)\)/g,
 
                 // Named param (+ extra capturing parens for opt-part detection)
-                p = /(\(\?)?:\w+/g,
+                p = /(\(\?)?:[A-Za-z_](?:\w)+/g,
 
                 // Splat param
                 s = /\*\w+/g,
@@ -314,11 +314,12 @@
          *  be tested. This is syntactically and functionally analogous to Backbone routes: urlExps
          *  may contain parameter parts, ':param', which match a single URL component between
          *  slashes; and splat parts '*splat', which can match any number of URL components.
-         *  Parentheses may also be used to denote optional parts.The values captured by params and
-         *  splats will be passed as parameters to the given handler method.
+         *  Parentheses may also be used to denote optional parts. The values captured by params
+         *  and splats will be passed as parameters to the given handler method.
          *  (see http://backbonejs.org/#Router-routes). Regular expressions may also be
          *  used, in which case all values captured by reg-exp capturing groups will be passed as
-         *  parameters to the given handler method.
+         *  parameters to the given handler method.  Note that `:param`s are required to begin with
+         *  a letter or underscore - those that don't are treated as a fixed part of the URL
          * @param {string} [httpMethod="*"] The sync method (an HTTP verb (POST, GET, PUT, PATCH or
          *  DELETE)), that should trigger the route's handler. Both the URL-expression and the
          *  method should match for the handler to be invoked. httpMethod may also be set to '*' to

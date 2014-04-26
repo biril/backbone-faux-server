@@ -152,4 +152,123 @@
             deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
         }
     });
+
+    test("':param' identifiers are interpreted as param parts iff they begin with letter / underscore", function () {
+        var matchingRoute = null, i, numOfTests,
+            tests = [{
+                urlExp: "example.com/:section",
+                url: "example.com/some-section",
+                params: ["some-section"]
+            }, {
+                urlExp: "example.com:section",
+                url: "example.comsome-section",
+                params: ["some-section"]
+            }, {
+                urlExp: "example.com/(:section)",
+                url: "example.com/some-section",
+                params: ["some-section"]
+            }, {
+                urlExp: "example.com(/:section)",
+                url: "example.com/some-section",
+                params: ["some-section"]
+            }, {
+                urlExp: "example.com(:section)",
+                url: "example.comsome-section",
+                params: ["some-section"]
+            }];
+
+        for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+            fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            fauxServer.removeRoute("testRoute");
+
+            ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+        }
+
+        // Change ':section' token into ':5ection'. No routes should match now
+        for (i = 0, numOfTests; i < numOfTests; ++i) {
+            tests[i].urlExp = tests[i].urlExp.replace(":section", ":5ection");
+        }
+
+        for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+            fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            fauxServer.removeRoute("testRoute");
+
+            ok(!matchingRoute, tests[i].urlExp + " does not match " + tests[i].url);
+        }
+
+        // However changing ':section' to ':s3ction' should keep routes matching
+        for (i = 0, numOfTests; i < numOfTests; ++i) {
+            tests[i].urlExp = tests[i].urlExp.replace(":5ection", ":s3ction");
+        }
+
+        for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+            fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            fauxServer.removeRoute("testRoute");
+
+            ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+        }
+    });
+
+    test("Protocols & port numbers are not interpreted as param parts", function () {
+        var matchingRoute = null, i, numOfTests,
+            tests = [{
+                urlExp: "example.com:8080",
+                url: "example.com:8080",
+                params: []
+            },{
+                urlExp: "http://example.com:8080",
+                url: "http://example.com:8080",
+                params: []
+            }, {
+                urlExp: "example.com:8080/:section",
+                url: "example.com:8080/home",
+                params: ["home"]
+            }, {
+                urlExp: "example.com(:8080)",
+                url: "example.com",
+                params: []
+            }, {
+                urlExp: "example.com(:8080)/:section",
+                url: "example.com/home",
+                params: ["home"]
+            }, {
+                urlExp: "(http://)example.com(:8080)/:section",
+                url: "example.com/home",
+                params: ["home"]
+            }];
+
+        for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+            fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            fauxServer.removeRoute("testRoute");
+
+            ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
+            deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
+        }
+
+        tests = [{
+                urlExp: "example.com:8080",
+                url: "example.com:8081"
+            }, {
+                urlExp: "example.com:8080/:section",
+                url: "example.com:8081/home"
+            }, {
+                urlExp: "example.com(:8080)",
+                url: "example.com:8081"
+            }, {
+                urlExp: "example.com(:8080)/:section",
+                url: "example.com:8081/home"
+            }];
+
+        for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
+            fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            fauxServer.removeRoute("testRoute");
+
+            ok(!matchingRoute, tests[i].urlExp + " does not match " + tests[i].url);
+        }
+    });
 }());
