@@ -518,4 +518,4 @@ License
 
 Licensed and freely distributed under the MIT License (LICENSE.txt).
 
-Copyright (c) 2012-2013 Alex Lambiris
+Copyright (c) 2012-2014 Alex Lambiris

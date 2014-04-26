@@ -2,7 +2,7 @@
 
 //     https://github.com/biril/backbone-faux-server
 //     Licensed and freely distributed under the MIT License
-//     Copyright (c) 2012-2013 Alex Lambiris
+//     Copyright (c) 2012-2014 Alex Lambiris
 
 /*global exports, define, global, require, _, Backbone */
 (function (root, createModule) {
