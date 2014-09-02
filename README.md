@@ -76,8 +76,9 @@ environment:
     ```
 
     Note that the AMD definition of BFS depends on `backbone` and `underscore` so some loader
-    configuration will be required. For RequireJS you may want to use
-    [AMD-compliant versions](https://github.com/amdjs) and configure paths
+    setup will be required. For non-AMD compliant versions of Backbone (< 1.1.1) or Undescore
+    (< 1.6.0), [James Burke's amdjs forks](https://github.com/amdjs) may be used instead, along
+    with the necessary paths configuration
 
     ```javascript
     require.config({
@@ -89,7 +90,7 @@ environment:
     });
     ```
 
-    or [shim them](http://requirejs.org/docs/api.html#config-shim).
+    or you may prefer to just [shim them](http://requirejs.org/docs/api.html#config-shim).
 
 Usage
 -----
