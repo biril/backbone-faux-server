@@ -224,5 +224,4 @@
         throws(function () { fauxServer.patch(); }, "patch throws");
         throws(function () { fauxServer.del();   }, "del throws");
     });
-
 }());
