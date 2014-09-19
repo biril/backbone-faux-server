@@ -1,4 +1,5 @@
-/*global QUnit, $, test, ok, strictEqual, deepEqual, start, stop, Backbone, fauxServer */
+/*global QUnit, Backbone, fauxServer, test, strictEqual */
+
 (function () {
     "use strict";
 
@@ -64,7 +65,7 @@
             transport = {};
         book.urlRoot = "library-app/books";
 
-        fauxServer.setTransportFactory(function (options) {
+        fauxServer.setTransportFactory(function (/* options */) {
             return {
                 promise: function () { return transport; },
                 resolve: function () {},
@@ -85,7 +86,7 @@
         var book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedResult, msg) {
-                fauxServer.setTransportFactory(function (options) {
+                fauxServer.setTransportFactory(function (/* options */) {
                     return {
                         promise: function () {},
                         reject: function () {},
@@ -127,7 +128,7 @@
         var book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedReason, msg) {
-                fauxServer.setTransportFactory(function (options) {
+                fauxServer.setTransportFactory(function (/* options */) {
                     return {
                         promise: function () {},
                         resolve: function () {},

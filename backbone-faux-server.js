@@ -200,7 +200,7 @@
         //  a deferred-like object implementing a `promise` / `resolve` / `reject` interface. A
         //  successfull sync will invoke `transport.resolve` while a failed one will invoke
         //  `transport.reject`. The sync method will always return `transport.promise()`
-        createTransport = function (syncOptions, syncContext) {
+        createTransport = function (syncOptions /*, syncContext */) {
             // If an underlying ajax lib is defined for Backbone (`Backbone.$`) and it features a
             //  `Deferred` method (which is precisely the case when Backbone.$ = jQuery) then
             //  attempt to create a 'deferred transport' which will invoke the `success` / `error`

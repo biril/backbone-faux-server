@@ -1,15 +1,7 @@
-/*global QUnit, test, ok, strictEqual, deepEqual, throws, start, stop, expect, Backbone, fauxServer:true */
+/*global QUnit, Backbone, fauxServer, test, strictEqual */
+
 (function () {
     "use strict";
-
-    // Helpers
-    var dumpArray = function (array) {
-            var i, l, d = [];
-            for (i = 0, l = array.length; i < l; ++i) {
-                d.push(array[i] === undefined ? "_undefined_" : array[i]);
-            }
-            return d.join(", ");
-        };
 
     //
     QUnit.module("chaining", {

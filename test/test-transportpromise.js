@@ -1,4 +1,5 @@
-/*global QUnit, $, test, ok, strictEqual, deepEqual, start, stop, Backbone, fauxServer */
+/*global QUnit, Backbone, fauxServer, $, test, ok, start, stop */
+
 (function () {
     "use strict";
 
@@ -61,7 +62,6 @@
 
         var book = this.createDummyBook(),
             books = new this.Books(),
-            t = null, // thenable
             isThenable = function (q) { return q && q.then && typeof q.then === "function"; };
         book.urlRoot = "library-app/books";
 
