@@ -218,12 +218,11 @@
     });
 
     test("get, post, put, patch, del throw when 'urlExp' is omitted", function () {
-        var methods = ["get", "post", "put", "patch", "del"],
-            i = 0, l = methods.length;
-
-        for (; i < l; ++i) {
-            throws(function () { fauxServer[methods[i]](); }, methods[i] + " throws");
-        }
+        throws(function () { fauxServer.get();   }, "get throws");
+        throws(function () { fauxServer.post();  }, "post throws");
+        throws(function () { fauxServer.put();   }, "put throws");
+        throws(function () { fauxServer.patch(); }, "patch throws");
+        throws(function () { fauxServer.del();   }, "del throws");
     });
 
 }());
