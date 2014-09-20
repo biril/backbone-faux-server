@@ -50,7 +50,7 @@
         }
     });
 
-    test("Sync returns a promise-transport (a thenable object)", function () {
+    test("Sync returns a promise-transport (a thenable object)", 6, function () {
         fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
