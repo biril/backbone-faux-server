@@ -248,8 +248,11 @@
             // An exec-method to actually run the appropriate handler. Defined below
             execHandler = null,
 
-            // We'll be creating a transport for this sync / returning the transport's promise
-            transport = null;
+            // We'll be creating a transport for this sync..
+            transport = null,
+
+            // ..and returning the transport's promise
+            transportPromise = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
         if (options.emulateHTTP && c.httpMethod !== "GET") {
@@ -281,15 +284,17 @@
             transport[_.isString(result) ? "reject" : "resolve"](result);
         };
 
-        model.trigger("request", model, null, options);
+        // The transport's promise to return. Assuming the default transport-factory implementation
+        //  this may be an actual promise or just undefined
+        transportPromise = transport.promise();
+
+        model.trigger("request", model, transportPromise, options);
 
         // Call exec-method _now_ if zero-latency, else call later
         if (!latency) { execHandler(); }
         else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
 
-        // Return the transport's promise. Assuming the default transport-factory implementation
-        //  this may be an actual promise or just undefined
-        return transport.promise();
+        return transportPromise;
     };
 
     // Attach methods to faux-server

@@ -74,6 +74,65 @@
         ok(isThenable(book.destroy()), "true when deleting a Model");
     });
 
+    test("request event includes a promise-transport (a thenable object)", 6, function () {
+        fauxServer.addRoutes({
+            createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
+            readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
+            readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
+            updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT" },
+            patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH" },
+            deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE" }
+        });
+
+        var book = this.createDummyBook(),
+            books = new this.Books(),
+            isThenable = function (q) { return q && q.then && typeof q.then === "function"; };
+        book.urlRoot = "library-app/books";
+
+        //
+        book.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when saving a model");
+        });
+        book.save();
+        book.off("request");
+
+        //
+        book.set({ id: "0123456789" });
+        book.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when reading a model");
+        });
+        book.fetch();
+        book.off("request");
+
+        //
+        books.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when reading a Collection");
+        });
+        books.fetch();
+        books.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when updating a Model");
+        });
+        book.save();
+        book.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when updating a Model by patching");
+        });
+        book.save(null, { patch: true });
+        book.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            ok(isThenable(xhr), "true when deleting a Model");
+        });
+        book.destroy();
+        book.off("request");
+    });
+
     test("Returned promise-transport is fulfilled on sync success", 12, function () {
         fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },

@@ -65,7 +65,7 @@
             transport = {};
         book.urlRoot = "library-app/books";
 
-        fauxServer.setTransportFactory(function (/* options */) {
+        fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
             return {
                 promise: function () { return transport; },
                 resolve: function () {},
@@ -80,6 +80,73 @@
         strictEqual(book.save(), transport, "true when updating a Model");
         strictEqual(book.save(null, { patch: true }), transport, "true when updating a Model by patching");
         strictEqual(book.destroy(), transport, "true when deleting a Model");
+    });
+
+    test("request event includes previously defined custom transport's promise", function () {
+        fauxServer.addRoutes({
+            createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
+            readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
+            readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
+            updateBook: { urlExp: "library-app/books/:id", httpMethod: "PUT" },
+            patchBook:  { urlExp: "library-app/books/:id", httpMethod: "PATCH" },
+            deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE" }
+        });
+
+        var book = this.createDummyBook(),
+            books = new this.Books(),
+            transport = {};
+        book.urlRoot = "library-app/books";
+
+        fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
+            return {
+                promise: function () { return transport; },
+                resolve: function () {},
+                reject: function () {}
+            };
+        });
+
+        //
+        book.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when saving a model");
+        });
+        book.save();
+        book.off("request");
+
+        //
+        book.set({ id: "0123456789" });
+        book.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when reading a model");
+        });
+        book.fetch();
+        book.off("request");
+
+        //
+        books.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when reading a Collection");
+        });
+        books.fetch();
+        books.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when updating a Model");
+        });
+        book.save();
+        book.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when updating a Model by patching");
+        });
+        book.save(null, { patch: true });
+        book.off("request");
+
+        //
+        book.on("request", function (__, xhr) {
+            strictEqual(xhr, transport, "true when deleting a Model");
+        });
+        book.destroy();
+        book.off("request");
     });
 
     test("Returned transport is 'fulfilled' on sync success", 6, function () {
