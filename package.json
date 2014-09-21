@@ -22,8 +22,8 @@
     "backbone": "1.1.x"
   },
   "devDependencies": {
-    "qunit": "0.5.x",
-    "jshint": "2.1.x"
+    "qunit": "0.7.x",
+    "jshint": "2.5.x"
   },
   "scripts": {
     "test": "node ./test/testrunner.js",
