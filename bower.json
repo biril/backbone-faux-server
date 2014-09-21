@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "underscore": "1.5.x",
-    "backbone": "1.0.x"
+    "backbone": "1.1.x"
   },
   "license": "MIT",
   "ignore": [

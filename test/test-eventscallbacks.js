@@ -137,9 +137,8 @@
     });
 
     test("Model.fetch() success callback is invoked with (model, response, options) [GET-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             readRouteResponse = { someExtraAttribute: "extraAttribute" };
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Reading the model
@@ -194,9 +193,8 @@
     });
 
     test("Model.save() success callback is invoked with (model, response, options) after update [PUT-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             updateRouteResponse = { updateTime: "now" };
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Updating the model
@@ -214,9 +212,8 @@
     });
 
     test("Model.save() success callback is invoked with (model, response, options) after update [PATCH-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             updateRouteResponse = { updateTime: "now" };
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Updating the model (by patching)
@@ -235,9 +232,8 @@
     });
 
     test("Model.destroy() success callback is invoked with (model, response, options) [DELETE-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             deleteRouteResponse = { someAttribute: "attribute" };
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Deleting the model
@@ -317,9 +313,8 @@
     });
 
     test("Model.fetch() error callback is invoked with (model, response, options) [GET-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             readRouteResponse = "Error on read";
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Reading the model
@@ -374,9 +369,8 @@
     });
 
     test("Model.save() error callback is invoked with (model, response, options) after create [PUT-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             updateRouteResponse = "Error on update";
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Creating the model
@@ -394,9 +388,8 @@
     });
 
     test("Model.destroy() error callback is invoked with (model, response, options) after create [DELETE-handler]", 3, function () {
-        var book = this.createDummyBook(),
+        var book = this.createDummyBook("0123456789"),
             deleteRouteResponse = "Error on delete";
-        book.id = "0123456789";
         book.urlRoot = "library-app/books";
 
         // Creating the model
