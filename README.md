@@ -56,6 +56,10 @@ environment:
     console.log("fauxServer version: " + fauxServer.getVersion());
     ```
 
+    The project also includes a relevant
+    [example app](https://github.com/biril/backbone-faux-server/tree/master/examples/books) where
+    BFS is included through a `<script>` tag and treated as a global.
+
 * `require` when working _with CommonJS_ (e.g. Node). Assuming BFS is `npm install`ed:
 
     ```javascript
@@ -91,6 +95,11 @@ environment:
     ```
 
     or you may prefer to just [shim them](http://requirejs.org/docs/api.html#config-shim).
+
+    The project also includes a relevant
+    [example app](https://github.com/biril/backbone-faux-server/tree/master/examples/books-AMD)
+    where BFS is treated as an AMD module.
+
 
 Usage
 -----
@@ -253,7 +262,10 @@ Reference
 
 The following list, while not exhaustive, includes all essential parts of the BFS API. The ommitted
 bits are there to aid testing and fascilitate fancier stuff you probably won't ever need. Further
-insight may be gained by taking a look at the examples, the test suite and - of course - the source.
+insight may be gained by taking a look at
+[the examples](https://github.com/biril/backbone-faux-server/tree/master/examples),
+[the test suite](https://github.com/biril/backbone-faux-server/tree/master/test) and - of course -
+[the source](https://github.com/biril/backbone-faux-server/blob/master/backbone-faux-server.js).
 
 ### Methods
 
