@@ -8,13 +8,13 @@ Backbone Faux Server
 A (tiny) framework for mocking up server-side persistence / processing for
 [Backbone.js](https://github.com/documentcloud/backbone)
 
-Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers
-(callbacks). Faux-server overrides (is a drop-in replacement of) Backbone's native sync so that
-whenever a Model (or Collection) is synced and its URL along with the sync method being used form a
-pair that matches a defined route, the route's handler is invoked. Implement handlers in JS to test
-the expected behaviour of your app, work with dummy data, support persistence using local-storage,
-etc. When & if you choose to move to a real server, switching back to Backbone's native, ajax-based
-sync is as simple as calling `fauxServer.enable(false)`.
+Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers.
+Faux-server overrides (is a drop-in replacement of) Backbone's native sync so that
+whenever a Model (or Collection) is synced and its URL along with the sync method form a pair that
+matches a defined route, the route's handler is invoked. Implement handlers to test the expected
+behaviour of your app, work with dummy data, support persistence using local-storage, etc. When &
+if you choose to move to a real server, switching back to Backbone's native, ajax-based sync is as
+simple as calling `fauxServer.enable(false)`.
 
 Backbone faux server (henceforth 'BFS') grew out of the author's need to quickly flesh out Backbone
 prototype apps without having to fiddle with a server, a DB, or anything else that would require
@@ -24,7 +24,7 @@ exist for this but they deviate from or obscure Backbone's opinion of Model URLs
 interdependence. Additionally, BFS doesn't implement some specific persistence scheme but only
 provides hooks for your own custom processing / persistence scheme, _per_ HTTP verb, _per_ resource
 (Model or Collection URL). Functionality written this way, may be ported to the server-side in a
-very straightforward manner.
+straightforward manner.
 
 
 Set up
@@ -132,9 +132,9 @@ For example, to handle the creation of a Book (`Books.create(..)`), define a rou
 
 ```javascript
 fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
-	// Every handler receives a 'context' parameter. Use context.data (a hash of Book attributes)
-	//  to create the Book entry in your persistence layer. Return attributes of created Book.
-	//  Something along the lines of:
+	// Every handler receives a 'context' parameter. Use context.data (a hash of Book
+	//  attributes) to create the Book entry in your persistence layer. Return
+	//  attributes of created Book. Something along the lines of:
 	context.data.id = newId(); // You'll probably want to assign an id to the new book
 	books.push(context.data);  // Save to persistence layer
 	return context.data;
@@ -521,9 +521,10 @@ Caveats / WTF
 * `npm install`ing with the `--dev` switch will fail due to node-qunit
     [quirk](https://github.com/kof/node-qunit/issues/41). As a solution, `npm install qunit` before
     installing other devDependencies.
-* The current version of BFS is tested against BB v1.0.0 and will _not_ work with 0.9.x revisions.
-	([BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) is the last known good
-	version for BB &lt;= v0.9.10).
+* The current version of BFS is tested against BB v1.1.2. It's generally compatible with 1.x
+    revisions but _not_ 0.9.x revisions.
+    ([BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) is the last known good
+    version for BB &lt;= v0.9.10).
 
 
 License
