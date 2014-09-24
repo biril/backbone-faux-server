@@ -75,7 +75,7 @@ environment:
     ```javascript
     // Your module
     define(["backbone-faux-server"], function (fauxServer) {
-    	console.log("fauxServer version: " + fauxServer.getVersion());
+        console.log("fauxServer version: " + fauxServer.getVersion());
     });
     ```
 
@@ -108,14 +108,14 @@ Define Backbone Models and Collections as you normally would:
 
 ```javascript
 var Book = Backbone.Model.extend({
-	defaults: {
-		title: "Unknown title",
-		author: "Unknown author"
-	}
+    defaults: {
+        title: "Unknown title",
+        author: "Unknown author"
+    }
 });
 var Books = Backbone.Collection.extend({
-	model: Book,
-	url: "library-app/books"
+    model: Book,
+    url: "library-app/books"
 });
 ```
 
@@ -132,12 +132,12 @@ For example, to handle the creation of a Book (`Books.create(..)`), define a rou
 
 ```javascript
 fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
-	// Every handler receives a 'context' parameter. Use context.data (a hash of Book
-	//  attributes) to create the Book entry in your persistence layer. Return
-	//  attributes of created Book. Something along the lines of:
-	context.data.id = newId(); // You'll probably want to assign an id to the new book
-	books.push(context.data);  // Save to persistence layer
-	return context.data;
+    // Every handler receives a 'context' parameter. Use context.data (a hash of Book
+    //  attributes) to create the Book entry in your persistence layer. Return
+    //  attributes of created Book. Something along the lines of:
+    context.data.id = newId(); // You'll probably want to assign an id to the new book
+    books.push(context.data);  // Save to persistence layer
+    return context.data;
 });
 ```
 
@@ -157,44 +157,44 @@ Book example:
 
 ```javascript
 fauxServer.addRoutes({
-	createBook: {
-		urlExp: "library-app/books",
-		httpMethod: "POST",
-		handler: function (context) {
-			// Create book using attributes in context.data
-			// Save to persistence layer
-			// Return attributes of newly created book
-		}
-	},
-	readBooks: {
-		urlExp: "library-app/books",
-		httpMethod: "GET",
-		handler: function (context) {
-			// Return array of stored book attributes
-		}
-	},
-	readBook: {
-		urlExp: "library-app/books/:id",
-		httpMethod: "GET",
-		handler: function (context, bookId) {
-			// Return attributes of stored book with id 'bookId'
-		}
-	},
-	updateBook: {
-		urlExp: "library-app/books/:id",
-		httpMethod: "PUT",
-		handler: function (context, bookId) {
-			// Update stored book with id 'bookId', using attributes in context.data
-			// Return updated attributes
-		}
-	},
-	deleteBook: {
-		urlExp: "library-app/books/:id",
-		httpMethod: "DELETE",
-		handler: function (context, bookId) {
-			// Delete stored book of id 'bookId'
-		}
-	}
+    createBook: {
+        urlExp: "library-app/books",
+        httpMethod: "POST",
+        handler: function (context) {
+            // Create book using attributes in context.data
+            // Save to persistence layer
+            // Return attributes of newly created book
+        }
+    },
+    readBooks: {
+        urlExp: "library-app/books",
+        httpMethod: "GET",
+        handler: function (context) {
+            // Return array of stored book attributes
+        }
+    },
+    readBook: {
+        urlExp: "library-app/books/:id",
+        httpMethod: "GET",
+        handler: function (context, bookId) {
+            // Return attributes of stored book with id 'bookId'
+        }
+    },
+    updateBook: {
+        urlExp: "library-app/books/:id",
+        httpMethod: "PUT",
+        handler: function (context, bookId) {
+            // Update stored book with id 'bookId', using attributes in context.data
+            // Return updated attributes
+        }
+    },
+    deleteBook: {
+        urlExp: "library-app/books/:id",
+        httpMethod: "DELETE",
+        handler: function (context, bookId) {
+            // Delete stored book of id 'bookId'
+        }
+    }
 }
 ```
 
@@ -205,7 +205,7 @@ the route name may be skipped like so:
 
 ```javascript
 fauxServer.addRoute("library-app/books", "POST", function (context) {
-	// Create book ..
+    // Create book ..
 });
 ```
 
@@ -215,7 +215,7 @@ rewritten as
 
 ```javascript
 fauxServer.post("library-app/books", function (context) {
-	// Create book ..
+    // Create book ..
 });
 ```
 
@@ -223,24 +223,24 @@ Thus, an alternative, more compact syntax for the preceding `addRoutes` example 
 
 ```javascript
 fauxServer
-	.post("library-app/books", function (context) {
-		// Create book using attributes in context.data
-		// Save to persistence layer
-		// Return attributes of newly created book
+    .post("library-app/books", function (context) {
+        // Create book using attributes in context.data
+        // Save to persistence layer
+        // Return attributes of newly created book
 
-	}).get("library-app/books", function (context) {
-		// Return array of stored book attributes
+    }).get("library-app/books", function (context) {
+        // Return array of stored book attributes
 
-	}).get("library-app/books/:id", function (context, bookId) {
-		// Return attributes of stored book with id 'bookId'
+    }).get("library-app/books/:id", function (context, bookId) {
+        // Return attributes of stored book with id 'bookId'
 
-	}).put("library-app/books/:id", function (context, bookId) {
-		// Update stored book with id 'bookId', using attributes in context.data
-		// Return updated attributes
+    }).put("library-app/books/:id", function (context, bookId) {
+        // Update stored book with id 'bookId', using attributes in context.data
+        // Return updated attributes
 
-	}).del("library-app/books/:id", function (context, bookId) {
-		// Delete stored book of id 'bookId'
-	});
+    }).del("library-app/books/:id", function (context, bookId) {
+        // Delete stored book of id 'bookId'
+    });
 }
 ```
 
@@ -290,27 +290,27 @@ configurations where multiple routes match, the one most recently defined will b
 * `name`: Name of this route. Optional. A named route may be queried and / or removed by its name
     (see `getRoute` / `removeRoute`) and will replace an earlier defined route of same name.
 * `urlExp`: An expression against which, Model(or Collection)-URLs will be tested. This is
-	syntactically and functionally analogous to
-	[Backbone routes](http://backbonejs.org/#Router-routes): `urlExp`s may contain parameter parts,
-	`:param`, which match a single URL component between slashes; and splat parts `*splat`, which
-	can match any number of URL components. Parentheses may also be used to denote optional parts.
-	The values captured by params and splats will be passed as parameters to the given handler
-	method. Regular expressions may also be used, in which case all values captured by
-	reg-exp capturing groups will be passed as parameters to the given handler method. Note that
-	`:param`s are required to begin with a letter or underscore - those that don't are treated as
-	a fixed part of the URL. The expression `http://example.com:8080` contains _no_ `:param` parts.
+    syntactically and functionally analogous to
+    [Backbone routes](http://backbonejs.org/#Router-routes): `urlExp`s may contain parameter parts,
+    `:param`, which match a single URL component between slashes; and splat parts `*splat`, which
+    can match any number of URL components. Parentheses may also be used to denote optional parts.
+    The values captured by params and splats will be passed as parameters to the given handler
+    method. Regular expressions may also be used, in which case all values captured by
+    reg-exp capturing groups will be passed as parameters to the given handler method. Note that
+    `:param`s are required to begin with a letter or underscore - those that don't are treated as
+    a fixed part of the URL. The expression `http://example.com:8080` contains _no_ `:param` parts.
 * `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE)), that should
-	trigger the route's handler. Both the URL-expression and the method should match for the
-	handler to be invoked. `httpMethod` may also be set to '*' or ommitted to create a
-	match-all-methods handler: One that will be invoked whenever `urlExp` matches the model's (or
-	collection's) URL _regardless_ of method. In the scope of a match-all-methods handler, the HTTP
-	method currently being handled may be acquired by querying the `context` parameter for
-	`context.httpMethod`. Note that when `Backbone.emulateHTTP` is set to true or `emulateHTTP` is
-	passed as an inline option during sync, 'create', 'update', 'patch' and 'delete' will all be
-	mapped to POST. In this case `context.httpMethod` will be set to POST and the true HTTP method
-	being handled may be acquired by querying `context.httpMethodOverride`.
+    trigger the route's handler. Both the URL-expression and the method should match for the
+    handler to be invoked. `httpMethod` may also be set to '*' or ommitted to create a
+    match-all-methods handler: One that will be invoked whenever `urlExp` matches the model's (or
+    collection's) URL _regardless_ of method. In the scope of a match-all-methods handler, the HTTP
+    method currently being handled may be acquired by querying the `context` parameter for
+    `context.httpMethod`. Note that when `Backbone.emulateHTTP` is set to true or `emulateHTTP` is
+    passed as an inline option during sync, 'create', 'update', 'patch' and 'delete' will all be
+    mapped to POST. In this case `context.httpMethod` will be set to POST and the true HTTP method
+    being handled may be acquired by querying `context.httpMethodOverride`.
 * `handler`: The handler to be invoked when both route's URL-expression and route's method match. A
-	do-nothing handler will be used if one is not provided. The handler's expected signature is
+    do-nothing handler will be used if one is not provided. The handler's expected signature is
 
     `function (context, [param1, [param2, ...]])`
 
@@ -367,7 +367,7 @@ Get route of given name.
 
 * `name`: Name of route to acquire.
 * returns: Route of given name or null if no such route exists. Note that the returned route is a
-	copy and cannot be modified to alter faux-server's behaviour.
+    copy and cannot be modified to alter faux-server's behaviour.
 
 #### setDefaultHandler ([handler])
 
@@ -375,18 +375,18 @@ Set a handler to be invoked when no route is matched to the current `<model-URL,
 pair. This will override the default behaviour of invoking the native sync.
 
 * `handler`: A handler to be invoked when no route is found that matches a given
-	`<model-URL, sync-method>` pair. Ommit the parameter to reset to the default behaviour. See
-	`addRoute` for handler's signature and semantics. Note that a default-handler isn't part of a
-	route, so the `context.route` parameter will not be valid.
+    `<model-URL, sync-method>` pair. Ommit the parameter to reset to the default behaviour. See
+    `addRoute` for handler's signature and semantics. Note that a default-handler isn't part of a
+    route, so the `context.route` parameter will not be valid.
 
 #### setLatency (min[, max])
 
 Set server's emulated latency (zero by default)
 
 * `min`: Server's emulated latency in ms. Interpreted as the minimum of a range when a `max` value
-	is provided. Ommitting will set to 0.
+    is provided. Ommitting will set to 0.
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
-	latency in the [min, max] range.
+    latency in the [min, max] range.
 
 #### setTransportFactory (transportFactory)
 
@@ -394,9 +394,9 @@ Set server's transport factory
 
 * `transportFactory`: A factory function with signature
 
-	`function (syncOptions, syncContext)`
+    `function (syncOptions, syncContext)`
 
-	invoked _per sync_ (with sync's relevant options and context) to create a new transport.
+    invoked _per sync_ (with sync's relevant options and context) to create a new transport.
 
 Transports are deferred-like objects implementing a `resolve` / `reject` / `promise` interface. A
 successful sync will invoke `transport.resolve` while a failed one will invoke `transport.reject`.
@@ -410,7 +410,7 @@ Enable or disable the faux-server. When disabled, syncing is performed by the na
 method. Handy for easily toggling between mock / real server.
 
 * `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit to enable the
-	faux-server, set to false to disable.
+    faux-server, set to false to disable.
 
 #### getVersion ()
 
@@ -439,7 +439,7 @@ call after sync:
 
 ```javascript
 aModel.save().then(function () {
-	// .. continue after successfully saving the model ..
+    // .. continue after successfully saving the model ..
 });
 ```
 
@@ -490,24 +490,24 @@ As a reference, this is (a somewhat simplified version of) the default BFS trans
 // Transport-factory function, invoked _per sync_ (with the relevant options / context)
 //  to instantiate a new transport
 function (syncOptions, syncContext) {
-	// If an underlying ajax lib is defined for Backbone and it features a
-	//  Deferred method (which is precisely the case when Backbone.$ = jQuery)
-	//  then create and return a deferred object as transport
-	if (Backbone.$ && Backbone.$.Deferred) {
-		var deferred = Backbone.$.Deferred();
-		deferred.then(syncOptions.success, syncOptions.error);
-		return deferred;
-	}
+    // If an underlying ajax lib is defined for Backbone and it features a
+    //  Deferred method (which is precisely the case when Backbone.$ = jQuery)
+    //  then create and return a deferred object as transport
+    if (Backbone.$ && Backbone.$.Deferred) {
+        var deferred = Backbone.$.Deferred();
+        deferred.then(syncOptions.success, syncOptions.error);
+        return deferred;
+    }
 
-	// Otherwise create a poor-man's deferred - an object that implements a
-	//  promise/resolve/reject interface without actual promise semantics:
-	//  resolve and reject just delegate to success and error callbacks while
-	//  promise() returns undefined. This is a good enough transport
-	return {
-		promise: function () {},
-		resolve: function (value) { syncOptions.success(value); },
-		reject: function (reason) { syncOptions.error(reason); }
-	};
+    // Otherwise create a poor-man's deferred - an object that implements a
+    //  promise/resolve/reject interface without actual promise semantics:
+    //  resolve and reject just delegate to success and error callbacks while
+    //  promise() returns undefined. This is a good enough transport
+    return {
+        promise: function () {},
+        resolve: function (value) { syncOptions.success(value); },
+        reject: function (reason) { syncOptions.error(reason); }
+    };
 }
 ```
 
