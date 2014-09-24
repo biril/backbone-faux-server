@@ -18,13 +18,13 @@ sync is as simple as calling `fauxServer.enable(false)`.
 
 Backbone faux server (henceforth 'BFS') grew out of the author's need to quickly flesh out Backbone
 prototype apps without having to fiddle with a server, a DB, or anything else that would require
-more than a JS script. Similar solutions exist for this (such as
-[Backbone localStorage Adapter](https://github.com/jeromegn/Backbone.localStorage)) but they deviate
-from (or at least obscure) Backbone's opinion of Model URLs, REST and their interdependence.
-Additionally, BFS doesn't implement some specific persistence scheme but only provides hooks for
-your own custom processing / persistence scheme, _per_ HTTP verb, _per_ resource (Model or
-Collection URL). Functionality written this way, may be ported to the server-side in a very
-straightforward manner.
+more than a JS script.
+[Similar solutions](https://github.com/jashkenas/backbone/wiki/Extensions%2C-Plugins%2C-Resources)
+exist for this but they deviate from or obscure Backbone's opinion of Model URLs, REST and their
+interdependence. Additionally, BFS doesn't implement some specific persistence scheme but only
+provides hooks for your own custom processing / persistence scheme, _per_ HTTP verb, _per_ resource
+(Model or Collection URL). Functionality written this way, may be ported to the server-side in a
+very straightforward manner.
 
 
 Set up
