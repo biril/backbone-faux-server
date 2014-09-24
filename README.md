@@ -19,7 +19,7 @@ simple as calling `fauxServer.enable(false)`.
 Backbone faux server (henceforth 'BFS') grew out of the author's need to quickly flesh out Backbone
 prototype apps without having to fiddle with a server, a DB, or anything else that would require
 more than a JS script.
-[Similar solutions](https://github.com/jashkenas/backbone/wiki/Extensions%2C-Plugins%2C-Resources)
+[Similar solutions](https://github.com/jashkenas/backbone/wiki/Extensions%2C-Plugins%2C-Resources#storage)
 exist for this but they deviate from or obscure Backbone's opinion of Model URLs, REST and their
 interdependence. Additionally, BFS doesn't implement some specific persistence scheme but only
 provides hooks for your own custom processing / persistence scheme, _per_ HTTP verb, _per_ resource
