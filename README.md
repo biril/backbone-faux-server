@@ -252,9 +252,10 @@ The QUnit test suite may be run in a browser (test/index.html) or on the command
 `make test` or `npm test`. The command line version runs on Node and depends on
 [node-qunit](https://github.com/kof/node-qunit) (`npm install` to fetch it before testing).
 
-Contributions are obviously very much appreciated. Please commit your changes on the `dev` branch -
-not `master`. `dev` is always ahead, contains the latest state of the project and is periodically
-merged back to `master` with the appropriate version bump.
+Contributions are obviously appreciated. Please commit your changes on the `dev` branch - not
+`master`. `dev` is always ahead, contains the latest state of the project and is periodically
+merged back to `master` with the appropriate version bump. In lieu of a formal styleguide, take
+care to maintain the existing coding style. Test your code prior to a pull request.
 
 
 Reference
