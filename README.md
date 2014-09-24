@@ -524,8 +524,8 @@ Caveats / WTF
     installing other devDependencies.
 * The current version of BFS is tested against BB v1.1.2. It's generally compatible with 1.x
     revisions but _not_ 0.9.x revisions.
-    ([BFS v0.7.0](https://github.com/biril/backbone-faux-server/tree/v0.7.0) is the last known good
-    version for BB &lt;= v0.9.10).
+    ([BFS v0.7.0](https://github.com/biril/backbone-faux-server/releases/tag/v0.7.0) is the last
+    known good version for BB &lt;= v0.9.10).
 
 
 License
