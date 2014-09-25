@@ -178,6 +178,88 @@
             return null;
         },
 
+        // Helper to create route for given `name`, `urlExp`, `httpMethod` and `handler`. Will set
+        //  missing arguments to defaults and sanitize values where appropriate - note that the
+        //  only mandatory argument is `urlExp`
+        createRoute = function (name, urlExp, httpMethod, handler) {
+            var args = skipUndefinedTail(_.toArray(arguments));
+
+            switch (args.length) {
+
+            // Missing `name`, `handler` or `httpMethod`
+            case 3:
+
+                // Missing `name` or `httpMethod`
+                if (_.isFunction(args[2])) {
+                    handler = args[2];
+
+                    // Missing `name`
+                    if (args[1] === "*" || _.contains(crudToHttp, args[1])) {
+                        urlExp = args[0];
+                        httpMethod = args[1];
+                        name = null;
+
+                    // Missing httpMethod
+                    } else {
+                        httpMethod = "*";
+                    }
+
+                // Missing handler
+                } else {
+                    handler = noOp;
+                }
+                break;
+
+            // Missing `name` & `httpMethod`, `httpMethod` & `handler` or `name` & `handler`
+            case 2:
+
+                // Missing `name` & `httpMethod`
+                if (_.isFunction(args[1])) {
+                    urlExp = args[0];
+                    handler = args[1];
+                    httpMethod = "*";
+                    name = null;
+
+                // Missing `name` & `handler` or `httpMethod` & `handler`
+                } else {
+                    handler = noOp;
+
+                    // Missing `name` & `handler`
+                    if (args[1] === "*" || _.contains(crudToHttp, args[1])) {
+                        urlExp = args[0];
+                        httpMethod = args[1];
+                        name = null;
+
+                    // Missing `httpMethod` & `handler`
+                    } else {
+                        httpMethod = "*";
+                    }
+                }
+                break;
+
+            // Missing `name` & `httpMethod` & `handler`
+            case 1:
+                urlExp = args[0];
+                httpMethod = "*";
+                handler = noOp;
+                name = null;
+                break;
+
+            case 0:
+                throw new Error("addRoute: Missing mandatory 'urlExp' argument");
+            }
+
+            httpMethod = httpMethod.toUpperCase();
+            urlExp = _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp);
+
+            return {
+                name: name || _.uniqueId(httpMethod + "_" + urlExp + "_"),
+                urlExp: urlExp,
+                httpMethod: httpMethod,
+                handler: handler
+            };
+        },
+
         // Get the data that should be sent to the server during a sync. This depends on
         //  the sync-method being used and any options that may have been given
         getRequestData = function (httpMethod, model, options) {
@@ -364,70 +446,11 @@
          * @return {object} The faux-server
          */
         addRoute: function (name, urlExp, httpMethod, handler) {
-            var routeIndex = routes.length,
+            var route, routeIndex;
 
-                // Create the route, setting missing arguments to defaults and sanitizing where
-                //  appropriate - note that the only mandatory argument is `urlExp`
-                route = (function (args) {
-                    switch (args.length) {
-
-                    // Missing `name`, `handler` or `httpMethod`
-                    case 3:
-                        if (_.isFunction(args[2])) { // Missing `name` or `httpMethod`
-                            handler = args[2];
-                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name`
-                                urlExp = args[0];
-                                httpMethod = args[1];
-                                name = null;
-                            } else { // Missing httpMethod
-                                httpMethod = "*";
-                            }
-                        } else { // Missing handler
-                            handler = noOp;
-                        }
-                        break;
-
-                    // Missing `name` & `httpMethod`, `httpMethod` & `handler` or `name` & `handler`
-                    case 2:
-                        if (_.isFunction(args[1])) { // Missing `name` & `httpMethod`
-                            urlExp = args[0];
-                            handler = args[1];
-                            httpMethod = "*";
-                            name = null;
-                        } else { // Missing `name` & `handler` or `httpMethod` & `handler`
-                            handler = noOp;
-                            if (args[1] === "*" || _.contains(crudToHttp, args[1])) { // Missing `name` & `handler`
-                                urlExp = args[0];
-                                httpMethod = args[1];
-                                name = null;
-                            } else { // Missing `httpMethod` & `handler`
-                                httpMethod = "*";
-                            }
-                        }
-                        break;
-
-                    // Missing `name` & `httpMethod` & `handler`
-                    case 1:
-                        urlExp = args[0];
-                        httpMethod = "*";
-                        handler = noOp;
-                        name = null;
-                        break;
-
-                    case 0:
-                        throw new Error("addRoute: Missing mandatory 'urlExp' argument");
-                    }
-
-                    httpMethod = httpMethod.toUpperCase();
-                    urlExp = _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp);
-
-                    return {
-                        name: name || _.uniqueId(httpMethod + "_" + urlExp + "_"),
-                        urlExp: urlExp,
-                        httpMethod: httpMethod,
-                        handler: handler
-                    };
-                }(skipUndefinedTail(_.toArray(arguments))));
+            // Create the route, setting missing arguments to defaults and sanitizing where
+            //  appropriate - note that the only mandatory argument is `urlExp`
+            route = createRoute.apply(null, arguments);
 
             // If a route of given name is already present then overwrite it with this one.
             //  Otherwise just append the new route
@@ -436,7 +459,7 @@
                     routeIndex = i;
                     return true;
                 }
-            });
+            }) || (routeIndex = routes.length);
             routes[routeIndex] = route;
 
             return this;
