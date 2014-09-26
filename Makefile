@@ -1,7 +1,7 @@
 test:
-	node ./test/testrunner.js
+	npm test
 
 lint:
-	jshint --show-non-errors backbone-faux-server.js test/testrunner.js test/test-*.js
+	npm run-script lint
 
 .PHONY: test lint
