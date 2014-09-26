@@ -436,7 +436,7 @@
         //   be updated on the client) need to be included. Return nothing after handling a DELETE.
         //   On failure, the handler should return s string (presumably a custom error messsage, an
         //   HTTP status code that indicates failure, etc).
-        addRoute: function (name, urlExp, httpMethod, handler) {
+        addRoute: function (/* name, urlExp, httpMethod, handler */) {
             var route, routeIndex;
 
             // Create the route, setting missing arguments to defaults and sanitizing where
