@@ -30,17 +30,19 @@ qunit.options.log = {
     summary: true,
 
     // log global summary (all files)
-    globalSummary: true,
+    // globalSummary: true,
 
     // log coverage
     coverage: true,
 
     // log global coverage (all files)
-    globalCoverage: true,
+    // globalCoverage: true,
 
     // log currently testing code file
     testing: true
 };
+
+qunit.options.coverage = { dir: "coverage" };
 
 qunit.run({
     code: { path: absPath("../backbone-faux-server.js"), namespace: "fauxServer" },
