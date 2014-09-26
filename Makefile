@@ -4,4 +4,7 @@ test:
 lint:
 	npm run-script lint
 
-.PHONY: test lint
+doc:
+	npm run-script doc
+
+.PHONY: test lint doc

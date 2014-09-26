@@ -23,11 +23,13 @@
   },
   "devDependencies": {
     "qunit": "0.7.x",
-    "jshint": "2.5.x"
+    "jshint": "2.5.x",
+    "docco": "0.6.x"
   },
   "scripts": {
     "test": "node ./test/testrunner.js",
-    "lint": "jshint --show-non-errors backbone-faux-server.js test/testrunner.js test/test-*.js"
+    "lint": "jshint --show-non-errors backbone-faux-server.js test/testrunner.js test/test-*.js",
+    "doc": "docco backbone-faux-server.js"
   },
   "engines": {
     "node": ">=0.10"
