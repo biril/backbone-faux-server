@@ -47,6 +47,7 @@ qunit.options.coverage = { dir: "coverage" };
 qunit.run({
     code: { path: absPath("../backbone-faux-server.js"), namespace: "fauxServer" },
     tests: [
+        absPath("test-version.js"),
         absPath("test-routes.js"),
         absPath("test-urlexpmatch.js"),
         absPath("test-handlers.js"),
