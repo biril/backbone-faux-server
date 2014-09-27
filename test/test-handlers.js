@@ -500,4 +500,25 @@
         stop();
         book.fetch();
     });
+
+    test("Latency (as a range) taken into account when syncing", 1, function () {
+        var latencyMin = 101,
+            latencyMax = 303,
+            t0 = 0,
+            now = function () { return +(new Date()); },
+            book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer.setLatency(latencyMin, latencyMax);
+
+        fauxServer.setDefaultHandler(function () { // Add a default handler
+            var dt = now() - t0;
+            start();
+            ok(dt >= latencyMin && dt <= latencyMax, "Handler called after " + dt + " MS");
+        });
+
+        t0 = now();
+        stop();
+        book.fetch();
+    });
 }());
