@@ -18,6 +18,70 @@
         }
     });
 
+    test("Routes are acquired by name", function () {
+        var h1 = function () {},
+            h2 = function () {},
+            route1, route2;
+
+        fauxServer.addRoute("testRoute1", "", "*", h1);
+        fauxServer.addRoute("testRoute2", "", "*", h2);
+
+        route1 = fauxServer.getRoute("testRoute1");
+        route2 = fauxServer.getRoute("testRoute2");
+
+        ok(route1, "first route acquired by name");
+        strictEqual(route1.handler, h1, "first acquired route has expected handler");
+
+        ok(route2, "second route acquired by name");
+        strictEqual(route2.handler, h2, "second acquired route has expected handler");
+    });
+
+    test("Routes acquired by name are a copy", function () {
+        var h = function () {},
+            route1;
+
+        fauxServer.addRoute("testRoute1", "", "*", h);
+
+        route1 = fauxServer.getRoute("testRoute1");
+        route1.handler = function () {};
+
+        route1 = fauxServer.getRoute("testRoute1");
+
+        strictEqual(route1.handler, h);
+    });
+
+    test("Routes are acquired by index", function () {
+        var h1 = function () {},
+            h2 = function () {},
+            route1, route2;
+
+        fauxServer.addRoute("", "*", h1);
+        fauxServer.addRoute("", "*", h2);
+
+        route1 = fauxServer.getRouteAt(0);
+        route2 = fauxServer.getRouteAt(1);
+
+        ok(route1, "first route acquired by name");
+        strictEqual(route1.handler, h1, "first acquired route has expected handler");
+
+        ok(route2, "second route acquired by name");
+        strictEqual(route2.handler, h2, "second acquired route has expected handler");
+    });
+
+    test("Routes acquired by index are a copy", function () {
+        var h = function () {},
+            route1;
+
+        fauxServer.addRoute("", "*", h);
+
+        route1 = fauxServer.getRouteAt(0);
+        route1.handler = function () {};
+
+        route1 = fauxServer.getRouteAt(0);
+
+        strictEqual(route1.handler, h);
+    });
+
     test("Routes are added and removed", function () {
         var h = function () {}; // No-op
 
