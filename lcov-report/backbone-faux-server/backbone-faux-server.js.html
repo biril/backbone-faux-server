@@ -1,0 +1,2041 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for backbone-faux-server/backbone-faux-server.js</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../prettify.css">
+
+    <style>
+        body, html {
+            margin:0; padding: 0;
+        }
+        body {
+            font-family: Helvetica Neue, Helvetica,Arial;
+            font-size: 10pt;
+        }
+        div.header, div.footer {
+            background: #eee;
+            padding: 1em;
+        }
+        div.header {
+            z-index: 100;
+            position: fixed;
+            top: 0;
+            border-bottom: 1px solid #666;
+            width: 100%;
+        }
+        div.footer {
+            border-top: 1px solid #666;
+        }
+        div.body {
+            margin-top: 10em;
+        }
+        div.meta {
+            font-size: 90%;
+            text-align: center;
+        }
+        h1, h2, h3 {
+            font-weight: normal;
+        }
+        h1 {
+            font-size: 12pt;
+        }
+        h2 {
+            font-size: 10pt;
+        }
+        pre {
+            font-family: Consolas, Menlo, Monaco, monospace;
+            margin: 0;
+            padding: 0;
+            line-height: 14px;
+            font-size: 14px;
+            -moz-tab-size: 2;
+            -o-tab-size:  2;
+            tab-size: 2;
+        }
+
+        div.path { font-size: 110%; }
+        div.path a:link, div.path a:visited { color: #000; }
+        table.coverage { border-collapse: collapse; margin:0; padding: 0 }
+
+        table.coverage td {
+            margin: 0;
+            padding: 0;
+            color: #111;
+            vertical-align: top;
+        }
+        table.coverage td.line-count {
+            width: 50px;
+            text-align: right;
+            padding-right: 5px;
+        }
+        table.coverage td.line-coverage {
+            color: #777 !important;
+            text-align: right;
+            border-left: 1px solid #666;
+            border-right: 1px solid #666;
+        }
+
+        table.coverage td.text {
+        }
+
+        table.coverage td span.cline-any {
+            display: inline-block;
+            padding: 0 5px;
+            width: 40px;
+        }
+        table.coverage td span.cline-neutral {
+            background: #eee;
+        }
+        table.coverage td span.cline-yes {
+            background: #b5d592;
+            color: #999;
+        }
+        table.coverage td span.cline-no {
+            background: #fc8c84;
+        }
+
+        .cstat-yes { color: #111; }
+        .cstat-no { background: #fc8c84; color: #111; }
+        .fstat-no { background: #ffc520; color: #111 !important; }
+        .cbranch-no { background:  yellow !important; color: #111; }
+
+        .cstat-skip { background: #ddd; color: #111; }
+        .fstat-skip { background: #ddd; color: #111 !important; }
+        .cbranch-skip { background: #ddd !important; color: #111; }
+
+        .missing-if-branch {
+            display: inline-block;
+            margin-right: 10px;
+            position: relative;
+            padding: 0 4px;
+            background: black;
+            color: yellow;
+        }
+
+        .skip-if-branch {
+            display: none;
+            margin-right: 10px;
+            position: relative;
+            padding: 0 4px;
+            background: #ccc;
+            color: white;
+        }
+
+        .missing-if-branch .typ, .skip-if-branch .typ {
+            color: inherit !important;
+        }
+
+        .entity, .metric { font-weight: bold; }
+        .metric { display: inline-block; border: 1px solid #333; padding: 0.3em; background: white; }
+        .metric small { font-size: 80%; font-weight: normal; color: #666; }
+
+        div.coverage-summary table { border-collapse: collapse; margin: 3em; font-size: 110%; }
+        div.coverage-summary td, div.coverage-summary table  th { margin: 0; padding: 0.25em 1em; border-top: 1px solid #666; border-bottom: 1px solid #666; }
+        div.coverage-summary th { text-align: left; border: 1px solid #666; background: #eee; font-weight: normal; }
+        div.coverage-summary th.file { border-right: none !important; }
+        div.coverage-summary th.pic { border-left: none !important; text-align: right; }
+        div.coverage-summary th.pct { border-right: none !important; }
+        div.coverage-summary th.abs { border-left: none !important; text-align: right; }
+        div.coverage-summary td.pct { text-align: right; border-left: 1px solid #666; }
+        div.coverage-summary td.abs { text-align: right; font-size: 90%; color: #444; border-right: 1px solid #666; }
+        div.coverage-summary td.file { text-align: right; border-left: 1px solid #666; white-space: nowrap;  }
+        div.coverage-summary td.pic { min-width: 120px !important;  }
+        div.coverage-summary a:link { text-decoration: none; color: #000; }
+        div.coverage-summary a:visited { text-decoration: none; color: #333; }
+        div.coverage-summary a:hover { text-decoration: underline; }
+        div.coverage-summary tfoot td { border-top: 1px solid #666; }
+
+        div.coverage-summary .yui3-datatable-sort-indicator, div.coverage-summary .dummy-sort-indicator {
+            height: 10px;
+            width: 7px;
+            display: inline-block;
+            margin-left: 0.5em;
+        }
+        div.coverage-summary .yui3-datatable-sort-indicator {
+            background: url("http://yui.yahooapis.com/3.6.0/build/datatable-sort/assets/skins/sam/sort-arrow-sprite.png") no-repeat scroll 0 0 transparent;
+        }
+        div.coverage-summary .yui3-datatable-sorted .yui3-datatable-sort-indicator {
+            background-position: 0 -20px;
+        }
+        div.coverage-summary .yui3-datatable-sorted-desc .yui3-datatable-sort-indicator {
+            background-position: 0 -10px;
+        }
+
+        .high { background: #b5d592 !important; }
+        .medium { background: #ffe87c !important; }
+        .low { background: #fc8c84 !important; }
+
+        span.cover-fill, span.cover-empty {
+            display:inline-block;
+            border:1px solid #444;
+            background: white;
+            height: 12px;
+        }
+        span.cover-fill {
+            background: #ccc;
+            border-right: 1px solid #444;
+        }
+        span.cover-empty {
+            background: white;
+            border-left: none;
+        }
+        span.cover-full {
+            border-right: none !important;
+        }
+        pre.prettyprint {
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .com { color: #999 !important; }
+        .ignore-none { color: #999; font-weight: normal; }
+
+    </style>
+</head>
+<body>
+<div class="header high">
+    <h1>Code coverage report for <span class="entity">backbone-faux-server/backbone-faux-server.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">86.59% <small>(142 / 164)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">86.67% <small>(91 / 105)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">89.47% <small>(34 / 38)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">87.67% <small>(128 / 146)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">backbone-faux-server/</a> &#187; backbone-faux-server.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">222</span>
+<span class="cline-any cline-yes">627</span>
+<span class="cline-any cline-yes">222</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">107</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">182</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">182</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">157</span>
+<span class="cline-any cline-yes">157</span>
+<span class="cline-any cline-yes">248</span>
+<span class="cline-any cline-yes">248</span>
+<span class="cline-any cline-yes">191</span>
+<span class="cline-any cline-yes">100</span>
+<span class="cline-any cline-yes">100</span>
+<span class="cline-any cline-yes">100</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">91</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">57</span>
+<span class="cline-any cline-yes">43</span>
+<span class="cline-any cline-yes">43</span>
+<span class="cline-any cline-yes">43</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">187</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">187</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">33</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33</span>
+<span class="cline-any cline-yes">32</span>
+<span class="cline-any cline-yes">32</span>
+<span class="cline-any cline-yes">32</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">62</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">62</span>
+<span class="cline-any cline-yes">12</span>
+<span class="cline-any cline-yes">12</span>
+<span class="cline-any cline-yes">12</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">50</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">75</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">53</span>
+<span class="cline-any cline-yes">11</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">91</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">7</span>
+<span class="cline-any cline-yes">7</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">88</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">187</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">187</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-yes">178</span>
+<span class="cline-any cline-yes">28</span>
+<span class="cline-any cline-yes">28</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">186</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9</span>
+<span class="cline-any cline-yes">9</span>
+<span class="cline-any cline-yes">34</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">53</span>
+<span class="cline-any cline-yes">51</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">73</span>
+<span class="cline-any cline-yes">73</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">39</span>
+<span class="cline-any cline-yes">29</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">45</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">43</span>
+<span class="cline-any cline-yes">43</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">15</span>
+<span class="cline-any cline-yes">15</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5</span>
+<span class="cline-any cline-yes">5</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">35</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">35</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-yes">15</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">//     Backbone Faux Server v0.10.3
+&nbsp;
+//     https://github.com/biril/backbone-faux-server
+//     Licensed and freely distributed under the MIT License
+//     Copyright (c) 2012-2014 Alex Lambiris
+&nbsp;
+/*global exports, define, global, require, _, Backbone */
+(function (root, createModule) {
+    "use strict";
+&nbsp;
+    var
+        // Detect current environment. Faux-server will be exposed as module / global accordingly
+        env = (function () {
+            // A global `exports` object signifies CommonJS-like enviroments that support
+            //  `module.exports`, e.g. Node
+            <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof exports === "object") { return "CommonJS"; }
+&nbsp;
+            // A global `define` method with an `amd` property signifies the presence of an AMD
+            //  loader (require.js, curl.js)
+<span class="cstat-no" title="statement not covered" >            if (typeof define === "function" &amp;&amp; define.amd) { <span class="cstat-no" title="statement not covered" >return "AMD"; </span>}</span>
+&nbsp;
+            // Otherwise we assume running in a browser
+<span class="cstat-no" title="statement not covered" >            return "browser";</span>
+        }()),
+&nbsp;
+        // The `fauxServer` object to be exposed as module / global
+        fauxServer = null;
+&nbsp;
+    // Support for CommonJS will be specific to node. So if in fact the detected environment is
+    //  'commonJS' we assume the presense of node's `global` object and set root to it. (`root` is
+    //  already set to `this` but in the specific case of Node, `this` won't actually capture the
+    //  global context - `global` is needed)
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (env === "CommonJS") { root = global; }
+&nbsp;
+    // Expose as module / global depending on environment
+    switch (env) {
+    case "CommonJS":
+        createModule(root.setTimeout, exports, require("underscore"), require("backbone"));
+        break;
+&nbsp;
+<span class="branch-1 cbranch-no" title="branch not covered" >    case "AMD":</span>
+<span class="cstat-no" title="statement not covered" >        define(["underscore", "backbone", "exports"], <span class="fstat-no" title="function not covered" >function (_, Backbone, exports) {</span></span>
+<span class="cstat-no" title="statement not covered" >            return createModule(root.setTimeout, exports, _, Backbone);</span>
+        });
+<span class="cstat-no" title="statement not covered" >        break;</span>
+&nbsp;
+<span class="branch-2 cbranch-no" title="branch not covered" >    case "browser":</span>
+&nbsp;
+        // When running in a browser, the additional `noConflict` method is attached to
+        //  `fauxServer`. This is only meaningful in this specific case where `fauxServer` is
+        //  globally exposed
+<span class="cstat-no" title="statement not covered" >        fauxServer = createModule(root.setTimeout, {}, _, Backbone);</span>
+<span class="cstat-no" title="statement not covered" >        fauxServer.noConflict = (<span class="fstat-no" title="function not covered" >function() {</span></span>
+&nbsp;
+            // Save a reference to the previous value of 'fauxServer', so that it can be restored
+            //  later on, if 'noConflict' is used
+<span class="cstat-no" title="statement not covered" >            var previousFauxServer = root.fauxServer;</span>
+&nbsp;
+            // The `noConflict` method: Sets the _global_ `fauxServer` variable to to its previous
+            //  value returning a reference to `fauxServer`
+<span class="cstat-no" title="statement not covered" >            return <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >                root.fauxServer = previousFauxServer;</span>
+<span class="cstat-no" title="statement not covered" >                fauxServer.noConflict = <span class="fstat-no" title="function not covered" >function () {</span> <span class="cstat-no" title="statement not covered" >return fauxServer; </span>};</span>
+<span class="cstat-no" title="statement not covered" >                return fauxServer;</span>
+            };
+        }());
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        root.fauxServer = fauxServer;</span>
+    }
+&nbsp;
+}(this, function (setTimeout, fauxServer, _, Backbone) {
+    "use strict";
+&nbsp;
+    var
+        // Helper which clones an array skipping any and all tail-elements which are undefined.
+        //  Array.length can't be trusted when the array contains undefined tail-element(s) which
+        //  are explicitly set: It is always set to the index of the last array element plus one
+        //  and a tail element explicitly set to undefined will in fact count as the 'last
+        //  element'. This can be problematic when counting function arguments in order to
+        //  sanitize, provide defaults, etc
+        skipUndefinedTail = function (array) {
+            var a = [], i = array.length - 1;
+            for (; i &gt;= 0; i--) { if (!_.isUndefined(array[i])) { a[i] = array[i]; } }
+            return a;
+        },
+&nbsp;
+        // Save a reference to the native sync method. Used when no route is matched during syncing
+        //  or faux-server is altogether disabled
+        nativeSync = Backbone.sync,
+&nbsp;
+        // Indicates whether the faux-server is currently enabled
+        isEnabled = true,
+&nbsp;
+        // The default-route - a route that contains the default handler if one is defined. The
+        //  default handler is invoked when no matching route is found for some
+        //  &lt;model-URL, sync-method&gt; pair and may be set by means of `setDefaultHandler`. A `null`
+        //  value for the default-route signifies the absence of a default handler
+        defaultRoute = null,
+&nbsp;
+        // Convert a urlExp string (containing params and splats) into a regular expression
+        makeRegExp = (function () {
+            var
+                // To escape special chars before converting to reg-exp
+                e = /[\-{}\[\]+?.,\\\^$|#\s]/g,
+&nbsp;
+                // Optional part
+                o = /\((.*?)\)/g,
+&nbsp;
+                // Named param (+ extra capturing parens for opt-part detection)
+                p = /(\(\?)?:[A-Za-z_](?:\w)+/g,
+&nbsp;
+                // Splat param
+                s = /\*\w+/g,
+&nbsp;
+                // Don't confuse (regex-equivalent-subsituted) optional parts with named params
+                getReplacementForP = function (match, isOptPart) {
+                    return isOptPart ? match : "([^\/]+)";
+                };
+&nbsp;
+            return function(exp) {
+                exp = exp.replace(e, "\\$&amp;")
+                         .replace(o, "(?:$1)?")
+                         .replace(p, getReplacementForP)
+                         .replace(s, "(.*?)");
+&nbsp;
+                return new RegExp("^" + exp + "$");
+            };
+        }()),
+&nbsp;
+        // A no-op method to reuse
+        noOp = function () {},
+&nbsp;
+        // Server's emulated latency
+        latency = 0,
+&nbsp;
+        // Mapping of CRUD (+ patch) to HTTP verbs
+        crudToHttp = {
+            "create": "POST",
+            "read": "GET",
+            "update": "PUT",
+            "delete": "DELETE",
+            "patch": "PATCH"
+        },
+&nbsp;
+        // Collection of all defined routes
+        routes = [],
+&nbsp;
+        // Get a route matching the given &lt;`url`, `httpMethod`&gt; pair. Routes that exactly match the
+        //  HTTP-method take precedence over match-all-methods routes (those with `httpMethod` set
+        //  to '*'). Matching routes that were defined later take precedence over those that were
+        //  defined earlier. A returned matching route will contain the additional `handlerParams`
+        //  property: an array containing params that are to be passed to the handler as captured
+        //  when the given URL was matched. Will return `null` if no route found. Note that
+        //  the acquired route is a copy - it cannot be modified to affect faux-server's behaviour
+        getMatchingRoute = function (url, httpMethod) {
+            var i, r, weakMatch;
+            for (i = routes.length - 1; i &gt;= 0; --i) { // Iterating from latest to earliest
+                r = routes[i];
+                if (r.urlExp.test(url)) {
+                    if (r.httpMethod === httpMethod) { // Found a match ..
+                        r = _.clone(r);
+                        r.handlerParams = r.urlExp.exec(url).slice(1);
+                        return r; // .. so return it. We're done
+                    }
+                    if (r.httpMethod === "*") { weakMatch = r; } // Found a weak match
+                }
+            }
+            if (weakMatch) { // Found a weak match. That's good too ..
+                r = _.clone(weakMatch);
+                r.handlerParams = r.urlExp.exec(url).slice(1);
+                return r; // .. so return it. We're done
+            }
+            return null;
+        },
+&nbsp;
+        // Helper to create route for given `name`, `urlExp`, `httpMethod` and `handler`. Will set
+        //  missing arguments to defaults and sanitize values where appropriate - note that the
+        //  only mandatory argument is `urlExp`
+        createRoute = function (name, urlExp, httpMethod, handler) {
+            var args = skipUndefinedTail(_.toArray(arguments));
+&nbsp;
+            switch (args.length) {
+&nbsp;
+            // Missing `name`, `handler` or `httpMethod`
+            case 3:
+&nbsp;
+                // Missing `name` or `httpMethod`
+                if (_.isFunction(args[2])) {
+                    handler = args[2];
+&nbsp;
+                    // Missing `name`
+                    if (args[1] === "*" || _.contains(crudToHttp, args[1])) {
+                        urlExp = args[0];
+                        httpMethod = args[1];
+                        name = null;
+&nbsp;
+                    // Missing httpMethod
+                    } else {
+                        httpMethod = "*";
+                    }
+&nbsp;
+                // Missing handler
+                } else {
+                    handler = noOp;
+                }
+                break;
+&nbsp;
+            // Missing `name` &amp; `httpMethod`, `httpMethod` &amp; `handler` or `name` &amp; `handler`
+            case 2:
+&nbsp;
+                // Missing `name` &amp; `httpMethod`
+                if (_.isFunction(args[1])) {
+                    urlExp = args[0];
+                    handler = args[1];
+                    httpMethod = "*";
+                    name = null;
+&nbsp;
+                // Missing `name` &amp; `handler` or `httpMethod` &amp; `handler`
+                } else {
+                    handler = noOp;
+&nbsp;
+                    // Missing `name` &amp; `handler`
+                    if (args[1] === "*" || _.contains(crudToHttp, args[1])) {
+                        urlExp = args[0];
+                        httpMethod = args[1];
+                        name = null;
+&nbsp;
+                    // Missing `httpMethod` &amp; `handler`
+                    } else {
+                        httpMethod = "*";
+                    }
+                }
+                break;
+&nbsp;
+            // Missing `name` &amp; `httpMethod` &amp; `handler`
+            case 1:
+                urlExp = args[0];
+                httpMethod = "*";
+                handler = noOp;
+                name = null;
+                break;
+&nbsp;
+            case 0:
+                throw new Error("addRoute: Missing mandatory 'urlExp' argument");
+            }
+&nbsp;
+            httpMethod = httpMethod.toUpperCase();
+            urlExp = _.isRegExp(urlExp) ? urlExp : makeRegExp(urlExp);
+&nbsp;
+            return {
+                name: name || _.uniqueId(httpMethod + "_" + urlExp + "_"),
+                urlExp: urlExp,
+                httpMethod: httpMethod,
+                handler: handler
+            };
+        },
+&nbsp;
+        // Get the data that should be sent to the server during a sync. This depends on
+        //  the sync-method being used and any options that may have been given
+        getRequestData = function (httpMethod, model, options) {
+            // A `data` property whithin options overrides any Model data.
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (options.data) { <span class="cstat-no" title="statement not covered" >return options.data; </span>}
+&nbsp;
+            // If no Model is given (??) then request data will be undefined no matter what
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (!model) { <span class="cstat-no" title="statement not covered" >return; </span>}
+&nbsp;
+            // In the specific case of PATCH, a hash of 'changed attributes' is expected within
+            //  options. If no such thing is present then the complete Model representation will
+            //  be used instead
+            if (httpMethod === "PATCH") { return options.attrs || model.toJSON(); }
+&nbsp;
+            // Send the complete Model representation when POSTing or PUTing
+            if (httpMethod === "POST" || httpMethod === "PUT") { return model.toJSON(); }
+        },
+&nbsp;
+        // Invoked _per sync_ (with the relevant options / context) to create a new transport -
+        //  a deferred-like object implementing a `promise` / `resolve` / `reject` interface. A
+        //  successfull sync will invoke `transport.resolve` while a failed one will invoke
+        //  `transport.reject`. The sync method will always return `transport.promise()`
+        createTransport = function (syncOptions /*, syncContext */) {
+            // If an underlying ajax lib is defined for Backbone (`Backbone.$`) and it features a
+            //  `Deferred` method (which is precisely the case when Backbone.$ = jQuery) then
+            //  attempt to create a 'deferred transport' which will invoke the `success` / `error`
+            //  callbacks when its promise is fulfilled / rejected. Note that sync will return the
+            //  transport's promise _not_ the transport itself
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (Backbone.$ &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >_.isFunction(Backbone.$.Deferred))</span> {
+<span class="cstat-no" title="statement not covered" >                try {</span>
+<span class="cstat-no" title="statement not covered" >                    var deferred = Backbone.$.Deferred();</span>
+<span class="cstat-no" title="statement not covered" >                    deferred.then(syncOptions.success, syncOptions.error);</span>
+<span class="cstat-no" title="statement not covered" >                    return deferred;</span>
+                } catch (e) {}
+            }
+&nbsp;
+            // Otherwise create a poor-man's deferred - an object that implements a dumb
+            //  `promise` / `resolve` / `reject` interface without actual promise semantics:
+            //  `resolve` and `reject` just delegate to `success` and `error` callbacks while
+            //  `promise` returns an `undefined`. This is a good enough transport
+            return {
+                promise: noOp,
+                resolve: function (value) { syncOptions.success(value); },
+                reject: function (reason) { syncOptions.error(reason); }
+            };
+        };
+&nbsp;
+    // Modify Backbone's sync to use the faux-server sync method (when appropriate)
+    Backbone.sync = function (crudMethod, model, options) {
+&nbsp;
+        // If faux-server is disabled, fall back to original sync
+        if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
+&nbsp;
+        _.defaults(options || (<span class="branch-1 cbranch-no" title="branch not covered" >options = {})</span>, {
+            emulateHTTP: Backbone.emulateHTTP,
+            emulateJSON: Backbone.emulateJSON
+        });
+&nbsp;
+        var
+            // Sync context
+            c = {
+                data: null,
+                url: null,
+                httpMethod: crudToHttp[crudMethod],
+                route: null
+            },
+&nbsp;
+            // An exec-method to actually run the appropriate handler. Defined below
+            execHandler = null,
+&nbsp;
+            // We'll be creating a transport for this sync..
+            transport = null,
+&nbsp;
+            // ..and returning the transport's promise
+            transportPromise = null;
+&nbsp;
+        // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
+        if (options.emulateHTTP &amp;&amp; c.httpMethod !== "GET") {
+            c.httpMethodOverride = c.httpMethod;
+            c.httpMethod = "POST";
+        }
+&nbsp;
+        // Ensure that we have a URL (A `url` property whithin options overrides Model /
+        //  Collection URL)
+        <span class="missing-if-branch" title="if path not taken" >I</span>if(!(c.url = options.url || _.result(model, "url"))) {
+<span class="cstat-no" title="statement not covered" >            throw new Error("sync: Undefined 'url' property or function of Model / Collection");</span>
+        }
+&nbsp;
+        // Find route for given URL or fall back to native sync if none found
+        if (!(c.route = getMatchingRoute(c.url, c.httpMethod) || defaultRoute)) {
+            return nativeSync.call(model, crudMethod, model, options);
+        }
+&nbsp;
+        // Ensure that we have the appropriate request data
+        c.data = getRequestData(c.httpMethod, model, options);
+&nbsp;
+        // Create a transport for this sync
+        transport = createTransport(options, c);
+&nbsp;
+        // An exec-method to actually run the handler and subsequently invoke success / error
+        //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
+        execHandler = function () {
+            var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
+            transport[_.isString(result) ? "reject" : "resolve"](result);
+        };
+&nbsp;
+        // The transport's promise to return. Assuming the default transport-factory implementation
+        //  this may be an actual promise or just undefined
+        transportPromise = transport.promise();
+&nbsp;
+        model.trigger("request", model, transportPromise, options);
+&nbsp;
+        // Call exec-method _now_ if zero-latency, else call later
+        if (!latency) { execHandler(); }
+        else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
+&nbsp;
+        return transportPromise;
+    };
+&nbsp;
+    // Attach methods to faux-server
+    _.extend(fauxServer, {
+&nbsp;
+        // Add a route to the faux-server - a mapping from a Model(or Collection)-URL &amp; sync-method
+        //  (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
+        //  `&lt;model-URL, sync-method&gt; -&gt; handler`. Whenever a Model is created, read, updated or
+        //  deleted, its URL and the the sync method being used will be tested against defined
+        //  routes in order to find a handler for creating, reading, updating or deleting this
+        //  Model. The same applies to reading Collections. When a match for the &lt;model-URL,
+        //  sync-method&gt; pair is _not_ found among defined routes, the native sync will be invoked
+        //  (this behaviour may be overriden - see `setDefaultHandler`). Later routes take
+        //  precedence over earlier routes so in configurations where multiple routes match,
+        //  the one most recently defined will be used.
+        //
+        //  The route `name` is optional and a named route may be queried and / or removed by its
+        //   name. Additionally, a named route will replace an earlier defined route of same name.
+        //
+        //  The route `urlExp` is an expression against which, Model(or Collection)-URLs will be
+        //   matched. This is syntactically and functionally analogous to Backbone routes,
+        //   featuring parameter parts (':param'), splat parts ('*splat') and parentheses. The
+        //   values captured by params and splats will be passed as parameters to the given handler
+        //   method. Regular expressions may also be used, in which case all values captured by
+        //   reg-exp capturing groups will be passed as parameters to the given handler method.
+        //   Note that `:param`s are required to begin with a letter or underscore - those that
+        //   don't are treated as a fixed part of the URL.
+        //
+        //  The route's `httpMethod` is an HTTP verb (POST, GET, PUT, PATCH or DELETE), that should
+        //   trigger the route's handler. Both the URL-expression and the method should match for
+        //   the handler to be invoked. httpMethod may also be set to '*' (or omitted) to create a
+        //   match-all-methods handler: One that will be invoked whenever urlExp matches the
+        //   model's (or collection's) URL _regardless_ of method. In the scope of a
+        //   match-all-methods handler, the HTTP method currently being handled may be acquired by
+        //   querying the context parameter for `context.httpMethod`. Note that when
+        //   `Backbone.emulateHTTP` is set to true or `emulateHTTP` is passed as an inline option
+        //   during sync, 'create', 'update', 'delete' and 'patch' will all be mapped to POST. In
+        //   this case `context.httpMethod` will be set to POST and the true HTTP method may be
+        //   acquired by querying `context.httpMethodOverride`.
+        //
+        //  The route `handler`'s signature should be
+        //   `function (context, [param1, [param2, ...]])`
+        //   where `context` contains properties `data`, `httpMethod`, `httpMethodOverride`,
+        //   `route` and `param1`, `param2`, ... are parameters derived by matching the `urlExp` to
+        //   the Model (or Collection) URL. Specifically, about `context` properties:
+        //
+        //   * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid
+        //      only on 'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of
+        //      PATCH, context.data may only contain a _subset_ of Model's attributes.
+        //   * `context.httpMethod`: The HTTP Method (POST, GET, PUT, PATCH, DELETE) that
+        //      is currently being handled.
+        //   * `context.url`: The URL that is currently being handled.
+        //   * `context.httpMethodOverride`: The true HTTP Method (POST, GET, PUT, PATCH, DELETE)
+        //      that is currently being handled when Backbone.emulateHTTP is set to true.
+        //      The equivalent of Backbone's X-HTTP-Method-Override header.
+        //   * `context.route`: The route that is currently being handled.
+        //
+        //  On success, the handler should return created Model attributes after handling a POST or
+        //   updated Model attributes after handling a PUT or PATCH. Return Model attributes after
+        //   handling a GET or an array of Model attributes after handling a GET that refers to a
+        //   collection. Note that only attributes that have been changed on the server (and should
+        //   be updated on the client) need to be included. Return nothing after handling a DELETE.
+        //   On failure, the handler should return s string (presumably a custom error messsage, an
+        //   HTTP status code that indicates failure, etc).
+        addRoute: function (/* name, urlExp, httpMethod, handler */) {
+            var route, routeIndex;
+&nbsp;
+            // Create the route, setting missing arguments to defaults and sanitizing where
+            //  appropriate - note that the only mandatory argument is `urlExp`
+            route = createRoute.apply(null, arguments);
+&nbsp;
+            // If a route of given name is already present then overwrite it with this one.
+            //  Otherwise just append the new route
+            _.any(routes, function (r, i) {
+                if (r.name === route.name) {
+                    routeIndex = i;
+                    return true;
+                }
+            }) || (routeIndex = routes.length);
+            routes[routeIndex] = route;
+&nbsp;
+            return this;
+        },
+&nbsp;
+        // Add multiple routes to faux-server. Given `routesToAdd` should be a hash or array: In
+        //  the case of a hash, keys should be route names and each route (nested hash) need only
+        //  contain `urlExp`, `httpMethod` and `handler`. See `addRoute`. Returns the faux-server
+        addRoutes: function (routesToAdd) {
+            var isArray = _.isArray(routesToAdd);
+            _.each(routesToAdd, function (r, rName) {
+                this.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
+            }, this);
+            return this;
+        },
+&nbsp;
+        // Remove route of given `routeName`. Returns the faux-server
+        removeRoute: function (routeName) {
+            routes = _.reject(routes, function (r) { return r.name === routeName; });
+            return this;
+        },
+&nbsp;
+        // Remove all previously defined routes. Returns the faux-server
+        removeRoutes: function () {
+            routes = [];
+            return this;
+        },
+&nbsp;
+        // Get route of given `routeName` or `null` if no such route exists. Note that the
+        //  acquired route is a copy - it cannot be modified to affect faux-server's behaviour
+        getRoute: function (routeName) {
+            var route = _.find(routes, function (r) { return r.name === routeName; });
+            return route ? _.clone(route) : null;
+        },
+&nbsp;
+        // Get route at given `routeIndex` or `null` if no such route exists. Note that the
+        //  acquired route is a copy - it cannot be modified to affect faux-server's behaviour
+        getRouteAt: function (routeIndex) {
+            return routes[routeIndex] ? _.clone(routes[routeIndex]) : null;
+        },
+&nbsp;
+        // Get route matching the given &lt;`url`, `httpMethod`&gt; pair or `null` if no such route
+        //  exists. Note that the acquired route is a copy - it cannot be modified to affect
+        //  faux-server's behaviour. See earlier definition of `getMatchingRoute` for details
+        getMatchingRoute: getMatchingRoute,
+&nbsp;
+        // Set the given `handler` as the one to be invoked when no route is matched to the current
+        //  &lt;model-URL, sync-method&gt; pair. This will override the default behaviour of invoking the
+        //  native sync. Ommit the parameter to reset to the default behaviour. See `addRoute` for
+        //  handler's signature and semantics. Note that a default-handler isn't part of a route,
+        //  so the `context.route` parameter will not be valid. Returns the faux-server
+        setDefaultHandler: function (handler) {
+            defaultRoute = !handler ? null : {
+                name: "",
+                urlExp: "",
+                handler: handler,
+                handlerParams: []
+            };
+            return this;
+        },
+&nbsp;
+        // Set server's emulated latency to `min` ms or a random latency withing [`min`, `max`] ms
+        //  when the optional `max` parameter is given. Ommitting both parameters will set to the
+        //  latency to 0. Returns the faux-server
+        setLatency: function (min, max) {
+            latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
+            return this;
+        },
+&nbsp;
+        // Set the server's transport factory - a factory function with signature
+        //  `function (syncOptions, syncContext)`
+        //  invoked  _per sync_ (with the relevant options / context) to create a new transport - a
+        //  deferred-like object implementing a `promise` / `resolve` / `reject` interface. A
+        //  successfull sync will invoke `transport.resolve` while a failed one will invoke
+        //  `transport.reject` The sync method will always return `transport.promise()`. Returns
+        //  the faux-server
+        setTransportFactory: function (transportFactory) {
+            createTransport = transportFactory;
+            return this;
+        },
+&nbsp;
+        // Enable / disable the faux-server. When disabled, sync will be delegated to the native
+        //  backbone `sync`. Handy for easily toggling between mock / real server. Set
+        //  `shouldEnable` to `true` or ommit altogether to enable, set to false to disable.
+        //  Returns the faux-server
+        enable: function (shouldEnable) {
+            isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
+            return this;
+        },
+&nbsp;
+        // Get faux-server version
+        getVersion: function () {
+            return "0.10.3"; // Keep in sync with package.json
+        }
+    });
+&nbsp;
+    // Attach &lt;httpMethod&gt;(name, urlExp, handler) methods to faux-server (`get`, `post`, `put`,
+    //  `patch` and `del`). These all delegate to addRoute
+    _.each(_.values(crudToHttp), function (httpMethod) {
+&nbsp;
+        // All shortcut-methods are named after the relevant HTTP verb except for 'delete' which is
+        //  abbreviated to 'del' in order to avoid reserved word awkwardness
+        var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
+        fauxServer[method] = function () {
+            // Expecting `name`, `urlExp`, `handler` arguments. Only `urlExp` is mandatory
+            var args = skipUndefinedTail(_.toArray(arguments));
+&nbsp;
+            if (!args.length) { throw new Error(method + ": Missing mandatory 'urlExp' argument"); }
+&nbsp;
+            // The `httpMethod` must be inserted into the args, either at tail-position if
+            //  `handler` is missing or just before it (after `urlExp`) if it's present
+            if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
+            else { args.splice(args.length - 1, 0, httpMethod); }
+&nbsp;
+            return fauxServer.addRoute.apply(this, args);
+        };
+    });
+&nbsp;
+    return fauxServer;
+}));
+&nbsp;</pre></td></tr>
+</table></pre>
+
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Sep 27 2014 16:51:26 GMT+0200 (CEST)</div>
+</div>
+
+<script src="../prettify.js"></script>
+
+<script src="http://yui.yahooapis.com/3.6.0/build/yui/yui-min.js"></script>
+<script>
+
+    YUI().use('datatable', function (Y) {
+
+        var formatters = {
+          pct: function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              try {
+                  return o.value.toFixed(2) + '%';
+              } catch (ex) { return o.value + '%'; }
+          },
+          html: function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              return o.record.get(o.column.key + '_html');
+          }
+        },
+          defaultFormatter = function (o) {
+              o.className += o.record.get('classes')[o.column.key];
+              return o.value;
+          };
+
+        function getColumns(theadNode) {
+            var colNodes = theadNode.all('tr th'),
+                cols = [],
+                col;
+            colNodes.each(function (colNode) {
+                col = {
+                    key: colNode.getAttribute('data-col'),
+                    label: colNode.get('innerHTML') || ' ',
+                    sortable: !colNode.getAttribute('data-nosort'),
+                    className: colNode.getAttribute('class'),
+                    type: colNode.getAttribute('data-type'),
+                    allowHTML: colNode.getAttribute('data-html') === 'true' || colNode.getAttribute('data-fmt') === 'html'
+                };
+                col.formatter = formatters[colNode.getAttribute('data-fmt')] || defaultFormatter;
+                cols.push(col);
+            });
+            return cols;
+        }
+
+        function getRowData(trNode, cols) {
+            var tdNodes = trNode.all('td'),
+                    i,
+                    row = { classes: {} },
+                    node,
+                    name;
+            for (i = 0; i < cols.length; i += 1) {
+                name = cols[i].key;
+                node = tdNodes.item(i);
+                row[name] = node.getAttribute('data-value') || node.get('innerHTML');
+                row[name + '_html'] = node.get('innerHTML');
+                row.classes[name] = node.getAttribute('class');
+                //Y.log('Name: ' + name + '; Value: ' + row[name]);
+                if (cols[i].type === 'number') { row[name] = row[name] * 1; }
+            }
+            //Y.log(row);
+            return row;
+        }
+
+        function getData(tbodyNode, cols) {
+            var data = [];
+            tbodyNode.all('tr').each(function (trNode) {
+                data.push(getRowData(trNode, cols));
+            });
+            return data;
+        }
+
+        function replaceTable(node) {
+            if (!node) { return; }
+            var cols = getColumns(node.one('thead')),
+                data = getData(node.one('tbody'), cols),
+                table,
+                parent = node.get('parentNode');
+
+            table = new Y.DataTable({
+                columns: cols,
+                data: data,
+                sortBy: 'file'
+            });
+            parent.set('innerHTML', '');
+            table.render(parent);
+        }
+
+        Y.on('domready', function () {
+            replaceTable(Y.one('div.coverage-summary table'));
+            if (typeof prettyPrint === 'function') {
+                prettyPrint();
+            }
+        });
+    });
+</script>
+</body>
+</html>
