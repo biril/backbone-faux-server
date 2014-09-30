@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, fauxServer, test, ok, start, stop */
+/*global QUnit, Backbone, fauxServer, test, ok, start, stop, throws */
 
 (function () {
     "use strict";
@@ -41,6 +41,27 @@
             Backbone.emulateHTTP = false;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
         }
+    });
+
+    test("sync throws when model has no URL", 5, function () {
+        var model = new Backbone.Model(),
+            collection = new Backbone.Collection();
+
+        fauxServer.setDefaultHandler(function () {
+            ok(false, "Fail: default handler invoked although model has no URL");
+        });
+
+        throws(function () { model.fetch();  }, "throws for read");
+        throws(function () { model.save();   }, "throws for create");
+        throws(function () { model.delete(); }, "throws for delete");
+
+        model.set({ id: 1 });
+
+        throws(function () { model.save();   }, "throws for update");
+
+        //
+
+        throws (function () { collection.fetch(); }, "throws for collection read");
     });
 
     test("Latency (abs. value) taken into account when syncing", 1, function () {
