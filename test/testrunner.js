@@ -51,6 +51,7 @@ qunit.run({
         absPath("test-routes.js"),
         absPath("test-urlexpmatch.js"),
         absPath("test-handlers.js"),
+        absPath("test-sync.js"),
         absPath("test-eventscallbacks.js"),
         absPath("test-transportcustom.js"),
         absPath("test-chain.js")
