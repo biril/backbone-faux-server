@@ -278,6 +278,9 @@
         //  successfull sync will invoke `transport.resolve` while a failed one will invoke
         //  `transport.reject`. The sync method will always return `transport.promise()`
         createTransport = function (syncOptions /*, syncContext */) {
+            var success = syncOptions.success || noOp,
+                error = syncOptions.error || noOp;
+
             // If an underlying ajax lib is defined for Backbone (`Backbone.$`) and it features a
             //  `Deferred` method (which is precisely the case when Backbone.$ = jQuery) then
             //  attempt to create a 'deferred transport' which will invoke the `success` / `error`
@@ -286,7 +289,7 @@
             if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
                 try {
                     var deferred = Backbone.$.Deferred();
-                    deferred.then(syncOptions.success, syncOptions.error);
+                    deferred.then(success, error);
                     return deferred;
                 } catch (e) {}
             }
@@ -297,8 +300,8 @@
             //  `promise` returns an `undefined`. This is a good enough transport
             return {
                 promise: noOp,
-                resolve: function (value) { syncOptions.success(value); },
-                reject: function (reason) { syncOptions.error(reason); }
+                resolve: function (value) { success(value); },
+                reject: function (reason) { error(reason); }
             };
         };
 

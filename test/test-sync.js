@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, fauxServer, test, ok, start, stop, throws */
+/*global QUnit, Backbone, fauxServer, test, ok, strictEqual, start, stop, throws */
 
 (function () {
     "use strict";
@@ -62,6 +62,21 @@
         //
 
         throws (function () { collection.fetch(); }, "throws for collection read");
+    });
+
+    test("sync may be invoked directly, without options", 4, function () {
+        var book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer.setDefaultHandler(function (context) {
+            ok(true, "Handler invoked for " + context.httpMethod);
+        });
+
+        book.sync("read", book);
+        book.sync("create", book);
+        book.set({ id: 1 });
+        book.sync("update", book);
+        book.sync("delete", book);
     });
 
     test("Latency (abs. value) taken into account when syncing", 1, function () {
