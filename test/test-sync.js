@@ -79,6 +79,33 @@
         book.sync("delete", book);
     });
 
+    test("sync options default to backbone's emulateHTTP", 6, function () {
+
+        Backbone.emulateHTTP = true;
+
+        var book = this.createDummyBook();
+        book.urlRoot = "library-app/books";
+
+        fauxServer.post("handler", "library-app/books", function (context) {
+            strictEqual(context.httpMethod, "POST");
+            strictEqual(context.httpMethodOverride, "POST");
+        });
+        book.sync("create", book);
+
+        fauxServer.post("handler", "library-app/books/:id", function (context) {
+            strictEqual(context.httpMethod, "POST");
+            strictEqual(context.httpMethodOverride, "PUT");
+        });
+        book.set({ id: 1 });
+        book.sync("update", book);
+
+        fauxServer.post("handler", "library-app/books/:id", function (context) {
+            strictEqual(context.httpMethod, "POST");
+            strictEqual(context.httpMethodOverride, "DELETE");
+        });
+        book.sync("delete", book);
+    });
+
     test("Latency (abs. value) taken into account when syncing", 1, function () {
         var latency = 303,
             t0 = 0,
