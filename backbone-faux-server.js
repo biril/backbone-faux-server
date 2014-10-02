@@ -60,8 +60,7 @@
             //  value returning a reference to `fauxServer`
             return function () {
                 root.fauxServer = previousFauxServer;
-                fauxServer.noConflict = function () { return fauxServer; };
-                return fauxServer;
+                return (fauxServer.noConflict = function () { return fauxServer; }).call();
             };
         }());
 
