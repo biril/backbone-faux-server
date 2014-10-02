@@ -43,7 +43,7 @@
         }
     });
 
-    test("sync throws when model has no URL", 5, function () {
+    test("Throws when Model / Collection has no URL", 5, function () {
         var model = new Backbone.Model(),
             collection = new Backbone.Collection();
 
@@ -51,25 +51,26 @@
             ok(false, "Fail: default handler invoked although model has no URL");
         });
 
-        throws(function () { model.fetch();  }, "throws for read");
-        throws(function () { model.save();   }, "throws for create");
-        throws(function () { model.delete(); }, "throws for delete");
+        throws(function () { model.fetch();  }, "throws for model read");
+        throws(function () { model.save();   }, "throws for model create");
+        throws(function () { model.delete(); }, "throws for model delete");
 
         model.set({ id: 1 });
 
-        throws(function () { model.save();   }, "throws for update");
+        throws(function () { model.save();   }, "throws for model update");
 
         //
 
         throws (function () { collection.fetch(); }, "throws for collection read");
     });
 
-    test("sync may be invoked directly, without options", 4, function () {
-        var book = this.createDummyBook();
-        book.urlRoot = "library-app/books";
+    test("May be invoked directly, without options", 5, function () {
+        var book = new this.Book(),
+            books = new this.Books();
+        books.add(book);
 
         fauxServer.setDefaultHandler(function (context) {
-            ok(true, "Handler invoked for " + context.httpMethod);
+            ok(true, "Handler invoked for model sync with " + context.httpMethod + " verb");
         });
 
         book.sync("read", book);
@@ -77,9 +78,15 @@
         book.set({ id: 1 });
         book.sync("update", book);
         book.sync("delete", book);
+
+        fauxServer.setDefaultHandler(function (context) {
+            ok(true, "Handler invoked for collection sync with " + context.httpMethod + " verb");
+        });
+
+        books.sync("read", book);
     });
 
-    test("sync options default to backbone's emulateHTTP", 6, function () {
+    test("Options default to backbone's emulateHTTP", 6, function () {
 
         Backbone.emulateHTTP = true;
 
@@ -87,26 +94,26 @@
         book.urlRoot = "library-app/books";
 
         fauxServer.post("handler", "library-app/books", function (context) {
-            strictEqual(context.httpMethod, "POST");
-            strictEqual(context.httpMethodOverride, "POST");
+            strictEqual(context.httpMethod, "POST", "during invocation of create-handler: httpMethod is POST");
+            strictEqual(context.httpMethodOverride, "POST", "during invocation of create-handler: httpMethodOverride is POST");
         });
         book.sync("create", book);
 
         fauxServer.post("handler", "library-app/books/:id", function (context) {
-            strictEqual(context.httpMethod, "POST");
-            strictEqual(context.httpMethodOverride, "PUT");
+            strictEqual(context.httpMethod, "POST", "during invocation of update-handler: httpMethod is POST");
+            strictEqual(context.httpMethodOverride, "PUT", "during invocation of update-handler: httpMethodOverride is PUT");
         });
         book.set({ id: 1 });
         book.sync("update", book);
 
         fauxServer.post("handler", "library-app/books/:id", function (context) {
-            strictEqual(context.httpMethod, "POST");
-            strictEqual(context.httpMethodOverride, "DELETE");
+            strictEqual(context.httpMethod, "POST", "during invocation of delete-handler: httpMethod is POST");
+            strictEqual(context.httpMethodOverride, "DELETE", "during invocation of delete-handler: httpMethodOverride is DELETE");
         });
         book.sync("delete", book);
     });
 
-    test("Latency (abs. value) taken into account when syncing", 1, function () {
+    test("Latency (abs. value) taken into account", 1, function () {
         var latency = 303,
             t0 = 0,
             now = function () { return +(new Date()); },
@@ -126,7 +133,7 @@
         book.fetch(); // sync
     });
 
-    test("Latency (random value within range) taken into account when syncing", 1, function () {
+    test("Latency (random value within range) taken into account", 1, function () {
         var latencyMin = 101,
             latencyMax = 303,
             t0 = 0,
