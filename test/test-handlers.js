@@ -6,40 +6,40 @@
     //
     QUnit.module("handlers", {
         setup: function () {
-            var Book = Backbone.Model.extend({
-                    defaults: {
-                        title: "Unknown title",
-                        author: "Unknown author"
-                    }
-                }),
-                Books = Backbone.Collection.extend({
-                    model: Book,
-                    url: "library-app/books"
-                }),
-                createDummyBook = function (id) {
-                    var dummyBook = new Book({
-                            title: "The Catcher in the Rye",
-                            author: "J. D. Salinger",
-                            pubDate: "July 16, 1951"
-                        });
-                    if (id) { dummyBook.set({ id: id }); }
-                    return dummyBook;
-                };
+            this.Book = Backbone.Model.extend({
+                defaults: {
+                    title: "Unknown title",
+                    author: "Unknown author"
+                }
+            });
+            this.Books = Backbone.Collection.extend({
+                model: this.Book,
+                url: "library-app/books"
+            });
+            this.createDummyBook = function (id) {
+                var dummyBook = new this.Book({
+                        title: "The Catcher in the Rye",
+                        author: "J. D. Salinger",
+                        pubDate: "July 16, 1951"
+                    });
+                if (id) { dummyBook.set({ id: id }); }
+                return dummyBook;
+            };
+
+            Backbone.emulateHTTP = false;
+            Backbone.emulateJSON = false;
 
             Backbone.$ = undefined;
-
-            this.Book = Book;
-            this.Books = Books;
-            this.createDummyBook = createDummyBook;
+            Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
         },
         teardown: function () {
             delete this.Book;
             delete this.Books;
+            delete this.createDummyBook;
+
             fauxServer.removeRoutes();
             fauxServer.setDefaultHandler();
             fauxServer.setLatency();
-            Backbone.emulateHTTP = false;
-            Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
         }
     });
 

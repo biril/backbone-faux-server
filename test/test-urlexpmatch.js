@@ -15,7 +15,10 @@
     //
     QUnit.module("URL-exp matching", {
         setup: function () {
+            Backbone.emulateHTTP = false;
+
             Backbone.$ = undefined;
+            Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
         },
         teardown: function () {
             fauxServer.removeRoutes();

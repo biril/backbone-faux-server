@@ -12,6 +12,7 @@
     QUnit.module("routes", {
         setup: function () {
             Backbone.$ = undefined;
+            Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
         },
         teardown: function () {
             fauxServer.removeRoutes();
