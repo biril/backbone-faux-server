@@ -64,6 +64,29 @@
         throws (function () { collection.fetch(); }, "throws for collection read");
     });
 
+    test("A url property in options overrides Model's / Collection's URL", 5, function () {
+        var book = new this.Book(),
+            books = new this.Books();
+        books.add(book);
+
+        fauxServer.addRoute("theRoute", "some/overriden/url", "*", function (context) {
+            ok(true, "Handler invoked for model sync with " + context.httpMethod + " verb");
+        });
+
+        book.fetch({ url: "some/overriden/url" });
+        book.save(null, { url: "some/overriden/url" });
+        book.set({ id: 1 });
+        book.save(null, { url: "some/overriden/url" });
+        book.destroy({ url: "some/overriden/url" });
+
+        fauxServer.addRoute("theRoute", "some/other/url", "*", function (context) {
+            ok(true, "Handler invoked for collection sync with " + context.httpMethod + " verb");
+        });
+
+        //
+        books.fetch({ url: "some/other/url" });
+    });
+
     test("May be invoked directly, without options", 5, function () {
         var book = new this.Book(),
             books = new this.Books();
