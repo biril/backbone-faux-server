@@ -261,9 +261,6 @@
             // A `data` property whithin options overrides any Model data.
             if (options.data) { return options.data; }
 
-            // If no Model is given (??) then request data will be undefined no matter what
-            if (!model) { return; }
-
             // In the specific case of PATCH, a hash of 'changed attributes' is expected within
             //  options. If no such thing is present then the complete Model representation will
             //  be used instead
