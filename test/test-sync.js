@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, fauxServer, test, ok, strictEqual, start, stop, throws */
+/*global QUnit, Backbone, fauxServer, test, ok, strictEqual, deepEqual, start, stop, throws */
 
 (function () {
     "use strict";
@@ -85,6 +85,22 @@
 
         //
         books.fetch({ url: "some/other/url" });
+    });
+
+    test("A data property in options overrides Model's data", 3, function () {
+        var book = new this.Book(),
+            books = new this.Books();
+        books.add(book);
+
+        fauxServer.setDefaultHandler(function (context) {
+            deepEqual(context.data, { some: 1, data: "2" },
+                "Handler invoked with expected data for " + context.httpMethod);
+        });
+
+        book.save(null, { data: { some: 1, data: "2" } });
+        book.set({ id: 1 });
+        book.save(null, { data: { some: 1, data: "2" } });
+        book.save(null, { data: { some: 1, data: "2" }, patch: true });
     });
 
     test("May be invoked directly, without options", 5, function () {
