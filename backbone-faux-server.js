@@ -1,10 +1,14 @@
 //     Backbone Faux Server v0.10.4
-
+//
 //     https://github.com/biril/backbone-faux-server
 //     Licensed and freely distributed under the MIT License
 //     Copyright (c) 2012-2014 Alex Lambiris
 
 /*global exports, define, global, require, _, Backbone */
+
+// Detect env & export module
+// --------------------------
+
 (function (root, createModule) {
     "use strict";
 
@@ -52,8 +56,8 @@
         fauxServer = createModule(root.setTimeout, {}, _, Backbone);
         fauxServer.noConflict = (function() {
 
-            // Save a reference to the previous value of 'fauxServer', so that it can be restored
-            //  later on, if 'noConflict' is used
+            // Save a reference to the previous value of `fauxServer`, so that it can be restored
+            //  later on, if `noConflict` is used
             var previousFauxServer = root.fauxServer;
 
             // The `noConflict` method: Sets the _global_ `fauxServer` variable to to its previous
@@ -67,36 +71,29 @@
         root.fauxServer = fauxServer;
     }
 
+// Create module
+// --------------------------
+
 }(this, function (setTimeout, fauxServer, _, Backbone) {
     "use strict";
 
     var
-        // Helper which clones an array skipping any and all tail-elements which are undefined.
-        //  Array.length can't be trusted when the array contains undefined tail-element(s) which
-        //  are explicitly set: It is always set to the index of the last array element plus one
-        //  and a tail element explicitly set to undefined will in fact count as the 'last
-        //  element'. This can be problematic when counting function arguments in order to
-        //  sanitize, provide defaults, etc
+        // A no-op method to reuse
+        noOp = function () {},
+
+        // Clone an array skipping all tail-elements which are undefined. `Array.length` can't be
+        //  trusted for arrays containing tail-element(s) explicitly set to `undefined` as it's
+        //  always set to the index of the last element plus one - and a tail element explicitly
+        //  set to undefined will in fact count as the 'last element'. Problematic when counting
+        //  function arguments in order to sanitize, provide defaults, etc
         skipUndefinedTail = function (array) {
             var a = [], i = array.length - 1;
             for (; i >= 0; i--) { if (!_.isUndefined(array[i])) { a[i] = array[i]; } }
             return a;
         },
 
-        // Save a reference to the native sync method. Used when no route is matched during syncing
-        //  or faux-server is altogether disabled
-        nativeSync = Backbone.sync,
-
-        // Indicates whether the faux-server is currently enabled
-        isEnabled = true,
-
-        // The default-route - a route that contains the default handler if one is defined. The
-        //  default handler is invoked when no matching route is found for some
-        //  <model-URL, sync-method> pair and may be set by means of `setDefaultHandler`. A `null`
-        //  value for the default-route signifies the absence of a default handler
-        defaultRoute = null,
-
-        // Convert a urlExp string (containing params and splats) into a regular expression
+        // Convert a urlExp string - a string containing parameter parts (‘:param’), splat parts
+        //  (‘*splat’) and parentheses into a regular expression
         makeRegExp = (function () {
             var
                 // To escape special chars before converting to reg-exp
@@ -126,8 +123,18 @@
             };
         }()),
 
-        // A no-op method to reuse
-        noOp = function () {},
+        // Save a reference to the native sync method. Will be invoked when no route is matched
+        //  during sync (and there's no default-route) or faux-server is disabled altogether
+        nativeSync = Backbone.sync,
+
+        // Indicates whether faux-server is currently enabled
+        isEnabled = true,
+
+        // The default-route - a route that contains the default handler if one is defined. The
+        //  default handler is invoked when no matching route is found for some model-URL /
+        //  sync-method pair and may be set by means of `setDefaultHandler`. A `null` value
+        //  signifies the absence of a default handler
+        defaultRoute = null,
 
         // Server's emulated latency
         latency = 0,
@@ -172,9 +179,9 @@
             return null;
         },
 
-        // Helper to create route for given `name`, `urlExp`, `httpMethod` and `handler`. Will set
-        //  missing arguments to defaults and sanitize values where appropriate - note that the
-        //  only mandatory argument is `urlExp`
+        // Create route for given `name`, `urlExp`, `httpMethod` and `handler`. Will set missing
+        //  arguments to defaults and sanitize values where appropriate - note that the only
+        //  mandatory argument is `urlExp`
         createRoute = function (name, urlExp, httpMethod, handler) {
             var args = skipUndefinedTail(_.toArray(arguments));
 
@@ -193,12 +200,12 @@
                         httpMethod = args[1];
                         name = null;
 
-                    // Missing httpMethod
+                    // Missing `httpMethod`
                     } else {
                         httpMethod = "*";
                     }
 
-                // Missing handler
+                // Missing `handler`
                 } else {
                     handler = noOp;
                 }
@@ -278,7 +285,7 @@
                 error = syncOptions.error || noOp;
 
             // If an underlying ajax lib is defined for Backbone (`Backbone.$`) and it features a
-            //  `Deferred` method (which is precisely the case when Backbone.$ = jQuery) then
+            //  `Deferred` method (which is precisely the case when `Backbone.$` = `jQuery`) then
             //  attempt to create a 'deferred transport' which will invoke the `success` / `error`
             //  callbacks when its promise is fulfilled / rejected. Note that sync will return the
             //  transport's promise _not_ the transport itself
@@ -301,7 +308,9 @@
             };
         };
 
-    // Modify Backbone's sync to use the faux-server sync method (when appropriate)
+    // ### The Sync method
+
+    // Replace Backbone's native sync with faux-server sync:
     Backbone.sync = function (crudMethod, model, options) {
 
         // If faux-server is disabled, fall back to original sync
@@ -314,7 +323,7 @@
 
         var
             // Sync context
-            c = {
+            ctx = {
                 data: null,
                 url: null,
                 httpMethod: crudToHttp[crudMethod],
@@ -331,32 +340,32 @@
             transportPromise = null;
 
         // When emulating HTTP, 'create', 'update', 'delete' and 'patch' are all mapped to POST.
-        if (options.emulateHTTP && c.httpMethod !== "GET") {
-            c.httpMethodOverride = c.httpMethod;
-            c.httpMethod = "POST";
+        if (options.emulateHTTP && ctx.httpMethod !== "GET") {
+            ctx.httpMethodOverride = ctx.httpMethod;
+            ctx.httpMethod = "POST";
         }
 
         // Ensure that we have a URL (A `url` property whithin options overrides Model /
         //  Collection URL)
-        if(!(c.url = options.url || _.result(model, "url"))) {
+        if(!(ctx.url = options.url || _.result(model, "url"))) {
             throw new Error("sync: Undefined 'url' property or function of Model / Collection");
         }
 
         // Find route for given URL or fall back to native sync if none found
-        if (!(c.route = getMatchingRoute(c.url, c.httpMethod) || defaultRoute)) {
+        if (!(ctx.route = getMatchingRoute(ctx.url, ctx.httpMethod) || defaultRoute)) {
             return nativeSync.call(model, crudMethod, model, options);
         }
 
         // Ensure that we have the appropriate request data
-        c.data = getRequestData(c.httpMethod, model, options);
+        ctx.data = getRequestData(ctx.httpMethod, model, options);
 
         // Create a transport for this sync
-        transport = createTransport(options, c);
+        transport = createTransport(options, ctx);
 
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
         execHandler = function () {
-            var result = c.route.handler.apply(null, [c].concat(c.route.handlerParams)); // Handle
+            var result = ctx.route.handler.apply(null, [ctx].concat(ctx.route.handlerParams));
             transport[_.isString(result) ? "reject" : "resolve"](result);
         };
 
@@ -373,9 +382,13 @@
         return transportPromise;
     };
 
-    // Attach methods to faux-server
+    // ### The fauxServer API
+
+    // Extend `fauxServer` with the fauxServer API methods:
     _.extend(fauxServer, {
 
+
+        // #### addRoute([name, ]urlExp[, httpMethod][, handler])
         // Add a route to the faux-server - a mapping from a Model(or Collection)-URL & sync-method
         //  (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
         //  `<model-URL, sync-method> -> handler`. Whenever a Model is created, read, updated or
@@ -417,7 +430,7 @@
         //   `route` and `param1`, `param2`, ... are parameters derived by matching the `urlExp` to
         //   the Model (or Collection) URL. Specifically, about `context` properties:
         //
-        //   * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid
+        //   * `context.data`: Attributes of the Model (or Collection) being processed. Valid
         //      only on 'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of
         //      PATCH, context.data may only contain a _subset_ of Model's attributes.
         //   * `context.httpMethod`: The HTTP Method (POST, GET, PUT, PATCH, DELETE) that
@@ -433,13 +446,14 @@
         //   handling a GET or an array of Model attributes after handling a GET that refers to a
         //   collection. Note that only attributes that have been changed on the server (and should
         //   be updated on the client) need to be included. Return nothing after handling a DELETE.
-        //   On failure, the handler should return s string (presumably a custom error messsage, an
+        //   On failure, the handler should return s string (presumably a custom error message, an
         //   HTTP status code that indicates failure, etc).
+
+        //
         addRoute: function (/* name, urlExp, httpMethod, handler */) {
             var route, routeIndex;
 
-            // Create the route, setting missing arguments to defaults and sanitizing where
-            //  appropriate - note that the only mandatory argument is `urlExp`
+            // Create the route, defaulting and sanitizing where appropriate
             route = createRoute.apply(null, arguments);
 
             // If a route of given name is already present then overwrite it with this one.
@@ -455,52 +469,81 @@
             return this;
         },
 
-        // Add multiple routes to faux-server. Given `routesToAdd` should be a hash or array: In
-        //  the case of a hash, keys should be route names and each route (nested hash) need only
-        //  contain `urlExp`, `httpMethod` and `handler`. See `addRoute`. Returns the faux-server
-        addRoutes: function (routesToAdd) {
-            var isArray = _.isArray(routesToAdd);
-            _.each(routesToAdd, function (r, rName) {
+
+        // #### addRoutes(routes)
+        // Add multiple routes to faux-server. Given `routes` should be a hash or array: In the
+        //  case of a hash, keys should be route names and each route (nested hash) need only
+        //  contain `urlExp`, `httpMethod` and `handler`. Also see `addRoute`. Returns the
+        //  faux-server
+
+        //
+        addRoutes: function (routes) {
+            var isArray = _.isArray(routes);
+            _.each(routes, function (r, rName) {
                 this.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
             }, this);
             return this;
         },
 
+
+        // #### removeRoute(routeName)
         // Remove route of given `routeName`. Returns the faux-server
+
+        //
         removeRoute: function (routeName) {
             routes = _.reject(routes, function (r) { return r.name === routeName; });
             return this;
         },
 
+
+        // #### removeRoutes()
         // Remove all previously defined routes. Returns the faux-server
+
+        //
         removeRoutes: function () {
             routes = [];
             return this;
         },
 
+
+        // #### getRoute(routeName)
         // Get route of given `routeName` or `null` if no such route exists. Note that the
         //  acquired route is a copy - it cannot be modified to affect faux-server's behaviour
+
+        //
         getRoute: function (routeName) {
             var route = _.find(routes, function (r) { return r.name === routeName; });
             return route ? _.clone(route) : null;
         },
 
-        // Get route at given `routeIndex` or `null` if no such route exists. Note that the
+
+        // #### getRouteAt(index)
+        // Get route at given `index` or `null` if no such route exists. Note that the
         //  acquired route is a copy - it cannot be modified to affect faux-server's behaviour
-        getRouteAt: function (routeIndex) {
-            return routes[routeIndex] ? _.clone(routes[routeIndex]) : null;
+
+        //
+        getRouteAt: function (index) {
+            return routes[index] ? _.clone(routes[index]) : null;
         },
 
+
+        // #### getMatchingRoute(url, httpMethod)
         // Get route matching the given <`url`, `httpMethod`> pair or `null` if no such route
         //  exists. Note that the acquired route is a copy - it cannot be modified to affect
         //  faux-server's behaviour. See earlier definition of `getMatchingRoute` for details
+
+        //
         getMatchingRoute: getMatchingRoute,
 
+
+        // #### setDefaultHandler([handler])
         // Set the given `handler` as the one to be invoked when no route is matched to the current
         //  <model-URL, sync-method> pair. This will override the default behaviour of invoking the
-        //  native sync. Ommit the parameter to reset to the default behaviour. See `addRoute` for
+        //  native sync. Omit the parameter to reset to the default behaviour. See `addRoute` for
         //  handler's signature and semantics. Note that a default-handler isn't part of a route,
         //  so the `context.route` parameter will not be valid. Returns the faux-server
+
+        //
         setDefaultHandler: function (handler) {
             defaultRoute = !handler ? null : {
                 name: "",
@@ -511,14 +554,20 @@
             return this;
         },
 
+
+        // #### setLatency(min[, max])
         // Set server's emulated latency to `min` ms or a random latency withing [`min`, `max`] ms
-        //  when the optional `max` parameter is given. Ommitting both parameters will set to the
-        //  latency to 0. Returns the faux-server
+        //  when the optional `max` parameter is given. Omitting both parameters will set latency
+        //  to 0. Returns the faux-server
+
+        //
         setLatency: function (min, max) {
             latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
             return this;
         },
 
+
+        // #### setTransportFactory(factory)
         // Set the server's transport factory - a factory function with signature
         //  `function (syncOptions, syncContext)`
         //  invoked  _per sync_ (with the relevant options / context) to create a new transport - a
@@ -526,37 +575,49 @@
         //  successfull sync will invoke `transport.resolve` while a failed one will invoke
         //  `transport.reject` The sync method will always return `transport.promise()`. Returns
         //  the faux-server
-        setTransportFactory: function (transportFactory) {
-            createTransport = transportFactory;
+
+        //
+        setTransportFactory: function (factory) {
+            createTransport = factory;
             return this;
         },
 
+
+        // #### enable(shouldEnable)
         // Enable / disable the faux-server. When disabled, sync will be delegated to the native
         //  backbone `sync`. Handy for easily toggling between mock / real server. Set
-        //  `shouldEnable` to `true` or ommit altogether to enable, set to false to disable.
+        //  `shouldEnable` to `true` or omit altogether to enable, set to `false` to disable.
         //  Returns the faux-server
+
+        //
         enable: function (shouldEnable) {
             isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
             return this;
         },
 
+
+        // #### getVersion()
         // Get faux-server version
+
+        //
         getVersion: function () {
             return "0.10.4"; // Keep in sync with package.json
         }
     });
 
-    // Attach <httpMethod>(name, urlExp, handler) methods to faux-server (`get`, `post`, `put`,
-    //  `patch` and `del`). These all delegate to addRoute
+
+    // #### get/post/put/patch/del([name, ]urlExp[, handler])
+    // Add a route to the faux-server, for HTTP GET / POST / PUT / PATCH / DEL
+
+    // Attach `<httpMethod>(name, urlExp, handler)` shortcut-methods which delegate to `addRoute`
     _.each(_.values(crudToHttp), function (httpMethod) {
 
         // All shortcut-methods are named after the relevant HTTP verb except for 'delete' which is
-        //  abbreviated to 'del' in order to avoid reserved word awkwardness
+        //  abbreviated to 'del' to avoid reserved-word trouble
         var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
-        fauxServer[method] = function () {
-            // Expecting `name`, `urlExp`, `handler` arguments. Only `urlExp` is mandatory
-            var args = skipUndefinedTail(_.toArray(arguments));
 
+        fauxServer[method] = function () {
+            var args = skipUndefinedTail(_.toArray(arguments));
             if (!args.length) { throw new Error(method + ": Missing mandatory 'urlExp' argument"); }
 
             // The `httpMethod` must be inserted into the args, either at tail-position if
@@ -564,6 +625,7 @@
             if (!_.isFunction(args[args.length - 1])) { args.push(httpMethod); }
             else { args.splice(args.length - 1, 0, httpMethod); }
 
+            // Delegate to `addRoute`
             return fauxServer.addRoute.apply(this, args);
         };
     });
