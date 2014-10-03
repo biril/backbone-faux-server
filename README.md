@@ -9,12 +9,12 @@ A (tiny) framework for mocking up server-side persistence / processing for
 [Backbone.js](https://github.com/documentcloud/backbone)
 
 Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers.
-Faux-server overrides (is a drop-in replacement of) Backbone's native sync so that
-whenever a Model (or Collection) is synced and its URL along with the sync method form a pair that
-matches a defined route, the route's handler is invoked. Implement handlers to test the expected
-behaviour of your app, work with dummy data, support persistence using local-storage, etc. When &
-if you choose to move to a real server, switching back to Backbone's native, ajax-based sync is as
-simple as calling `fauxServer.enable(false)`.
+Faux-server overrides (is a drop-in replacement of) Backbone's native sync so that whenever a Model
+(or Collection) is synced and its URL along with the sync method form a pair that matches a defined
+route, the route's handler is invoked. Implement handlers to test the expected behaviour of your
+app, work with dummy data, support persistence using local-storage, etc. When & if you choose to
+move to a real server, switching back to Backbone's native, ajax-based sync is as simple as
+`fauxServer.enable(false)`.
 
 Backbone faux server (henceforth 'BFS') grew out of the author's need to quickly flesh out Backbone
 prototype apps without having to fiddle with a server, a DB, or anything else that would require
@@ -132,9 +132,9 @@ For example, to handle the creation of a Book (`Books.create(..)`), define a rou
 
 ```javascript
 fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
-    // Every handler receives a 'context' parameter. Use context.data (a hash of Book
-    //  attributes) to create the Book entry in your persistence layer. Return
-    //  attributes of created Book. Something along the lines of:
+    // Every handler receives a 'context' parameter. Use context.data (a hash of
+    //  Book attributes) to create the Book entry in your persistence layer.
+    //  Return attributes of created Book. Something along the lines of:
     context.data.id = newId(); // You'll probably want to assign an id to the new book
     books.push(context.data);  // Save to persistence layer
     return context.data;
@@ -199,7 +199,7 @@ fauxServer.addRoutes({
 ```
 
 Route names can be useful for querying and / or removing earlier defined routes. However, this is
-often unecessary and route names may be skipped in most declarations. (They're mandatory as keys
+often unnecessary and route names may be skipped in most declarations. (They're mandatory as keys
 when passing a hash of routes to `addRoutes`.) Coming back to the earlier "createBook" example,
 the route name may be skipped like so:
 
@@ -263,12 +263,14 @@ care to maintain the existing coding style. Test your code prior to a pull reque
 Reference
 ---------
 
-The following list, while not exhaustive, includes all essential parts of the BFS API. The ommitted
-bits are there to aid testing and fascilitate fancier stuff you probably won't ever need. Further
-insight may be gained by taking a look at
+The following list, while not exhaustive, includes all essential parts of the BFS API. The omitted
+bits are there facilitate fancier stuff you probably won't ever need. Further insight may be gained
+by taking a look at
 [the examples](https://github.com/biril/backbone-faux-server/tree/master/examples),
 [the test suite](https://github.com/biril/backbone-faux-server/tree/master/test) and - of course -
 [the source](https://github.com/biril/backbone-faux-server/blob/master/backbone-faux-server.js).
+For the latter, an [annotated version](http://biril.github.io/backbone-faux-server/) is also
+maintained.
 
 ### Methods
 
@@ -286,7 +288,7 @@ used are tested against defined routes in order to find a handler for creating, 
 updating or deleting this Model. The same applies to reading Collections: Whenever a Collection is
 read, its URL (and the 'read' method) will be tested against defined routes in order to find a
 handler for reading it. When a match for the `<model-URL, sync-method>` pair is not found among
-defined routes, the native sync is invoked (this behaviour may be overriden - see
+defined routes, the native sync is invoked (this behaviour may be overridden - see
 `fauxServer.setDefaultHandler`). Later routes take precedence over earlier routes so in
 configurations where multiple routes match, the one most recently defined will be used.
 
@@ -304,7 +306,7 @@ configurations where multiple routes match, the one most recently defined will b
     a fixed part of the URL. The expression `http://example.com:8080` contains _no_ `:param` parts.
 * `httpMethod`: The sync method, (an HTTP verb (POST, GET, PUT, PATCH or DELETE)), that should
     trigger the route's handler. Both the URL-expression and the method should match for the
-    handler to be invoked. `httpMethod` may also be set to '*' or ommitted to create a
+    handler to be invoked. `httpMethod` may also be set to '*' or omitted to create a
     match-all-methods handler: One that will be invoked whenever `urlExp` matches the model's (or
     collection's) URL _regardless_ of method. In the scope of a match-all-methods handler, the HTTP
     method currently being handled may be acquired by querying the `context` parameter for
@@ -321,7 +323,7 @@ configurations where multiple routes match, the one most recently defined will b
     `param1`, `param2`, ... are parameters derived by matching the `urlExp` to the Model
     (or Collection) URL. Specifically, about `context` properties:
 
-    * `context.data`: Attributes of the Model (or Collection) being proccessed. Valid only on
+    * `context.data`: Attributes of the Model (or Collection) being processed. Valid only on
        'create' (POST), 'update' (PUT) or 'patch' (PATCH). In the specific case of PATCH,
        `context.data` may only contain a _subset_ of Model's attributes.
     * `context.httpMethod`: The HTTP Method (POST, GET, PUT, PATCH or DELETE) that is currently
@@ -337,7 +339,7 @@ configurations where multiple routes match, the one most recently defined will b
     an array of Model attributes after handling a GET that refers to a collection. Note that only
     attributes that have been changed on the server (and should be updated on the client) need to be
     included in returned hashes. Return nothing after handling a DELETE. On failure, the handler
-    should return a string (presumably a custom error messsage, an HTTP status code that indicates
+    should return a string (presumably a custom error message, an HTTP status code that indicates
     failure, etc).
 
 #### &lt;httpMethod&gt; ([name, ]urlExp[, handler])
@@ -352,7 +354,7 @@ Add multiple routes to the faux-server.
 * `routes`: A hash or array of routes to add. Each route is itself a hash with `name`, `urlExp`,
     `httpMethod` and `handler` attributes. As is the case with `addRoute`, the only attribute whose
     presence is mandatory is `urlExp`. Note that when passing a hash of routes, its keys are
-    treated as route names and the `name` attribute should be ommitted.
+    treated as route names and the `name` attribute should be omitted.
 
 #### removeRoute (name)
 
@@ -378,7 +380,7 @@ Set a handler to be invoked when no route is matched to the current `<model-URL,
 pair. This will override the default behaviour of invoking the native sync.
 
 * `handler`: A handler to be invoked when no route is found that matches a given
-    `<model-URL, sync-method>` pair. Ommit the parameter to reset to the default behaviour. See
+    `<model-URL, sync-method>` pair. Omit the parameter to reset to the default behaviour. See
     `addRoute` for handler's signature and semantics. Note that a default-handler isn't part of a
     route, so the `context.route` parameter will not be valid.
 
@@ -387,7 +389,7 @@ pair. This will override the default behaviour of invoking the native sync.
 Set server's emulated latency (zero by default)
 
 * `min`: Server's emulated latency in ms. Interpreted as the minimum of a range when a `max` value
-    is provided. Ommitting will set to 0.
+    is provided. Omitting will set to 0.
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
     latency in the [min, max] range.
 
@@ -405,14 +407,14 @@ Transports are deferred-like objects implementing a `resolve` / `reject` / `prom
 successful sync will invoke `transport.resolve` while a failed one will invoke `transport.reject`.
 The sync method will always return `transport.promise()`.
 
-See [the Tranport section](#transports) for further details.
+See [the Transport section](#transports) for further details.
 
 #### enable ([shouldEnable])
 
 Enable or disable the faux-server. When disabled, syncing is performed by the native Backbone sync
 method. Handy for easily toggling between mock / real server.
 
-* `shouldEnable`: Indicates whether to enable or disable. Set to true or ommit to enable the
+* `shouldEnable`: Indicates whether to enable or disable. Set to true or omit to enable the
     faux-server, set to false to disable.
 
 #### getVersion ()
