@@ -6,7 +6,7 @@
   "authors": [
     "biril <alexlambiris@gmail.com>"
   ],
-  "description": "A (tiny) framework for mocking up server-side persistence / processing for Backbone.js",
+  "description": "A framework for mocking up server-side persistence / processing for Backbone.js",
   "keywords": [
     "backbone",
     "mock",

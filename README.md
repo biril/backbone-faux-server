@@ -5,7 +5,7 @@ Backbone Faux Server
 [![NPM version](https://badge.fury.io/js/backbone-faux-server.png)](http://badge.fury.io/js/backbone-faux-server)
 [![Bower version](https://badge.fury.io/bo/backbone-faux-server.png)](http://badge.fury.io/bo/backbone-faux-server)
 
-A (tiny) framework for mocking up server-side persistence / processing for
+A framework for mocking up server-side persistence / processing for
 [Backbone.js](https://github.com/documentcloud/backbone)
 
 Define any number of routes that map `<model-URL, sync-method>` pairs to custom handlers.
