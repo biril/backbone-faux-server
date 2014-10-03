@@ -12,64 +12,43 @@
 (function (root, createModule) {
     "use strict";
 
-    var
-        // Detect current environment. Faux-server will be exposed as module / global accordingly
-        env = (function () {
-            // A global `exports` object signifies CommonJS-like enviroments that support
-            //  `module.exports`, e.g. Node
-            if (typeof exports === "object") { return "CommonJS"; }
+    // Detect current environment. Faux-server will be exposed as module / global accordingly:
 
-            // A global `define` method with an `amd` property signifies the presence of an AMD
-            //  loader (require.js, curl.js)
-            if (typeof define === "function" && define.amd) { return "AMD"; }
+    // A global `exports` object signifies CommonJS-like enviroment that supports `module.exports`,
+    //  e.g. Node
+    if (typeof exports === "object") {
 
-            // Otherwise we assume running in a browser
-            return "browser";
-        }()),
+        // Support for CommonJS will be specific to node. So if in fact the detected environment is
+        //  'commonJS' we assume the presense of node's `global` object and use it in place of
+        //  `root`. (`root` is already set to `this` but in the specific case of Node, `this` won't
+        //  actually capture the global context - `global` is needed)
+        return createModule(global.setTimeout, exports, require("underscore"), require("backbone"));
+    }
 
-        // The `fauxServer` object to be exposed as module / global
-        fauxServer = null;
-
-    // Support for CommonJS will be specific to node. So if in fact the detected environment is
-    //  'commonJS' we assume the presense of node's `global` object and set root to it. (`root` is
-    //  already set to `this` but in the specific case of Node, `this` won't actually capture the
-    //  global context - `global` is needed)
-    if (env === "CommonJS") { root = global; }
-
-    // Expose as module / global depending on environment
-    switch (env) {
-    case "CommonJS":
-        createModule(root.setTimeout, exports, require("underscore"), require("backbone"));
-        break;
-
-    case "AMD":
-        define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
+    // A global `define` method with an `amd` property signifies the presence of an AMD loader
+    //  (require.js, curl.js)
+    if (typeof define === "function" && define.amd) {
+        return define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
             return createModule(root.setTimeout, exports, _, Backbone);
         });
-        break;
-
-    case "browser":
-
-        // When running in a browser, the additional `noConflict` method is attached to
-        //  `fauxServer`. This is only meaningful in this specific case where `fauxServer` is
-        //  globally exposed
-        fauxServer = createModule(root.setTimeout, {}, _, Backbone);
-        fauxServer.noConflict = (function() {
-
-            // Save a reference to the previous value of `fauxServer`, so that it can be restored
-            //  later on, if `noConflict` is used
-            var previousFauxServer = root.fauxServer;
-
-            // The `noConflict` method: Sets the _global_ `fauxServer` variable to to its previous
-            //  value returning a reference to `fauxServer`
-            return function () {
-                root.fauxServer = previousFauxServer;
-                return (fauxServer.noConflict = function () { return fauxServer; }).call();
-            };
-        }());
-
-        root.fauxServer = fauxServer;
     }
+
+    // Otherwise we assume running in a browser:
+
+    // Save a reference to previous value of `fauxServer` before (potentially) overwriting it - so
+    //  that it can be restored on `noConflict`
+    var previousFauxServer = root.fauxServer;
+
+    //
+    createModule(root.setTimeout, root.fauxServer = {}, _, Backbone);
+
+    // The `noConflict` method sets the `fauxServer` _global_ to to its previous value (_once_),
+    //  returning a reference to `fauxServer` (_always_)
+    root.fauxServer.noConflict = function () {
+        var fauxServer = root.fauxServer;
+        root.fauxServer = previousFauxServer;
+        return (fauxServer.noConflict = function () { return fauxServer; }).call();
+    };
 
 // Create module
 // --------------------------

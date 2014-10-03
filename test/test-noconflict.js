@@ -1,18 +1,17 @@
 /*global QUnit, Backbone, test, strictEqual */
 
-// To be run in browser - before first invocation of `fauxServer.noConflict`
+// To be run in browser - prior to _any_ invocation of `fauxServer.noConflict` [ :( ]
 /*jshint browser:true */
 
 (function () {
     "use strict";
 
-    var originalNoConflict = window.fauxServer.noConflict,
-        theFauxServer = window.fauxServer;
+    var theFauxServer = window.fauxServer;
 
     //
     QUnit.module("no conflict", {
         setup: function () {
-            theFauxServer = originalNoConflict.call(theFauxServer);
+            theFauxServer.noConflict();
         },
         teardown: function () {
             window.fauxServer = theFauxServer;
@@ -20,7 +19,6 @@
     });
 
     test("Sets global fauxServer to previous value", 2, function () {
-        originalNoConflict.call(theFauxServer);
         strictEqual(window.fauxServer, undefined, "after first invocation ..");
 
         theFauxServer.noConflict();
@@ -30,7 +28,7 @@
     test("Returns fauxServer", 2, function () {
         var fs;
 
-        fs = originalNoConflict.call(theFauxServer);
+        fs = theFauxServer.noConflict();
         strictEqual(fs, theFauxServer, "after first invocation ..");
 
         fs = theFauxServer.noConflict();
