@@ -257,7 +257,8 @@ is also available.
 Contributions are obviously appreciated. Please commit your changes on the `dev` branch - not
 `master`. `dev` is always ahead, contains the latest state of the project and is periodically
 merged back to `master` with the appropriate version bump. In lieu of a formal styleguide, take
-care to maintain the existing coding style. Test your code prior to a pull request.
+care to maintain the existing coding style. Please make sure your changes test out green prior to
+pull requests.
 
 
 Reference
