@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, test, strictEqual */
+/*global QUnit, test, strictEqual */
 
 // To be run in browser - prior to _any_ invocation of `fauxServer.noConflict` [ :( ]
 /*jshint browser:true */

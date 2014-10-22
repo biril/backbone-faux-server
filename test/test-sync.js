@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, fauxServer, test, asyncTest, ok, strictEqual, deepEqual, start, stop, throws */
+/*global QUnit, Backbone, fauxServer, test, asyncTest, ok, strictEqual, deepEqual, start, throws */
 
 (function () {
     "use strict";
