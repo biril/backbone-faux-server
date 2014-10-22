@@ -1,4 +1,4 @@
-/*global QUnit, Backbone, fauxServer, test, ok, strictEqual, deepEqual */
+/*global QUnit, Backbone, fauxServer, test, asyncTest, start, ok, strictEqual, deepEqual */
 
 (function () {
     "use strict";
@@ -73,7 +73,7 @@
     });
 
 
-    test("Returning non-string from any handler invokes success callback & triggers 'sync' event", 12, function () {
+    asyncTest("Returning non-string from any handler invokes success callback & triggers 'sync' event", 12, function () {
         // Adding routes without defining a handler => implicitly defining a def do-nothing handler
         //  which returns undefined
         fauxServer.addRoutes({
@@ -85,20 +85,33 @@
             deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE" }
         });
 
-        var book = this.createDummyBook(),
+        var numOfHandlerInvoked = 0,
+            startIfDone = function () {
+                if (++numOfHandlerInvoked === 12) {
+                    start();
+                }
+            },
+            book = this.createDummyBook(),
             books = new this.Books();
         book.urlRoot = "library-app/books";
 
 
         // Expect this to be called 5 times, one for each book-Model-sync op
-        book.on("sync", function () { ok(true, "'sync' event triggered on Model"); });
+        book.on("sync", function () {
+            ok(true, "'sync' event triggered on Model");
+            startIfDone();
+        });
 
         // Expect this to be called just once, for the books-Collection-sync op
-        books.on("sync", function () { ok(true, "'sync' event triggered on Collection"); });
+        books.on("sync", function () {
+            ok(true, "'sync' event triggered on Collection");
+            startIfDone();
+        });
 
         book.save(null, { // Create
             success: function () {
                 ok(true, "Success handler called when saving a new Model (a POST-handler)");
+                startIfDone();
             }
         });
 
@@ -107,18 +120,21 @@
         book.fetch({ // Read Model
             success: function () {
                 ok(true, "Success handler called when fetching a Model (a GET-handler)");
+                startIfDone();
             }
         });
 
         books.fetch({ // Read Collection
             success: function () {
                 ok(true, "Success handler called when fetching a Collection (a GET-handler)");
+                startIfDone();
             }
         });
 
         book.save(null, { // Update
             success: function () {
                 ok(true, "Success handler called when updating a Model (a PUT-handler)");
+                startIfDone();
             }
         });
 
@@ -126,17 +142,19 @@
             patch: true,
             success: function () {
                 ok(true, "Success handler called when patching a Model (a PATCH-handler)");
+                startIfDone();
             }
         });
 
         book.destroy({ // Delete
             success: function () {
                 ok(true, "Success handler called when destroying a Model (a DELETE-handler)");
+                startIfDone();
             }
         });
     });
 
-    test("Model.fetch() success callback is invoked with (model, response, options) [GET-handler]", 3, function () {
+    asyncTest("Model.fetch() success callback is invoked with (model, response, options) [GET-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             readRouteResponse = { someExtraAttribute: "extraAttribute" };
         book.urlRoot = "library-app/books";
@@ -151,11 +169,12 @@
                 strictEqual(model, book, "success callback invoked with _model_");
                 deepEqual(response, readRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Collection.fetch() success callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
+    asyncTest("Collection.fetch() success callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
         var books = new this.Books(),
             readRouteResponse = [{ someExtraAttribute: "extraAttribute" }];
 
@@ -169,11 +188,12 @@
                 strictEqual(collection, books, "success callback invoked with _collection_");
                 deepEqual(response, readRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.save() success callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
+    asyncTest("Model.save() success callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
         var book = this.createDummyBook(),
             createRouteResponse = { id: "0123456789", creationTime: "now", updateTime: "now" };
         book.urlRoot = "library-app/books";
@@ -188,11 +208,12 @@
                 strictEqual(model, book, "success callback invoked with _model_");
                 deepEqual(response, createRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.save() success callback is invoked with (model, response, options) after update [PUT-handler]", 3, function () {
+    asyncTest("Model.save() success callback is invoked with (model, response, options) after update [PUT-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             updateRouteResponse = { updateTime: "now" };
         book.urlRoot = "library-app/books";
@@ -207,11 +228,12 @@
                 strictEqual(model, book, "success callback invoked with _model_");
                 deepEqual(response, updateRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.save() success callback is invoked with (model, response, options) after update [PATCH-handler]", 3, function () {
+    asyncTest("Model.save() success callback is invoked with (model, response, options) after update [PATCH-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             updateRouteResponse = { updateTime: "now" };
         book.urlRoot = "library-app/books";
@@ -227,11 +249,12 @@
                 strictEqual(model, book, "success callback invoked with _model_");
                 deepEqual(response, updateRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.destroy() success callback is invoked with (model, response, options) [DELETE-handler]", 3, function () {
+    asyncTest("Model.destroy() success callback is invoked with (model, response, options) [DELETE-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             deleteRouteResponse = { someAttribute: "attribute" };
         book.urlRoot = "library-app/books";
@@ -246,11 +269,12 @@
                 strictEqual(model, book, "success callback invoked with _model_");
                 deepEqual(response, deleteRouteResponse, "success callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Returning a string from any handler invokes error callback & signals 'error' event)", 12, function () {
+    asyncTest("Returning a string from any handler invokes error callback & signals 'error' event)", 12, function () {
         fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Error on create"; } },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Error on read model"; } },
@@ -260,21 +284,34 @@
             deleteBook: { urlExp: "library-app/books/:id", httpMethod: "DELETE", handler: function () { return "Error on delete"; } }
         });
 
-        var book = this.createDummyBook(),
+        var numOfHandlerInvoked = 0,
+            startIfDone = function () {
+                if (++numOfHandlerInvoked === 12) {
+                    start();
+                }
+            },
+            book = this.createDummyBook(),
             books = new this.Books();
         book.urlRoot = "library-app/books";
 
 
         // Expect this to be called 5 times, one for each book-Model-sync op
-        book.on("error", function () { ok(true, "'error' event triggered on Model"); });
+        book.on("error", function () {
+            ok(true, "'error' event triggered on Model");
+            startIfDone();
+        });
 
         // Expect this to be called just once, for the books-Collection-sync op
-        books.on("error", function () { ok(true, "'error' event triggered on Collection"); }); // Expect this to be called 1 time
+        books.on("error", function () {
+            ok(true, "'error' event triggered on Collection");
+            startIfDone();
+        }); // Expect this to be called 1 time
 
 
         book.save(null, { // Create
             error: function () {
                 ok(true, "Error handler called when saving a new Model (a POST-handler)");
+                startIfDone();
             }
         });
 
@@ -283,18 +320,21 @@
         book.fetch({ // Read Model
             error: function () {
                 ok(true, "Error handler called when fetching a Model (a GET-handler)");
+                startIfDone();
             }
         });
 
         books.fetch({ // Read Collection
             error: function () {
                 ok(true, "Error handler called when fetching a Collection (a GET-handler)");
+                startIfDone();
             }
         });
 
         book.save(null, { // Update
             error: function () {
                 ok(true, "Error handler called when updating a Model (a PUT-handler)");
+                startIfDone();
             }
         });
 
@@ -302,17 +342,19 @@
             patch: true,
             error: function () {
                 ok(true, "Error handler called when patching a Model (a PATCH-handler)");
+                startIfDone();
             }
         });
 
         book.destroy({ // Delete
             error: function () {
                 ok(true, "Error handler called when destroying a Model (a DELETE-handler)");
+                startIfDone();
             }
         });
     });
 
-    test("Model.fetch() error callback is invoked with (model, response, options) [GET-handler]", 3, function () {
+    asyncTest("Model.fetch() error callback is invoked with (model, response, options) [GET-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             readRouteResponse = "Error on read";
         book.urlRoot = "library-app/books";
@@ -327,11 +369,12 @@
                 strictEqual(model, book, "error callback invoked with _model_");
                 strictEqual(response, readRouteResponse, "error callback invoked with _response_");
                 ok(options.someOption, "error callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Collection.fetch() error callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
+    asyncTest("Collection.fetch() error callback is invoked with (collection, response, options) [GET-handler]", 3, function () {
         var books = new this.Books(),
             readRouteResponse = "Error on read";
 
@@ -345,11 +388,12 @@
                 strictEqual(collection, books, "success callback invoked with _collection_");
                 strictEqual(response, readRouteResponse, "error callback invoked with _response_");
                 ok(options.someOption, "success callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.save() error callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
+    asyncTest("Model.save() error callback is invoked with (model, response, options) after create [POST-handler]", 3, function () {
         var book = this.createDummyBook(),
             createRouteResponse = "Error on create";
         book.urlRoot = "library-app/books";
@@ -364,11 +408,12 @@
                 strictEqual(model, book, "error callback invoked with _model_");
                 strictEqual(response, createRouteResponse, "error callback invoked with _response_");
                 ok(options.someOption, "error callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.save() error callback is invoked with (model, response, options) after create [PUT-handler]", 3, function () {
+    asyncTest("Model.save() error callback is invoked with (model, response, options) after create [PUT-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             updateRouteResponse = "Error on update";
         book.urlRoot = "library-app/books";
@@ -383,11 +428,12 @@
                 strictEqual(model, book, "error callback invoked with _model_");
                 strictEqual(response, updateRouteResponse, "error callback invoked with _response_");
                 ok(options.someOption, "error callback invoked with _options_");
+                start();
             }
         });
     });
 
-    test("Model.destroy() error callback is invoked with (model, response, options) after create [DELETE-handler]", 3, function () {
+    asyncTest("Model.destroy() error callback is invoked with (model, response, options) after create [DELETE-handler]", 3, function () {
         var book = this.createDummyBook("0123456789"),
             deleteRouteResponse = "Error on delete";
         book.urlRoot = "library-app/books";
@@ -402,6 +448,7 @@
                 strictEqual(model, book, "error callback invoked with _model_");
                 strictEqual(response, deleteRouteResponse, "error callback invoked with _response_");
                 ok(options.someOption, "error callback invoked with _options_");
+                start();
             }
         });
     });

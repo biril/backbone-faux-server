@@ -355,8 +355,9 @@
         model.trigger("request", model, transportPromise, options);
 
         // Call exec-method _now_ if zero-latency, else call later
-        if (!latency) { execHandler(); }
-        else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
+        // if (!latency) { execHandler(); }
+        // else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
+        setTimeout(execHandler, _.isFunction(latency) ? latency() : latency);
 
         return transportPromise;
     };

@@ -1,10 +1,22 @@
-/*global QUnit, Backbone, fauxServer, test, strictEqual */
+/*global QUnit, Backbone, fauxServer, test, asyncTest, start, strictEqual, setInterval, clearInterval */
 
 (function () {
     "use strict";
 
     // Helpers
-    var doGenericSetup = function () {
+
+    var
+        // Helpers to wait for `pred` to become `true`and subsequently execute `thenDo`
+        atFirst = function (thenDo) { thenDo(); },
+        andThenWhen = function (pred, thenDo) {
+            var interval = setInterval(function () {
+                if (pred()) {
+                    clearInterval(interval);
+                    thenDo();
+                }
+            }, 100);
+        },
+        doGenericSetup = function () {
             this.Book = Backbone.Model.extend({
                 defaults: {
                     title: "Unknown title",
@@ -148,15 +160,18 @@
         book.off("request");
     });
 
-    test("Returned transport is 'fulfilled' on sync success", 6, function () {
-        var book = this.createDummyBook(),
+    asyncTest("Returned transport is 'fulfilled' on sync success", 6, function () {
+        var isPromiseResolved,
+            book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedResult, msg) {
                 fauxServer.setTransportFactory(function (/* options */) {
+                    isPromiseResolved = false;
                     return {
                         promise: function () {},
                         reject: function () {},
                         resolve: function (result) {
+                            isPromiseResolved = true;
                             strictEqual(result, expectedResult, msg);
                         }
                     };
@@ -164,41 +179,52 @@
             };
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("library-app/books", "POST", function () { return 303; });
-        setTransportFactoryAndExpect(303, "true when saving a Model");
-        book.save();
-
-        fauxServer.addRoute("library-app/books/:id", "GET", function () { return 304; });
-        setTransportFactoryAndExpect(304, "true when reading a Model");
-        book.set({ id: "0123456789" });
-        book.fetch();
-
-        fauxServer.addRoute("library-app/books", "GET", function () { return 305; });
-        setTransportFactoryAndExpect(305, "true when reading a Collection");
-        books.fetch();
-
-        fauxServer.addRoute("library-app/books/:id", "PUT", function () { return 306; });
-        setTransportFactoryAndExpect(306, "true when updating a Model");
-        book.save();
-
-        fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return 307; });
-        setTransportFactoryAndExpect(307, "true when updating a Model by patching");
-        book.save(null, { patch: true });
-
-        fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return 308; });
-        setTransportFactoryAndExpect(308, "true when deleting a Model");
-        book.destroy();
+        atFirst(function () {
+            fauxServer.addRoute("library-app/books", "POST", function () { return 303; });
+            setTransportFactoryAndExpect(303, "true when saving a Model");
+            book.save();
+        });
+        andThenWhen(function () { return isPromiseResolved; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "GET", function () { return 304; });
+            setTransportFactoryAndExpect(304, "true when reading a Model");
+            book.set({ id: "0123456789" });
+            book.fetch();
+        });
+        andThenWhen(function () { return isPromiseResolved; }, function () {
+            fauxServer.addRoute("library-app/books", "GET", function () { return 305; });
+            setTransportFactoryAndExpect(305, "true when reading a Collection");
+            books.fetch();
+        });
+        andThenWhen(function () { return isPromiseResolved; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "PUT", function () { return 306; });
+            setTransportFactoryAndExpect(306, "true when updating a Model");
+            book.save();
+        });
+        andThenWhen(function () { return isPromiseResolved; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return 307; });
+            setTransportFactoryAndExpect(307, "true when updating a Model by patching");
+            book.save(null, { patch: true });
+        });
+        andThenWhen(function () { return isPromiseResolved; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return 308; });
+            setTransportFactoryAndExpect(308, "true when deleting a Model");
+            book.destroy();
+        });
+        andThenWhen(function () { return isPromiseResolved; }, start);
     });
 
-    test("Returned transport is 'rejected' on sync error", 6, function () {
-        var book = this.createDummyBook(),
+    asyncTest("Returned transport is 'rejected' on sync error", 6, function () {
+        var isPromiseRejected,
+            book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedReason, msg) {
                 fauxServer.setTransportFactory(function (/* options */) {
+                    isPromiseRejected = false;
                     return {
                         promise: function () {},
                         resolve: function () {},
                         reject: function (reason) {
+                            isPromiseRejected = true;
                             strictEqual(reason, expectedReason, msg);
                         }
                     };
@@ -206,29 +232,37 @@
             };
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("library-app/books", "POST", function () { return "303"; });
-        setTransportFactoryAndExpect("303", "true when saving a Model");
-        book.save();
-
-        fauxServer.addRoute("library-app/books/:id", "GET", function () { return "304"; });
-        setTransportFactoryAndExpect("304", "true when reading a Model");
-        book.set({ id: "0123456789" });
-        book.fetch();
-
-        fauxServer.addRoute("library-app/books", "GET", function () { return "305"; });
-        setTransportFactoryAndExpect("305", "true when reading a Collection");
-        books.fetch();
-
-        fauxServer.addRoute("library-app/books/:id", "PUT", function () { return "306"; });
-        setTransportFactoryAndExpect("306", "true when updating a Model");
-        book.save();
-
-        fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return "307"; });
-        setTransportFactoryAndExpect("307", "true when updating a Model by patching");
-        book.save(null, { patch: true });
-
-        fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return "308"; });
-        setTransportFactoryAndExpect("308", "true when deleting a Model");
-        book.destroy();
+        atFirst(function () {
+            fauxServer.addRoute("library-app/books", "POST", function () { return "303"; });
+            setTransportFactoryAndExpect("303", "true when saving a Model");
+            book.save();
+        });
+        andThenWhen(function () { return isPromiseRejected; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "GET", function () { return "304"; });
+            setTransportFactoryAndExpect("304", "true when reading a Model");
+            book.set({ id: "0123456789" });
+            book.fetch();
+        });
+        andThenWhen(function () { return isPromiseRejected; }, function () {
+            fauxServer.addRoute("library-app/books", "GET", function () { return "305"; });
+            setTransportFactoryAndExpect("305", "true when reading a Collection");
+            books.fetch();
+        });
+        andThenWhen(function () { return isPromiseRejected; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "PUT", function () { return "306"; });
+            setTransportFactoryAndExpect("306", "true when updating a Model");
+            book.save();
+        });
+        andThenWhen(function () { return isPromiseRejected; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return "307"; });
+            setTransportFactoryAndExpect("307", "true when updating a Model by patching");
+            book.save(null, { patch: true });
+        });
+        andThenWhen(function () { return isPromiseRejected; }, function () {
+            fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return "308"; });
+            setTransportFactoryAndExpect("308", "true when deleting a Model");
+            book.destroy();
+        });
+        andThenWhen(function () { return isPromiseRejected; }, start);
     });
 }());
