@@ -3,6 +3,14 @@
 (function () {
     "use strict";
 
+    var epsilon = 50,
+        isCloseEnoughToLatency = function (dt, latency) {
+            return (dt >= latency && dt <= latency + epsilon);
+        },
+        isWithinLatencyRange = function (dt, latencyMin, latencyMax) {
+            return (dt >= latencyMin && dt <= latencyMax + epsilon);
+        };
+
     //
     QUnit.module("sync", {
         setup: function () {
@@ -176,7 +184,7 @@
         .setDefaultHandler(function () {
             var dt = now() - t0;
             start();
-            ok(dt >= latency, "Handler called after (" + latency + " <=) " + dt + " ms");
+            ok(isCloseEnoughToLatency(dt, latency), "Handler called after (" + latency + " ~) " + dt + " ms");
         });
 
         t0 = now();
@@ -201,10 +209,10 @@
         .setLatency(function (context) { return idToLatency[context.data.id]; })
         .setDefaultHandler(function (context) {
             var dt = now() - t0,
-                requiredDt = idToLatency[context.data.id];
+                expectedLatency = idToLatency[context.data.id];
 
-            ok(dt >= requiredDt,
-                "Handler for book of id " + context.data.id + " invoked after (" + requiredDt + " <=) " + dt + " ms");
+            ok(isCloseEnoughToLatency(dt, expectedLatency), "Handler for book of id " +
+                context.data.id + " invoked after (" + expectedLatency + " ~) " + dt + " ms");
             if(++numOfTimesHandlerInvoked === 3) { start(); }
         });
 
@@ -228,8 +236,8 @@
         .setDefaultHandler(function () {
             var dt = now() - t0;
             start();
-            ok(dt >= latencyMin && dt <= latencyMax,
-                "Handler called after ("+ latencyMin + " <=) " + dt + " (<= " + latencyMax + ") ms");
+            ok(isWithinLatencyRange(dt, latencyMin, latencyMax),
+                "Handler called after ("+ latencyMin + " <=~) " + dt + " (<=~ " + latencyMax + ") ms");
         });
 
         t0 = now();
