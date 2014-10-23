@@ -184,6 +184,37 @@
         book.fetch(); // sync
     });
 
+    asyncTest("Latency (function) taken into account", 3, function () {
+        var t0 = 0,
+            now = function () { return +(new Date()); },
+            numOfTimesHandlerInvoked = 0,
+            book303 = this.createDummyBook("303"),
+            book606 = this.createDummyBook("606"),
+            book909 = this.createDummyBook("909"),
+            idToLatency = { "303": 900, "606": 600, "909": 300 };
+
+        book303.urlRoot = "library-app/books";
+        book606.urlRoot = "library-app/books";
+        book909.urlRoot = "library-app/books";
+
+        fauxServer
+        .setLatency(function (context) { return idToLatency[context.data.id]; })
+        .setDefaultHandler(function (context) {
+            var dt = now() - t0,
+                requiredDt = idToLatency[context.data.id];
+
+            ok(dt >= requiredDt,
+                "Handler for book of id " + context.data.id + " invoked after (" + requiredDt + " <=) " + dt + " ms");
+            if(++numOfTimesHandlerInvoked === 3) { start(); }
+        });
+
+        t0 = now();
+
+        book303.save();
+        book606.save();
+        book909.save();
+    });
+
     asyncTest("Latency (random value within range) taken into account", 1, function () {
         var latencyMin = 101,
             latencyMax = 303,

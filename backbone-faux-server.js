@@ -354,10 +354,8 @@
 
         model.trigger("request", model, transportPromise, options);
 
-        // Call exec-method _now_ if zero-latency, else call later
-        // if (!latency) { execHandler(); }
-        // else { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
-        setTimeout(execHandler, _.isFunction(latency) ? latency() : latency);
+        // Call exec-method asynchronously, taking into account any given latency
+        setTimeout(execHandler, _.isFunction(latency) ? latency(ctx) : latency);
 
         return transportPromise;
     };
@@ -538,7 +536,9 @@
         // #### setLatency(min[, max])
         // Set server's emulated latency to `min` ms or a random latency withing [`min`, `max`] ms
         //  when the optional `max` parameter is given. Omitting both parameters will set latency
-        //  to 0. Returns the faux-server
+        //  to 0. In place of a fixed minimum, a function may also be given that returns a latency.
+        //  The function will be invoked per handled route, with the same parameters as those
+        //  passed to the relevant route handler (`context`, etc). Returns the faux-server
 
         //
         setLatency: function (min, max) {

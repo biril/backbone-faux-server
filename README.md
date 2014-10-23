@@ -390,9 +390,12 @@ pair. This will override the default behaviour of invoking the native sync.
 Set server's emulated latency (zero by default)
 
 * `min`: Server's emulated latency in ms. Interpreted as the minimum of a range when a `max` value
-    is provided. Omitting will set to 0.
+    is provided. Omitting will set to 0. In place of a fixed minimum, a function may also be
+    given that returns a latency. The function will be invoked per handled route, with the same
+    parameters as those passed to the relevant route handler (`context`, etc).
+
 * `max`: Maximum server latency in ms. Specifying this will cause syncing to occur with a random
-    latency in the [min, max] range.
+    latency in the [min, max] range. When `max` is given, `min` should be a fixed number.
 
 #### setTransportFactory (transportFactory)
 
