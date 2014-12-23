@@ -17,19 +17,14 @@
     // A global `exports` object signifies CommonJS-like enviroment that supports `module.exports`,
     //  e.g. Node
     if (typeof exports === "object") {
-
-        // Support for CommonJS will be specific to node. So if in fact the detected environment is
-        //  'commonJS' we assume the presense of node's `global` object and use it in place of
-        //  `root`. (`root` is already set to `this` but in the specific case of Node, `this` won't
-        //  actually capture the global context - `global` is needed)
-        return createModule(global.setTimeout, exports, require("underscore"), require("backbone"));
+        return createModule(exports, require("underscore"), require("backbone"));
     }
 
     // A global `define` method with an `amd` property signifies the presence of an AMD loader
     //  (require.js, curl.js)
     if (typeof define === "function" && define.amd) {
         return define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
-            return createModule(root.setTimeout, exports, _, Backbone);
+            return createModule(exports, _, Backbone);
         });
     }
 
@@ -40,7 +35,7 @@
     var previousFauxServer = root.fauxServer;
 
     //
-    createModule(root.setTimeout, root.fauxServer = {}, _, Backbone);
+    createModule(root.fauxServer = {}, _, Backbone);
 
     // The `noConflict` method sets the `fauxServer` _global_ to to its previous value (_once_),
     //  returning a reference to `fauxServer` (_always_)
@@ -53,7 +48,7 @@
 // Create module
 // --------------------------
 
-}(this, function (setTimeout, fauxServer, _, Backbone) {
+}(this, function (fauxServer, _, Backbone) {
     "use strict";
 
     var
@@ -355,7 +350,7 @@
         model.trigger("request", model, transportPromise, options);
 
         // Call exec-method asynchronously, taking into account any given latency
-        setTimeout(execHandler, _.isFunction(latency) ? latency(ctx) : latency);
+        _.delay(execHandler, _.isFunction(latency) ? latency(ctx) : latency);
 
         return transportPromise;
     };
