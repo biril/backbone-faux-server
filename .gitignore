@@ -2,4 +2,5 @@ bower_components/
 node_modules/
 docs/
 examples/
+coverage/
 
