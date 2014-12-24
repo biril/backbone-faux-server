@@ -1,6 +1,6 @@
 {
   "name": "backbone-faux-server",
-  "version": "0.10.4",
+  "version": "0.10.5",
   "author": "biril <alexlambiris@gmail.com>",
   "description": "A framework for mocking up server-side persistence / processing for Backbone.js",
   "contributors": [],

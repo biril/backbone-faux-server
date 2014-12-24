@@ -7,7 +7,7 @@
     QUnit.module("version");
 
     test("reports version", function () {
-        strictEqual(fauxServer.getVersion(), "0.10.4");
+        strictEqual(fauxServer.getVersion(), "0.10.5");
     });
 
 }());
