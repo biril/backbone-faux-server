@@ -27,9 +27,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <pre><code>Backbone Faux Server v0<span class="hljs-number">.10</span><span class="hljs-number">.4</span>
+              <pre><code>Backbone Faux Server v0<span class="hljs-number">.10</span><span class="hljs-number">.5</span>
+
+https:<span class="hljs-comment">//github.com/biril/backbone-faux-server</span>
+Licensed and freely distributed under the MIT License
+Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">2014</span> Alex Lambiris
 </code></pre>
             </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="hljs-comment">/*global exports, define, global, require, _, Backbone */</span></pre></div></div>
             
         </li>
         
@@ -40,18 +47,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <pre><code>https:<span class="hljs-comment">//github.com/biril/backbone-faux-server</span>
-Licensed and freely distributed under the MIT License
-Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">2014</span> Alex Lambiris
-</code></pre>
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-<span class="hljs-comment">/*global exports, define, global, require, _, Backbone */</span>
-(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(root, createModule)</span> </span>{
-<span class="hljs-pi">    "use strict"</span>;
+              <h2 id="detect-env-export-module">Detect env &amp; export module</h2>
 
-    <span class="hljs-keyword">var</span></pre></div></div>
+            </div>
             
         </li>
         
@@ -62,11 +60,12 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Detect current environment. Faux-server will be exposed as module / global accordingly</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>        env = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
+            <div class="content"><div class='highlight'><pre>
+(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(root, createModule)</span> </span>{
+<span class="hljs-pi">    "use strict"</span>;</pre></div></div>
             
         </li>
         
@@ -77,12 +76,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>A global <code>exports</code> object signifies CommonJS-like enviroments that support
- <code>module.exports</code>, e.g. Node</p>
+              <p>Detect current environment. Faux-server will be exposed as module / global accordingly:</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> exports === <span class="hljs-string">"object"</span>) { <span class="hljs-keyword">return</span> <span class="hljs-string">"CommonJS"</span>; }</pre></div></div>
             
         </li>
         
@@ -93,12 +89,14 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>A global <code>define</code> method with an <code>amd</code> property signifies the presence of an AMD
- loader (require.js, curl.js)</p>
+              <p>A global <code>exports</code> object signifies CommonJS-like enviroment that supports <code>module.exports</code>,
+ e.g. Node</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> define === <span class="hljs-string">"function"</span> &amp;&amp; define.amd) { <span class="hljs-keyword">return</span> <span class="hljs-string">"AMD"</span>; }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> exports === <span class="hljs-string">"object"</span>) {
+        <span class="hljs-keyword">return</span> createModule(exports, <span class="hljs-built_in">require</span>(<span class="hljs-string">"underscore"</span>), <span class="hljs-built_in">require</span>(<span class="hljs-string">"backbone"</span>));
+    }</pre></div></div>
             
         </li>
         
@@ -109,12 +107,16 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Otherwise we assume running in a browser</p>
+              <p>A global <code>define</code> method with an <code>amd</code> property signifies the presence of an AMD loader
+ (require.js, curl.js)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> <span class="hljs-string">"browser"</span>;
-        }()),</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> define === <span class="hljs-string">"function"</span> &amp;&amp; define.amd) {
+        <span class="hljs-keyword">return</span> define([<span class="hljs-string">"underscore"</span>, <span class="hljs-string">"backbone"</span>, <span class="hljs-string">"exports"</span>], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(_, Backbone, exports)</span> </span>{
+            <span class="hljs-keyword">return</span> createModule(exports, _, Backbone);
+        });
+    }</pre></div></div>
             
         </li>
         
@@ -125,11 +127,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>The <code>fauxServer</code> object to be exposed as module / global</p>
+              <p>Otherwise we assume running in a browser:</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        fauxServer = <span class="hljs-literal">null</span>;</pre></div></div>
             
         </li>
         
@@ -140,14 +140,12 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>Support for CommonJS will be specific to node. So if in fact the detected environment is
- ‘commonJS’ we assume the presense of node’s <code>global</code> object and set root to it. (<code>root</code> is
- already set to <code>this</code> but in the specific case of Node, <code>this</code> won’t actually capture the
- global context - <code>global</code> is needed)</p>
+              <p>Save a reference to previous value of <code>fauxServer</code> before (potentially) overwriting it - so
+ that it can be restored on <code>noConflict</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (env === <span class="hljs-string">"CommonJS"</span>) { root = global; }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> previousFauxServer = root.fauxServer;</pre></div></div>
             
         </li>
         
@@ -158,22 +156,10 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Expose as module / global depending on environment</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">switch</span> (env) {
-    <span class="hljs-keyword">case</span> <span class="hljs-string">"CommonJS"</span>:
-        createModule(root.setTimeout, exports, <span class="hljs-built_in">require</span>(<span class="hljs-string">"underscore"</span>), <span class="hljs-built_in">require</span>(<span class="hljs-string">"backbone"</span>));
-        <span class="hljs-keyword">break</span>;
-
-    <span class="hljs-keyword">case</span> <span class="hljs-string">"AMD"</span>:
-        define([<span class="hljs-string">"underscore"</span>, <span class="hljs-string">"backbone"</span>, <span class="hljs-string">"exports"</span>], <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(_, Backbone, exports)</span> </span>{
-            <span class="hljs-keyword">return</span> createModule(root.setTimeout, exports, _, Backbone);
-        });
-        <span class="hljs-keyword">break</span>;
-
-    <span class="hljs-keyword">case</span> <span class="hljs-string">"browser"</span>:</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    createModule(root.fauxServer = {}, _, Backbone);</pre></div></div>
             
         </li>
         
@@ -184,14 +170,16 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <p>When running in a browser, the additional <code>noConflict</code> method is attached to
- <code>fauxServer</code>. This is only meaningful in this specific case where <code>fauxServer</code> is
- globally exposed</p>
+              <p>The <code>noConflict</code> method sets the <code>fauxServer</code> <em>global</em> to to its previous value (<em>once</em>),
+ returning a reference to <code>fauxServer</code> (<em>always</em>)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        fauxServer = createModule(root.setTimeout, {}, _, Backbone);
-        fauxServer.noConflict = (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    root.fauxServer.noConflict = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">var</span> fauxServer = root.fauxServer;
+        root.fauxServer = previousFauxServer;
+        <span class="hljs-keyword">return</span> (fauxServer.noConflict = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> fauxServer; }).call();
+    };</pre></div></div>
             
         </li>
         
@@ -202,12 +190,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>Save a reference to the previous value of ‘fauxServer’, so that it can be restored
- later on, if ‘noConflict’ is used</p>
+              <h2 id="create-module">Create module</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">var</span> previousFauxServer = root.fauxServer;</pre></div></div>
             
         </li>
         
@@ -218,22 +203,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>The <code>noConflict</code> method: Sets the <em>global</em> <code>fauxServer</code> variable to to its previous
- value returning a reference to <code>fauxServer</code></p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-                root.fauxServer = previousFauxServer;
-                fauxServer.noConflict = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{ <span class="hljs-keyword">return</span> fauxServer; };
-                <span class="hljs-keyword">return</span> fauxServer;
-            };
-        }());
-
-        root.fauxServer = fauxServer;
-    }
-
-}(<span class="hljs-keyword">this</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(setTimeout, fauxServer, _, Backbone)</span> </span>{
+            <div class="content"><div class='highlight'><pre>
+}(<span class="hljs-keyword">this</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(fauxServer, _, Backbone)</span> </span>{
 <span class="hljs-pi">    "use strict"</span>;
 
     <span class="hljs-keyword">var</span></pre></div></div>
@@ -247,12 +221,26 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>Helper which clones an array skipping any and all tail-elements which are undefined.
- Array.length can’t be trusted when the array contains undefined tail-element(s) which
- are explicitly set: It is always set to the index of the last array element plus one
- and a tail element explicitly set to undefined will in fact count as the ‘last
- element’. This can be problematic when counting function arguments in order to
- sanitize, provide defaults, etc</p>
+              <p>A no-op method to reuse</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        noOp = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{},</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Clone an array skipping all tail-elements which are undefined. <code>Array.length</code> can’t be
+ trusted for arrays containing tail-element(s) explicitly set to <code>undefined</code> as it’s
+ always set to the index of the last element plus one - and a tail element explicitly
+ set to undefined will in fact count as the ‘last element’. Problematic when counting
+ function arguments in order to sanitize, provide defaults, etc</p>
 
             </div>
             
@@ -265,33 +253,19 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
         </li>
         
         
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <p>Save a reference to the native sync method. Used when no route is matched during syncing
- or faux-server is altogether disabled</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        nativeSync = Backbone.sync,</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>Indicates whether the faux-server is currently enabled</p>
+              <p>Convert a urlExp string - a string containing parameter parts (‘:param’), splat parts
+ (‘*splat’) and parentheses into a regular expression</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        isEnabled = <span class="hljs-literal">true</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        makeRegExp = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">var</span></pre></div></div>
             
         </li>
         
@@ -302,14 +276,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>The default-route - a route that contains the default handler if one is defined. The
- default handler is invoked when no matching route is found for some
- <model-URL, sync-method> pair and may be set by means of <code>setDefaultHandler</code>. A <code>null</code>
- value for the default-route signifies the absence of a default handler</p>
+              <p>To escape special chars before converting to reg-exp</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        defaultRoute = <span class="hljs-literal">null</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>                e = <span class="hljs-regexp">/[\-{}\[\]+?.,\\\^$|#\s]/g</span>,</pre></div></div>
             
         </li>
         
@@ -320,12 +291,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
-              <p>Convert a urlExp string (containing params and splats) into a regular expression</p>
+              <p>Optional part</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        makeRegExp = (<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            <span class="hljs-keyword">var</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>                o = <span class="hljs-regexp">/\((.*?)\)/g</span>,</pre></div></div>
             
         </li>
         
@@ -336,11 +306,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <p>To escape special chars before converting to reg-exp</p>
+              <p>Named param (+ extra capturing parens for opt-part detection)</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>                e = <span class="hljs-regexp">/[\-{}\[\]+?.,\\\^$|#\s]/g</span>,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>                p = <span class="hljs-regexp">/(\(\?)?:[A-Za-z_](?:\w)+/g</span>,</pre></div></div>
             
         </li>
         
@@ -351,36 +321,6 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>Optional part</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>                o = <span class="hljs-regexp">/\((.*?)\)/g</span>,</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-20">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
-              </div>
-              <p>Named param (+ extra capturing parens for opt-part detection)</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>                p = <span class="hljs-regexp">/(\(\?)?:[A-Za-z_](?:\w)+/g</span>,</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-21">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
               <p>Splat param</p>
 
             </div>
@@ -390,11 +330,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
         </li>
         
         
-        <li id="section-22">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Don’t confuse (regex-equivalent-subsituted) optional parts with named params</p>
 
@@ -417,17 +357,51 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
         </li>
         
         
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Save a reference to the native sync method. Will be invoked when no route is matched
+ during sync (and there’s no default-route) or faux-server is disabled altogether</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        nativeSync = Backbone.sync,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Indicates whether faux-server is currently enabled</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        isEnabled = <span class="hljs-literal">true</span>,</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <p>A no-op method to reuse</p>
+              <p>The default-route - a route that contains the default handler if one is defined. The
+ default handler is invoked when no matching route is found for some model-URL /
+ sync-method pair and may be set by means of <code>setDefaultHandler</code>. A <code>null</code> value
+ signifies the absence of a default handler</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        noOp = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{},</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        defaultRoute = <span class="hljs-literal">null</span>,</pre></div></div>
             
         </li>
         
@@ -529,9 +503,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
-              <p>Helper to create route for given <code>name</code>, <code>urlExp</code>, <code>httpMethod</code> and <code>handler</code>. Will set
- missing arguments to defaults and sanitize values where appropriate - note that the
- only mandatory argument is <code>urlExp</code></p>
+              <p>Create route for given <code>name</code>, <code>urlExp</code>, <code>httpMethod</code> and <code>handler</code>. Will set missing
+ arguments to defaults and sanitize values where appropriate - note that the only
+ mandatory argument is <code>urlExp</code></p>
 
             </div>
             
@@ -598,7 +572,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
-              <p>Missing httpMethod</p>
+              <p>Missing <code>httpMethod</code></p>
 
             </div>
             
@@ -615,7 +589,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
-              <p>Missing handler</p>
+              <p>Missing <code>handler</code></p>
 
             </div>
             
@@ -786,21 +760,6 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>If no Model is given (??) then request data will be undefined no matter what</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (!model) { <span class="hljs-keyword">return</span>; }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-43">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
-              </div>
               <p>In the specific case of PATCH, a hash of ‘changed attributes’ is expected within
  options. If no such thing is present then the complete Model representation will
  be used instead</p>
@@ -812,11 +771,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
         </li>
         
         
-        <li id="section-44">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>Send the complete Model representation when POSTing or PUTing</p>
 
@@ -828,11 +787,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
         </li>
         
         
-        <li id="section-45">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Invoked <em>per sync</em> (with the relevant options / context) to create a new transport -
  a deferred-like object implementing a <code>promise</code> / <code>resolve</code> / <code>reject</code> interface. A
@@ -841,7 +800,34 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        createTransport = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(syncOptions <span class="hljs-comment">/*, syncContext */</span>)</span> </span>{</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        createTransport = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(syncOptions <span class="hljs-comment">/*, syncContext */</span>)</span> </span>{
+            <span class="hljs-keyword">var</span> success = syncOptions.success || noOp,
+                error = syncOptions.error || noOp;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>If an underlying ajax lib is defined for Backbone (<code>Backbone.$</code>) and it features a
+ <code>Deferred</code> method (which is precisely the case when <code>Backbone.$</code> = <code>jQuery</code>) then
+ attempt to create a ‘deferred transport’ which will invoke the <code>success</code> / <code>error</code>
+ callbacks when its promise is fulfilled / rejected. Note that sync will return the
+ transport’s promise <em>not</em> the transport itself</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (Backbone.$ &amp;&amp; _.isFunction(Backbone.$.Deferred)) {
+                <span class="hljs-keyword">try</span> {
+                    <span class="hljs-keyword">var</span> deferred = Backbone.$.Deferred();
+                    deferred.then(success, error);
+                    <span class="hljs-keyword">return</span> deferred;
+                } <span class="hljs-keyword">catch</span> (e) {}
+            }</pre></div></div>
             
         </li>
         
@@ -852,21 +838,19 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>If an underlying ajax lib is defined for Backbone (<code>Backbone.$</code>) and it features a
- <code>Deferred</code> method (which is precisely the case when Backbone.$ = jQuery) then
- attempt to create a ‘deferred transport’ which will invoke the <code>success</code> / <code>error</code>
- callbacks when its promise is fulfilled / rejected. Note that sync will return the
- transport’s promise <em>not</em> the transport itself</p>
+              <p>Otherwise create a poor-man’s deferred - an object that implements a dumb
+ <code>promise</code> / <code>resolve</code> / <code>reject</code> interface without actual promise semantics:
+ <code>resolve</code> and <code>reject</code> just delegate to <code>success</code> and <code>error</code> callbacks while
+ <code>promise</code> returns an <code>undefined</code>. This is a good enough transport</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (Backbone.$ &amp;&amp; _.isFunction(Backbone.$.Deferred)) {
-                <span class="hljs-keyword">try</span> {
-                    <span class="hljs-keyword">var</span> deferred = Backbone.$.Deferred();
-                    deferred.then(syncOptions.success, syncOptions.error);
-                    <span class="hljs-keyword">return</span> deferred;
-                } <span class="hljs-keyword">catch</span> (e) {}
-            }</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> {
+                promise: noOp,
+                resolve: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value)</span> </span>{ success(value); },
+                reject: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(reason)</span> </span>{ error(reason); }
+            };
+        };</pre></div></div>
             
         </li>
         
@@ -877,19 +861,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>Otherwise create a poor-man’s deferred - an object that implements a dumb
- <code>promise</code> / <code>resolve</code> / <code>reject</code> interface without actual promise semantics:
- <code>resolve</code> and <code>reject</code> just delegate to <code>success</code> and <code>error</code> callbacks while
- <code>promise</code> returns an <code>undefined</code>. This is a good enough transport</p>
+              <h3 id="the-sync-method">The Sync method</h3>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> {
-                promise: noOp,
-                resolve: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value)</span> </span>{ syncOptions.success(value); },
-                reject: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(reason)</span> </span>{ syncOptions.error(reason); }
-            };
-        };</pre></div></div>
             
         </li>
         
@@ -900,7 +874,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>Modify Backbone’s sync to use the faux-server sync method (when appropriate)</p>
+              <p>Replace Backbone’s native sync with faux-server sync:</p>
 
             </div>
             
@@ -941,7 +915,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>            c = {
+            <div class="content"><div class='highlight'><pre>            ctx = {
                 data: <span class="hljs-literal">null</span>,
                 url: <span class="hljs-literal">null</span>,
                 httpMethod: crudToHttp[crudMethod],
@@ -1006,9 +980,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (options.emulateHTTP &amp;&amp; c.httpMethod !== <span class="hljs-string">"GET"</span>) {
-            c.httpMethodOverride = c.httpMethod;
-            c.httpMethod = <span class="hljs-string">"POST"</span>;
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (options.emulateHTTP &amp;&amp; ctx.httpMethod !== <span class="hljs-string">"GET"</span>) {
+            ctx.httpMethodOverride = ctx.httpMethod;
+            ctx.httpMethod = <span class="hljs-string">"POST"</span>;
         }</pre></div></div>
             
         </li>
@@ -1025,7 +999,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span>(!(c.url = options.url || _.result(model, <span class="hljs-string">"url"</span>))) {
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span>(!(ctx.url = options.url || _.result(model, <span class="hljs-string">"url"</span>))) {
             <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">"sync: Undefined 'url' property or function of Model / Collection"</span>);
         }</pre></div></div>
             
@@ -1042,7 +1016,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!(c.route = getMatchingRoute(c.url, c.httpMethod) || defaultRoute)) {
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!(ctx.route = getMatchingRoute(ctx.url, ctx.httpMethod) || defaultRoute)) {
             <span class="hljs-keyword">return</span> nativeSync.call(model, crudMethod, model, options);
         }</pre></div></div>
             
@@ -1059,7 +1033,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        c.data = getRequestData(c.httpMethod, model, options);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        ctx.data = getRequestData(ctx.httpMethod, model, options);</pre></div></div>
             
         </li>
         
@@ -1074,7 +1048,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        transport = createTransport(options, c);</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        transport = createTransport(options, ctx);</pre></div></div>
             
         </li>
         
@@ -1091,7 +1065,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
             </div>
             
             <div class="content"><div class='highlight'><pre>        execHandler = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            <span class="hljs-keyword">var</span> result = c.route.handler.apply(<span class="hljs-literal">null</span>, [c].concat(c.route.handlerParams)); <span class="hljs-comment">// Handle</span>
+            <span class="hljs-keyword">var</span> result = ctx.route.handler.apply(<span class="hljs-literal">null</span>, [ctx].concat(ctx.route.handlerParams));
             transport[_.isString(result) ? <span class="hljs-string">"reject"</span> : <span class="hljs-string">"resolve"</span>](result);
         };</pre></div></div>
             
@@ -1122,12 +1096,11 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
-              <p>Call exec-method <em>now</em> if zero-latency, else call later</p>
+              <p>Call exec-method asynchronously, taking into account any given latency</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (!latency) { execHandler(); }
-        <span class="hljs-keyword">else</span> { setTimeout(execHandler, _.isFunction(latency) ? latency() : latency); }
+            <div class="content"><div class='highlight'><pre>        _.delay(execHandler, _.isFunction(latency) ? latency(ctx) : latency);
 
         <span class="hljs-keyword">return</span> transportPromise;
     };</pre></div></div>
@@ -1141,11 +1114,9 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
-              <p>Attach methods to faux-server</p>
+              <h3 id="the-fauxserver-api">The fauxServer API</h3>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>    _.extend(fauxServer, {</pre></div></div>
             
         </li>
         
@@ -1156,7 +1127,23 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
-              <p>Add a route to the faux-server - a mapping from a Model(or Collection)-URL &amp; sync-method
+              <p>Extend <code>fauxServer</code> with the fauxServer API methods:</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    _.extend(fauxServer, {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <h4 id="addroute-name-urlexp-httpmethod-handler-">addRoute([name, ]urlExp[, httpMethod][, handler])</h4>
+<p>Add a route to the faux-server - a mapping from a Model(or Collection)-URL &amp; sync-method
  (an HTTP verb (POST, GET, PUT, PATCH or DELETE)) to some specific handler (callback):
  <code>&lt;model-URL, sync-method&gt; -&gt; handler</code>. Whenever a Model is created, read, updated or
  deleted, its URL and the the sync method being used will be tested against defined
@@ -1193,7 +1180,7 @@ Copyright (c) <span class="hljs-number">2012</span>-<span class="hljs-number">20
   <code>route</code> and <code>param1</code>, <code>param2</code>, … are parameters derived by matching the <code>urlExp</code> to
   the Model (or Collection) URL. Specifically, about <code>context</code> properties:</p>
 <ul>
-<li><code>context.data</code>: Attributes of the Model (or Collection) being proccessed. Valid
+<li><code>context.data</code>: Attributes of the Model (or Collection) being processed. Valid
  only on ‘create’ (POST), ‘update’ (PUT) or ‘patch’ (PATCH). In the specific case of
  PATCH, context.data may only contain a <em>subset</em> of Model’s attributes.</li>
 <li><code>context.httpMethod</code>: The HTTP Method (POST, GET, PUT, PATCH, DELETE) that
@@ -1208,31 +1195,12 @@ updated Model attributes after handling a PUT or PATCH. Return Model attributes 
 handling a GET or an array of Model attributes after handling a GET that refers to a
 collection. Note that only attributes that have been changed on the server (and should
 be updated on the client) need to be included. Return nothing after handling a DELETE.
-On failure, the handler should return s string (presumably a custom error messsage, an
+On failure, the handler should return s string (presumably a custom error message, an
 HTTP status code that indicates failure, etc).</p>
 </li>
 </ul>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        addRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-comment">/* name, urlExp, httpMethod, handler */</span>)</span> </span>{
-            <span class="hljs-keyword">var</span> route, routeIndex;</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-64">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
-              </div>
-              <p>Create the route, setting missing arguments to defaults and sanitizing where
- appropriate - note that the only mandatory argument is <code>urlExp</code></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            route = createRoute.apply(<span class="hljs-literal">null</span>, <span class="hljs-built_in">arguments</span>);</pre></div></div>
             
         </li>
         
@@ -1242,6 +1210,36 @@ HTTP status code that indicates failure, etc).</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        addRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(<span class="hljs-comment">/* name, urlExp, httpMethod, handler */</span>)</span> </span>{
+            <span class="hljs-keyword">var</span> route, routeIndex;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>Create the route, defaulting and sanitizing where appropriate</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            route = createRoute.apply(<span class="hljs-literal">null</span>, <span class="hljs-built_in">arguments</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>If a route of given name is already present then overwrite it with this one.
  Otherwise just append the new route</p>
@@ -1262,61 +1260,19 @@ HTTP status code that indicates failure, etc).</p>
         </li>
         
         
-        <li id="section-66">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
-              </div>
-              <p>Add multiple routes to faux-server. Given <code>routesToAdd</code> should be a hash or array: In
- the case of a hash, keys should be route names and each route (nested hash) need only
- contain <code>urlExp</code>, <code>httpMethod</code> and <code>handler</code>. See <code>addRoute</code>. Returns the faux-server</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        addRoutes: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routesToAdd)</span> </span>{
-            <span class="hljs-keyword">var</span> isArray = _.isArray(routesToAdd);
-            _.each(routesToAdd, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r, rName)</span> </span>{
-                <span class="hljs-keyword">this</span>.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
-            }, <span class="hljs-keyword">this</span>);
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
-        },</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-67">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
-              </div>
-              <p>Remove route of given <code>routeName</code>. Returns the faux-server</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        removeRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routeName)</span> </span>{
-            routes = _.reject(routes, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r)</span> </span>{ <span class="hljs-keyword">return</span> r.name === routeName; });
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
-        },</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
-              <p>Remove all previously defined routes. Returns the faux-server</p>
+              <h4 id="addroutes-routes-">addRoutes(routes)</h4>
+<p>Add multiple routes to faux-server. Given <code>routes</code> should be a hash or array: In the
+ case of a hash, keys should be route names and each route (nested hash) need only
+ contain <code>urlExp</code>, <code>httpMethod</code> and <code>handler</code>. Also see <code>addRoute</code>. Returns the
+ faux-server</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        removeRoutes: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            routes = [];
-            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
-        },</pre></div></div>
             
         </li>
         
@@ -1327,14 +1283,15 @@ HTTP status code that indicates failure, etc).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
-              <p>Get route of given <code>routeName</code> or <code>null</code> if no such route exists. Note that the
- acquired route is a copy - it cannot be modified to affect faux-server’s behaviour</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>        getRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routeName)</span> </span>{
-            <span class="hljs-keyword">var</span> route = _.find(routes, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r)</span> </span>{ <span class="hljs-keyword">return</span> r.name === routeName; });
-            <span class="hljs-keyword">return</span> route ? _.clone(route) : <span class="hljs-literal">null</span>;
+            <div class="content"><div class='highlight'><pre>        addRoutes: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routes)</span> </span>{
+            <span class="hljs-keyword">var</span> isArray = _.isArray(routes);
+            _.each(routes, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r, rName)</span> </span>{
+                <span class="hljs-keyword">this</span>.addRoute(isArray ? r.name : rName, r.urlExp, r.httpMethod, r.handler);
+            }, <span class="hljs-keyword">this</span>);
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
         },</pre></div></div>
             
         </li>
@@ -1346,14 +1303,10 @@ HTTP status code that indicates failure, etc).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
-              <p>Get route at given <code>routeIndex</code> or <code>null</code> if no such route exists. Note that the
- acquired route is a copy - it cannot be modified to affect faux-server’s behaviour</p>
+              <h4 id="removeroute-routename-">removeRoute(routeName)</h4>
+<p>Remove route of given <code>routeName</code>. Returns the faux-server</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>        getRouteAt: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routeIndex)</span> </span>{
-            <span class="hljs-keyword">return</span> routes[routeIndex] ? _.clone(routes[routeIndex]) : <span class="hljs-literal">null</span>;
-        },</pre></div></div>
             
         </li>
         
@@ -1364,13 +1317,13 @@ HTTP status code that indicates failure, etc).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
-              <p>Get route matching the given &lt;<code>url</code>, <code>httpMethod</code>&gt; pair or <code>null</code> if no such route
- exists. Note that the acquired route is a copy - it cannot be modified to affect
- faux-server’s behaviour. See earlier definition of <code>getMatchingRoute</code> for details</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>        getMatchingRoute: getMatchingRoute,</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        removeRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routeName)</span> </span>{
+            routes = _.reject(routes, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r)</span> </span>{ <span class="hljs-keyword">return</span> r.name === routeName; });
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        },</pre></div></div>
             
         </li>
         
@@ -1381,12 +1334,149 @@ HTTP status code that indicates failure, etc).</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
-              <p>Set the given <code>handler</code> as the one to be invoked when no route is matched to the current
+              <h4 id="removeroutes-">removeRoutes()</h4>
+<p>Remove all previously defined routes. Returns the faux-server</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        removeRoutes: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            routes = [];
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+        },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <h4 id="getroute-routename-">getRoute(routeName)</h4>
+<p>Get route of given <code>routeName</code> or <code>null</code> if no such route exists. Note that the
+ acquired route is a copy - it cannot be modified to affect faux-server’s behaviour</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        getRoute: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(routeName)</span> </span>{
+            <span class="hljs-keyword">var</span> route = _.find(routes, <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(r)</span> </span>{ <span class="hljs-keyword">return</span> r.name === routeName; });
+            <span class="hljs-keyword">return</span> route ? _.clone(route) : <span class="hljs-literal">null</span>;
+        },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <h4 id="getrouteat-index-">getRouteAt(index)</h4>
+<p>Get route at given <code>index</code> or <code>null</code> if no such route exists. Note that the
+ acquired route is a copy - it cannot be modified to affect faux-server’s behaviour</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        getRouteAt: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(index)</span> </span>{
+            <span class="hljs-keyword">return</span> routes[index] ? _.clone(routes[index]) : <span class="hljs-literal">null</span>;
+        },</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <h4 id="getmatchingroute-url-httpmethod-">getMatchingRoute(url, httpMethod)</h4>
+<p>Get route matching the given &lt;<code>url</code>, <code>httpMethod</code>&gt; pair or <code>null</code> if no such route
+ exists. Note that the acquired route is a copy - it cannot be modified to affect
+ faux-server’s behaviour. See earlier definition of <code>getMatchingRoute</code> for details</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-79">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-79">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        getMatchingRoute: getMatchingRoute,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-80">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-80">&#182;</a>
+              </div>
+              <h4 id="setdefaulthandler-handler-">setDefaultHandler([handler])</h4>
+<p>Set the given <code>handler</code> as the one to be invoked when no route is matched to the current
  <model-URL, sync-method> pair. This will override the default behaviour of invoking the
- native sync. Ommit the parameter to reset to the default behaviour. See <code>addRoute</code> for
+ native sync. Omit the parameter to reset to the default behaviour. See <code>addRoute</code> for
  handler’s signature and semantics. Note that a default-handler isn’t part of a route,
  so the <code>context.route</code> parameter will not be valid. Returns the faux-server</p>
 
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-81">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-81">&#182;</a>
+              </div>
+              
             </div>
             
             <div class="content"><div class='highlight'><pre>        setDefaultHandler: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(handler)</span> </span>{
@@ -1402,16 +1492,31 @@ HTTP status code that indicates failure, etc).</p>
         </li>
         
         
-        <li id="section-73">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
-              <p>Set server’s emulated latency to <code>min</code> ms or a random latency withing [<code>min</code>, <code>max</code>] ms
- when the optional <code>max</code> parameter is given. Ommitting both parameters will set to the
- latency to 0. Returns the faux-server</p>
+              <h4 id="setlatency-min-max-">setLatency(min[, max])</h4>
+<p>Set server’s emulated latency to <code>min</code> ms or a random latency withing [<code>min</code>, <code>max</code>] ms
+ when the optional <code>max</code> parameter is given. Omitting both parameters will set latency
+ to 0. In place of a fixed minimum, a function may also be given that returns a latency.
+ The function will be invoked per handled route, with the same parameters as those
+ passed to the relevant route handler (<code>context</code>, etc). Returns the faux-server</p>
 
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              
             </div>
             
             <div class="content"><div class='highlight'><pre>        setLatency: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(min, max)</span> </span>{
@@ -1422,13 +1527,14 @@ HTTP status code that indicates failure, etc).</p>
         </li>
         
         
-        <li id="section-74">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
-              <p>Set the server’s transport factory - a factory function with signature
+              <h4 id="settransportfactory-factory-">setTransportFactory(factory)</h4>
+<p>Set the server’s transport factory - a factory function with signature
  <code>function (syncOptions, syncContext)</code>
  invoked  <em>per sync</em> (with the relevant options / context) to create a new transport - a
  deferred-like object implementing a <code>promise</code> / <code>resolve</code> / <code>reject</code> interface. A
@@ -1438,25 +1544,50 @@ HTTP status code that indicates failure, etc).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        setTransportFactory: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(transportFactory)</span> </span>{
-            createTransport = transportFactory;
+        </li>
+        
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        setTransportFactory: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(factory)</span> </span>{
+            createTransport = factory;
             <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
         },</pre></div></div>
             
         </li>
         
         
-        <li id="section-75">
+        <li id="section-86">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-86">&#182;</a>
               </div>
-              <p>Enable / disable the faux-server. When disabled, sync will be delegated to the native
+              <h4 id="enable-shouldenable-">enable(shouldEnable)</h4>
+<p>Enable / disable the faux-server. When disabled, sync will be delegated to the native
  backbone <code>sync</code>. Handy for easily toggling between mock / real server. Set
- <code>shouldEnable</code> to <code>true</code> or ommit altogether to enable, set to false to disable.
+ <code>shouldEnable</code> to <code>true</code> or omit altogether to enable, set to <code>false</code> to disable.
  Returns the faux-server</p>
 
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              
             </div>
             
             <div class="content"><div class='highlight'><pre>        enable: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(shouldEnable)</span> </span>{
@@ -1467,32 +1598,58 @@ HTTP status code that indicates failure, etc).</p>
         </li>
         
         
-        <li id="section-76">
+        <li id="section-88">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-88">&#182;</a>
               </div>
-              <p>Get faux-server version</p>
+              <h4 id="getversion-">getVersion()</h4>
+<p>Get faux-server version</p>
 
             </div>
             
+        </li>
+        
+        
+        <li id="section-89">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-89">&#182;</a>
+              </div>
+              
+            </div>
+            
             <div class="content"><div class='highlight'><pre>        getVersion: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
-            <span class="hljs-keyword">return</span> <span class="hljs-string">"0.10.4"</span>; <span class="hljs-comment">// Keep in sync with package.json</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-string">"0.10.5"</span>; <span class="hljs-comment">// Keep in sync with package.json</span>
         }
     });</pre></div></div>
             
         </li>
         
         
-        <li id="section-77">
+        <li id="section-90">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
+                <a class="pilcrow" href="#section-90">&#182;</a>
               </div>
-              <p>Attach <httpMethod>(name, urlExp, handler) methods to faux-server (<code>get</code>, <code>post</code>, <code>put</code>,
- <code>patch</code> and <code>del</code>). These all delegate to addRoute</p>
+              <h4 id="get-post-put-patch-del-name-urlexp-handler-">get/post/put/patch/del([name, ]urlExp[, handler])</h4>
+<p>Add a route to the faux-server, for HTTP GET / POST / PUT / PATCH / DEL</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-91">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-91">&#182;</a>
+              </div>
+              <p>Attach <code>&lt;httpMethod&gt;(name, urlExp, handler)</code> shortcut-methods which delegate to <code>addRoute</code></p>
 
             </div>
             
@@ -1501,45 +1658,31 @@ HTTP status code that indicates failure, etc).</p>
         </li>
         
         
-        <li id="section-78">
+        <li id="section-92">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-92">&#182;</a>
               </div>
               <p>All shortcut-methods are named after the relevant HTTP verb except for ‘delete’ which is
- abbreviated to ‘del’ in order to avoid reserved word awkwardness</p>
+ abbreviated to ‘del’ to avoid reserved-word trouble</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">var</span> method = httpMethod === <span class="hljs-string">"DELETE"</span> ? <span class="hljs-string">"del"</span> : httpMethod.toLowerCase();
-        fauxServer[method] = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-79">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
-              </div>
-              <p>Expecting <code>name</code>, <code>urlExp</code>, <code>handler</code> arguments. Only <code>urlExp</code> is mandatory</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">var</span> args = skipUndefinedTail(_.toArray(<span class="hljs-built_in">arguments</span>));
-
+        fauxServer[method] = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">()</span> </span>{
+            <span class="hljs-keyword">var</span> args = skipUndefinedTail(_.toArray(<span class="hljs-built_in">arguments</span>));
             <span class="hljs-keyword">if</span> (!args.length) { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(method + <span class="hljs-string">": Missing mandatory 'urlExp' argument"</span>); }</pre></div></div>
             
         </li>
         
         
-        <li id="section-80">
+        <li id="section-93">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
+                <a class="pilcrow" href="#section-93">&#182;</a>
               </div>
               <p>The <code>httpMethod</code> must be inserted into the args, either at tail-position if
  <code>handler</code> is missing or just before it (after <code>urlExp</code>) if it’s present</p>
@@ -1547,9 +1690,22 @@ HTTP status code that indicates failure, etc).</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (!_.isFunction(args[args.length - <span class="hljs-number">1</span>])) { args.push(httpMethod); }
-            <span class="hljs-keyword">else</span> { args.splice(args.length - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, httpMethod); }
+            <span class="hljs-keyword">else</span> { args.splice(args.length - <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, httpMethod); }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-94">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-94">&#182;</a>
+              </div>
+              <p>Delegate to <code>addRoute</code></p>
 
-            <span class="hljs-keyword">return</span> fauxServer.addRoute.apply(<span class="hljs-keyword">this</span>, args);
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">return</span> fauxServer.addRoute.apply(<span class="hljs-keyword">this</span>, args);
         };
     });
 
