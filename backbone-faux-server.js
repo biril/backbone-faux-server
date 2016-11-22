@@ -4,7 +4,7 @@
 //     Licensed and freely distributed under the MIT License
 //     Copyright (c) 2012-2014 Alex Lambiris
 
-/*global exports, define, global, require, _, Backbone */
+/*global exports, define, global, require, _ */
 
 // Detect env & export module
 // --------------------------
@@ -17,14 +17,14 @@
     // A global `exports` object signifies CommonJS-like enviroment that supports `module.exports`,
     //  e.g. Node
     if (typeof exports === "object") {
-        return createModule(exports, require("underscore"), require("backbone"));
+        return createModule(exports, require("underscore"));
     }
 
     // A global `define` method with an `amd` property signifies the presence of an AMD loader
     //  (require.js, curl.js)
     if (typeof define === "function" && define.amd) {
-        return define(["underscore", "backbone", "exports"], function (_, Backbone, exports) {
-            return createModule(exports, _, Backbone);
+        return define(["underscore", "exports"], function (_, exports) {
+            return createModule(exports, _);
         });
     }
 
@@ -35,7 +35,7 @@
     var previousFauxServer = root.fauxServer;
 
     //
-    createModule(root.fauxServer = {}, _, Backbone);
+    createModule(root.fauxServer = {}, _);
 
     // The `noConflict` method sets the `fauxServer` _global_ to to its previous value (_once_),
     //  returning a reference to `fauxServer` (_always_)
@@ -48,7 +48,7 @@
 // Create module
 // --------------------------
 
-}(this, function (fauxServer, _, Backbone) {
+}(this, function (fauxServer, _) {
     "use strict";
 
     var
@@ -97,22 +97,6 @@
             };
         }()),
 
-        // Save a reference to the native sync method. Will be invoked when no route is matched
-        //  during sync (and there's no default-route) or faux-server is disabled altogether
-        nativeSync = Backbone.sync,
-
-        // Indicates whether faux-server is currently enabled
-        isEnabled = true,
-
-        // The default-route - a route that contains the default handler if one is defined. The
-        //  default handler is invoked when no matching route is found for some model-URL /
-        //  sync-method pair and may be set by means of `setDefaultHandler`. A `null` value
-        //  signifies the absence of a default handler
-        defaultRoute = null,
-
-        // Server's emulated latency
-        latency = 0,
-
         // Mapping of CRUD (+ patch) to HTTP verbs
         crudToHttp = {
             "create": "POST",
@@ -121,9 +105,6 @@
             "delete": "DELETE",
             "patch": "PATCH"
         },
-
-        // Collection of all defined routes
-        routes = [],
 
         // Get a route matching the given <`url`, `httpMethod`> pair. Routes that exactly match the
         //  HTTP-method take precedence over match-all-methods routes (those with `httpMethod` set
@@ -134,8 +115,8 @@
         //  the acquired route is a copy - it cannot be modified to affect faux-server's behaviour
         getMatchingRoute = function (url, httpMethod) {
             var i, r, weakMatch;
-            for (i = routes.length - 1; i >= 0; --i) { // Iterating from latest to earliest
-                r = routes[i];
+            for (i = this._routes.length - 1; i >= 0; --i) { // Iterating from latest to earliest
+                r = this._routes[i];
                 if (r.urlExp.test(url)) {
                     if (r.httpMethod === httpMethod) { // Found a match ..
                         r = _.clone(r);
@@ -263,9 +244,9 @@
             //  attempt to create a 'deferred transport' which will invoke the `success` / `error`
             //  callbacks when its promise is fulfilled / rejected. Note that sync will return the
             //  transport's promise _not_ the transport itself
-            if (Backbone.$ && _.isFunction(Backbone.$.Deferred)) {
+            if (this._Backbone.$ && _.isFunction(this._Backbone.$.Deferred)) {
                 try {
-                    var deferred = Backbone.$.Deferred();
+                    var deferred = this._Backbone.$.Deferred();
                     deferred.then(success, error);
                     return deferred;
                 } catch (e) {}
@@ -284,15 +265,14 @@
 
     // ### The Sync method
 
-    // Replace Backbone's native sync with faux-server sync:
-    Backbone.sync = function (crudMethod, model, options) {
+    var sync = function (crudMethod, model, options) {
 
         // If faux-server is disabled, fall back to original sync
-        if (!isEnabled) { return nativeSync.call(model, crudMethod, model, options); }
+        if (!this._isEnabled) { return this._nativeSync.call(model, crudMethod, model, options); }
 
         _.defaults(options || (options = {}), {
-            emulateHTTP: Backbone.emulateHTTP,
-            emulateJSON: Backbone.emulateJSON
+            emulateHTTP: this._Backbone.emulateHTTP,
+            emulateJSON: this._Backbone.emulateJSON
         });
 
         var
@@ -321,20 +301,22 @@
 
         // Ensure that we have a URL (A `url` property whithin options overrides Model /
         //  Collection URL)
-        if(!(ctx.url = options.url || _.result(model, "url"))) {
+        ctx.url = options.url || _.result(model, "url");
+        if (!ctx.url) {
             throw new Error("sync: Undefined 'url' property or function of Model / Collection");
         }
 
         // Find route for given URL or fall back to native sync if none found
-        if (!(ctx.route = getMatchingRoute(ctx.url, ctx.httpMethod) || defaultRoute)) {
-            return nativeSync.call(model, crudMethod, model, options);
+        ctx.route = getMatchingRoute.call(this, ctx.url, ctx.httpMethod) || this._defaultRoute;
+        if (!ctx.route) {
+            return this._nativeSync.call(model, crudMethod, model, options);
         }
 
         // Ensure that we have the appropriate request data
         ctx.data = getRequestData(ctx.httpMethod, model, options);
 
         // Create a transport for this sync
-        transport = createTransport(options, ctx);
+        transport = this._createTransport(options, ctx);
 
         // An exec-method to actually run the handler and subsequently invoke success / error
         //  callbacks. (The relevant 'success' or 'error' event will be triggered by backbone)
@@ -350,15 +332,14 @@
         model.trigger("request", model, transportPromise, options);
 
         // Call exec-method asynchronously, taking into account any given latency
-        _.delay(execHandler, _.isFunction(latency) ? latency(ctx) : latency);
+        _.delay(execHandler, _.isFunction(this._latency) ? this._latency(ctx) : this._latency);
 
         return transportPromise;
     };
 
     // ### The fauxServer API
 
-    // Extend `fauxServer` with the fauxServer API methods:
-    _.extend(fauxServer, {
+    var fauxServerApi = {
 
 
         // #### addRoute([name, ]urlExp[, httpMethod][, handler])
@@ -431,13 +412,13 @@
 
             // If a route of given name is already present then overwrite it with this one.
             //  Otherwise just append the new route
-            _.any(routes, function (r, i) {
+            _.any(this._routes, function (r, i) {
                 if (r.name === route.name) {
                     routeIndex = i;
                     return true;
                 }
-            }) || (routeIndex = routes.length);
-            routes[routeIndex] = route;
+            }) || (routeIndex = this._routes.length);
+            this._routes[routeIndex] = route;
 
             return this;
         },
@@ -464,7 +445,7 @@
 
         //
         removeRoute: function (routeName) {
-            routes = _.reject(routes, function (r) { return r.name === routeName; });
+            this._routes = _.reject(this._routes, function (r) { return r.name === routeName; });
             return this;
         },
 
@@ -474,7 +455,7 @@
 
         //
         removeRoutes: function () {
-            routes = [];
+            this._routes = [];
             return this;
         },
 
@@ -485,7 +466,7 @@
 
         //
         getRoute: function (routeName) {
-            var route = _.find(routes, function (r) { return r.name === routeName; });
+            var route = _.find(this._routes, function (r) { return r.name === routeName; });
             return route ? _.clone(route) : null;
         },
 
@@ -496,7 +477,7 @@
 
         //
         getRouteAt: function (index) {
-            return routes[index] ? _.clone(routes[index]) : null;
+            return this._routes[index] ? _.clone(this._routes[index]) : null;
         },
 
 
@@ -506,7 +487,9 @@
         //  faux-server's behaviour. See earlier definition of `getMatchingRoute` for details
 
         //
-        getMatchingRoute: getMatchingRoute,
+        getMatchingRoute: function() {
+            getMatchingRoute.apply(this, arguments);
+        },
 
 
         // #### setDefaultHandler([handler])
@@ -518,7 +501,7 @@
 
         //
         setDefaultHandler: function (handler) {
-            defaultRoute = !handler ? null : {
+            this._defaultRoute = !handler ? null : {
                 name: "",
                 urlExp: "",
                 handler: handler,
@@ -537,7 +520,9 @@
 
         //
         setLatency: function (min, max) {
-            latency = !max ? (min || 0) : function () { return min + Math.random() * (max - min); };
+            this._latency = !max ? (min || 0) : function () {
+                return min + Math.random() * (max - min);
+            };
             return this;
         },
 
@@ -553,7 +538,7 @@
 
         //
         setTransportFactory: function (factory) {
-            createTransport = factory;
+            this._createTransport = factory;
             return this;
         },
 
@@ -566,7 +551,7 @@
 
         //
         enable: function (shouldEnable) {
-            isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
+            this._isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
             return this;
         },
 
@@ -578,7 +563,7 @@
         getVersion: function () {
             return "0.10.5"; // Keep in sync with package.json
         }
-    });
+    };
 
 
     // #### get/post/put/patch/del([name, ]urlExp[, handler])
@@ -591,7 +576,7 @@
         //  abbreviated to 'del' to avoid reserved-word trouble
         var method = httpMethod === "DELETE" ? "del" : httpMethod.toLowerCase();
 
-        fauxServer[method] = function () {
+        fauxServerApi[method] = function () {
             var args = skipUndefinedTail(_.toArray(arguments));
             if (!args.length) { throw new Error(method + ": Missing mandatory 'urlExp' argument"); }
 
@@ -601,9 +586,45 @@
             else { args.splice(args.length - 1, 0, httpMethod); }
 
             // Delegate to `addRoute`
-            return fauxServer.addRoute.apply(this, args);
+            return this.addRoute.apply(this, args);
         };
     });
+
+    //
+    fauxServer.on = function (Backbone) {
+
+        // Save a reference to the native sync method. Will be invoked when no route is matched
+        //  during sync (and there's no default-route) or faux-server is disabled altogether
+        var nativeSync = Backbone.sync;
+
+        // Clone the API and enrich it with necessary properties
+        var api = _.extend({}, fauxServerApi, {
+
+            _Backbone: Backbone,
+            _nativeSync: nativeSync,
+            _createTransport: createTransport,
+
+            // A value indicating whether faux-server is currently enabled
+            _isEnabled: true,
+
+            // The default-route - a route that contains the default handler if one is defined. The
+            //  default handler is invoked when no matching route is found for some model-URL /
+            //  sync-method pair and may be set by means of `setDefaultHandler`. A `null` value
+            //  signifies the absence of a default handler
+            _defaultRoute: null,
+
+            // Server's emulated latency
+            _latency: 0,
+
+            // Collection of all defined routes
+            _routes: []
+        });
+
+        // Replace Backbone's native sync with faux-server sync
+        Backbone.sync = sync.bind(api);
+
+        return api;
+    };
 
     return fauxServer;
 }));
