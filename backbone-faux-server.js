@@ -591,7 +591,7 @@
     });
 
     //
-    fauxServer.on = function (Backbone) {
+    fauxServer.create = function (Backbone) {
 
         // Save a reference to the native sync method. Will be invoked when no route is matched
         //  during sync (and there's no default-route) or faux-server is disabled altogether
