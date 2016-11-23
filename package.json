@@ -4,7 +4,7 @@
   "author": "biril <alexlambiris@gmail.com>",
   "description": "A framework for mocking up server-side persistence / processing for Backbone.js",
   "contributors": [],
-  "main": "./backbone-faux-server.js",
+  "main": "backbone-faux-server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/biril/backbone-faux-server"
