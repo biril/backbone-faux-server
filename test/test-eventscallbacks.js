@@ -3,6 +3,8 @@
 (function () {
     "use strict";
 
+    var __fauxServer;
+
     //
     QUnit.module("events & callbacks", {
         setup: function () {
@@ -31,20 +33,20 @@
 
             Backbone.$ = undefined;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+
+            __fauxServer = fauxServer.create(Backbone);
         },
         teardown: function () {
             delete this.Book;
             delete this.Books;
             delete this.createDummyBook;
 
-            fauxServer.removeRoutes();
-            fauxServer.setDefaultHandler();
-            fauxServer.setLatency();
+            __fauxServer.destroy();
         }
     });
 
     test("Syncing triggers 'request' event", 6, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -76,7 +78,7 @@
     asyncTest("Returning non-string from any handler invokes success callback & triggers 'sync' event", 12, function () {
         // Adding routes without defining a handler => implicitly defining a def do-nothing handler
         //  which returns undefined
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -160,7 +162,7 @@
         book.urlRoot = "library-app/books";
 
         // Reading the model
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
             return readRouteResponse;
         });
         book.fetch({
@@ -179,7 +181,7 @@
             readRouteResponse = [{ someExtraAttribute: "extraAttribute" }];
 
         // Reading the collection
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+        __fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
             return readRouteResponse;
         });
         books.fetch({
@@ -199,7 +201,7 @@
         book.urlRoot = "library-app/books";
 
         // Creating the model
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
             return createRouteResponse;
         });
         book.save(null, {
@@ -219,7 +221,7 @@
         book.urlRoot = "library-app/books";
 
         // Updating the model
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
             return updateRouteResponse;
         });
         book.save(null, {
@@ -239,7 +241,7 @@
         book.urlRoot = "library-app/books";
 
         // Updating the model (by patching)
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
             return updateRouteResponse;
         });
         book.save(null, {
@@ -260,7 +262,7 @@
         book.urlRoot = "library-app/books";
 
         // Deleting the model
-        fauxServer.addRoute("readBook", "library-app/books/:id", "DELETE", function () {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "DELETE", function () {
             return deleteRouteResponse;
         });
         book.destroy({
@@ -275,7 +277,7 @@
     });
 
     asyncTest("Returning a string from any handler invokes error callback & signals 'error' event)", 12, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Error on create"; } },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Error on read model"; } },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET",    handler: function () { return "Error on read collection"; } },
@@ -360,7 +362,7 @@
         book.urlRoot = "library-app/books";
 
         // Reading the model
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
             return readRouteResponse;
         });
         book.fetch({
@@ -379,7 +381,7 @@
             readRouteResponse = "Error on read";
 
         // Reading the collection
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+        __fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
             return readRouteResponse;
         });
         books.fetch({
@@ -399,7 +401,7 @@
         book.urlRoot = "library-app/books";
 
         // Creating the model
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
             return createRouteResponse;
         });
         book.save(null, {
@@ -419,7 +421,7 @@
         book.urlRoot = "library-app/books";
 
         // Creating the model
-        fauxServer.addRoute("createBook", "library-app/books/:id", "PUT", function () {
+        __fauxServer.addRoute("createBook", "library-app/books/:id", "PUT", function () {
             return updateRouteResponse;
         });
         book.save(null, {
@@ -439,7 +441,7 @@
         book.urlRoot = "library-app/books";
 
         // Creating the model
-        fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function () {
+        __fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function () {
             return deleteRouteResponse;
         });
         book.destroy({
