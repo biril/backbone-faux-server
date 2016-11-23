@@ -3,43 +3,46 @@
 (function () {
     "use strict";
 
+    var __fauxServer;
+
     //
     QUnit.module("chaining", {
         setup: function () {
             Backbone.$ = undefined;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+            __fauxServer = fauxServer.create(Backbone);
         },
         teardown: function () {
-            fauxServer.removeRoutes();
+            __fauxServer.destroy();
         }
     });
 
     test("addRoute is chainable", function () {
-        strictEqual(fauxServer.addRoute("dummy"), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.addRoute("dummy"), __fauxServer, "returns faux-server");
     });
 
     test("addRoutes is chainable", function () {
-        strictEqual(fauxServer.addRoutes(), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.addRoutes(), __fauxServer, "returns faux-server");
     });
 
     test("removeAllRoutes is chainable", function () {
-        strictEqual(fauxServer.removeRoutes(), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.removeRoutes(), __fauxServer, "returns faux-server");
     });
 
     test("setDefaultHandler is chainable", function () {
-        strictEqual(fauxServer.setDefaultHandler(), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.setDefaultHandler(), __fauxServer, "returns faux-server");
     });
 
     test("setTransportFactory is chainable", function () {
-       strictEqual(fauxServer.setTransportFactory(), fauxServer, "returns faux-server");
+       strictEqual(__fauxServer.setTransportFactory(), __fauxServer, "returns faux-server");
     });
 
     test("setLatency is chainable", function () {
-        strictEqual(fauxServer.setLatency(0), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.setLatency(0), __fauxServer, "returns faux-server");
     });
 
     test("enable is chainable", function () {
-        strictEqual(fauxServer.enable(), fauxServer, "returns faux-server");
+        strictEqual(__fauxServer.enable(), __fauxServer, "returns faux-server");
     });
 
     test("get, post, put, patch, del are chainable", function () {
@@ -47,7 +50,8 @@
             i = 0, l = methods.length;
 
         for (; i < l; ++i) {
-            strictEqual(fauxServer[methods[i]]("dummy"), fauxServer, methods[i] + " returns faux-server");
+            strictEqual(__fauxServer[methods[i]]("dummy"),
+                __fauxServer, methods[i] + " returns faux-server");
         }
     });
 }());
