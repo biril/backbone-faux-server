@@ -593,16 +593,15 @@
     //
     fauxServer.create = function (Backbone) {
 
-        // Save a reference to the native sync method. Will be invoked when no route is matched
-        //  during sync (and there's no default-route) or faux-server is disabled altogether
-        var nativeSync = Backbone.sync;
-
         // Clone the API and enrich it with necessary properties
         var api = _.extend({}, fauxServerApi, {
 
+            //
             _Backbone: Backbone,
-            _nativeSync: nativeSync,
-            _createTransport: createTransport,
+
+            // Save reference to native `sync` method. Will be invoked when no route is matched
+            //  during sync (and there's no default-route) or faux-server is disabled altogether
+            _nativeSync: Backbone.sync,
 
             // A value indicating whether faux-server is currently enabled
             _isEnabled: true,
@@ -617,7 +616,10 @@
             _latency: 0,
 
             // Collection of all defined routes
-            _routes: []
+            _routes: [],
+
+            //
+            _createTransport: createTransport,
         });
 
         // Replace Backbone's native sync with faux-server sync
