@@ -625,6 +625,12 @@
         // Replace Backbone's native sync with faux-server sync
         Backbone.sync = sync.bind(api);
 
+        // Destroy this faux-server: Revert Backbone's `sync` to native version
+        api.destroy = function () {
+            this._Backbone.sync = this._nativeSync;
+            this._Backbone = null; // Forget Backbone. Forever
+        }
+
         return api;
     };
 
