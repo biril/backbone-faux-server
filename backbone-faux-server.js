@@ -488,7 +488,7 @@
 
         //
         getMatchingRoute: function() {
-            getMatchingRoute.apply(this, arguments);
+            return getMatchingRoute.apply(this, arguments);
         },
 
 
