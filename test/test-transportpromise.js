@@ -3,6 +3,8 @@
 (function () {
     "use strict";
 
+    var __fauxServer;
+
     // Helpers
     var doGenericSetup = function () {
             this.Book = Backbone.Model.extend({
@@ -27,15 +29,15 @@
 
             Backbone.emulateHTTP = false;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+
+            __fauxServer = fauxServer.create(Backbone);
         },
         doGenericTeardown = function () {
             delete this.Book;
             delete this.Books;
             delete this.createDummyBook;
 
-            fauxServer.removeRoutes();
-            fauxServer.setDefaultHandler();
-            fauxServer.setLatency();
+            __fauxServer.destroy();
         };
 
     //
@@ -50,7 +52,7 @@
     });
 
     test("Sync returns a promise-transport (a thenable object)", 6, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -74,7 +76,7 @@
     });
 
     test("request event includes a promise-transport (a thenable object)", 6, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -133,7 +135,7 @@
     });
 
     test("Returned promise-transport is fulfilled on sync success", 12, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -158,7 +160,7 @@
         book = this.createDummyBook();
         books = new this.Books();
         book.urlRoot = "library-app/books";
-        fauxServer.setLatency(100);
+        __fauxServer.setLatency(100);
         stillWaitingOnCallbacks = 6;
 
         book.save().then(function () {
@@ -191,7 +193,7 @@
     });
 
     test("Returned promise-transport is rejected on sync error", 12, function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST",   handler: function () { return "Some error occured on create"; } },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET",    handler: function () { return "Some error occured on read model"; } },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET",    handler: function () { return "Some error occured on read collection"; } },
@@ -216,7 +218,7 @@
         book = this.createDummyBook();
         books = new this.Books();
         book.urlRoot = "library-app/books";
-        fauxServer.setLatency(100);
+        __fauxServer.setLatency(100);
         stillWaitingOnCallbacks = 6;
 
         book.save().then(null, function () {
