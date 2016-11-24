@@ -11,6 +11,8 @@
             return (dt >= latencyMin && dt <= latencyMax + epsilon);
         };
 
+    var __fauxServer;
+
     //
     QUnit.module("sync", {
         setup: function () {
@@ -39,15 +41,15 @@
 
             Backbone.$ = undefined;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+            
+            __fauxServer = fauxServer.create(Backbone);
         },
         teardown: function () {
             delete this.Book;
             delete this.Books;
             delete this.createDummyBook;
-
-            fauxServer.removeRoutes();
-            fauxServer.setDefaultHandler();
-            fauxServer.setLatency();
+            
+            __fauxServer.destroy();
         }
     });
 
@@ -55,7 +57,7 @@
         var model = new Backbone.Model(),
             collection = new Backbone.Collection();
 
-        fauxServer.setDefaultHandler(function () {
+        __fauxServer.setDefaultHandler(function () {
             ok(false, "Fail: default handler invoked although model has no URL");
         });
 
@@ -78,7 +80,7 @@
             books = new this.Books();
         books.add(book);
 
-        fauxServer.addRoute("theRoute", "some/overriden/url", "*", function (context) {
+        __fauxServer.addRoute("theRoute", "some/overriden/url", "*", function (context) {
             ok(true, "Handler invoked for model sync with " + context.httpMethod + " verb");
             if (++numOfTimesHandlerInvoked === 5) { start(); }
         });
@@ -89,7 +91,7 @@
         book.save(null, { url: "some/overriden/url" });
         book.destroy({ url: "some/overriden/url" });
 
-        fauxServer.addRoute("theRoute", "some/other/url", "*", function (context) {
+        __fauxServer.addRoute("theRoute", "some/other/url", "*", function (context) {
             ok(true, "Handler invoked for collection sync with " + context.httpMethod + " verb");
             if (++numOfTimesHandlerInvoked === 5) { start(); }
         });
@@ -104,7 +106,7 @@
             books = new this.Books();
         books.add(book);
 
-        fauxServer.setDefaultHandler(function (context) {
+        __fauxServer.setDefaultHandler(function (context) {
             deepEqual(context.data, { some: 1, data: "2" },
                 "Handler invoked with expected data for " + context.httpMethod);
             if(++numOfTimesHandlerInvoked === 3) { start(); }
@@ -122,7 +124,7 @@
             books = new this.Books();
         books.add(book);
 
-        fauxServer.setDefaultHandler(function (context) {
+        __fauxServer.setDefaultHandler(function (context) {
             ok(true, "Handler invoked for model sync with " + context.httpMethod + " verb");
             if (++numOfTimesHandlerInvoked === 5) { start(); }
         });
@@ -133,7 +135,7 @@
         book.sync("update", book);
         book.sync("delete", book);
 
-        fauxServer.setDefaultHandler(function (context) {
+        __fauxServer.setDefaultHandler(function (context) {
             ok(true, "Handler invoked for collection sync with " + context.httpMethod + " verb");
             if (++numOfTimesHandlerInvoked === 5) { start(); }
         });
@@ -149,14 +151,14 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer.post("handler", "library-app/books", function (context) {
+        __fauxServer.post("handler", "library-app/books", function (context) {
             strictEqual(context.httpMethod, "POST", "during invocation of create-handler: httpMethod is POST");
             strictEqual(context.httpMethodOverride, "POST", "during invocation of create-handler: httpMethodOverride is POST");
             if (++numOfTimesHandlerInvoked === 3) { start(); }
         });
         book.sync("create", book);
 
-        fauxServer.post("handler", "library-app/books/:id", function (context) {
+        __fauxServer.post("handler", "library-app/books/:id", function (context) {
             strictEqual(context.httpMethod, "POST", "during invocation of update-handler: httpMethod is POST");
             strictEqual(context.httpMethodOverride, "PUT", "during invocation of update-handler: httpMethodOverride is PUT");
             if (++numOfTimesHandlerInvoked === 3) { start(); }
@@ -164,7 +166,7 @@
         book.set({ id: 1 });
         book.sync("update", book);
 
-        fauxServer.post("handler", "library-app/books/:id", function (context) {
+        __fauxServer.post("handler", "library-app/books/:id", function (context) {
             strictEqual(context.httpMethod, "POST", "during invocation of delete-handler: httpMethod is POST");
             strictEqual(context.httpMethodOverride, "DELETE", "during invocation of delete-handler: httpMethodOverride is DELETE");
             if (++numOfTimesHandlerInvoked === 3) { start(); }
@@ -179,7 +181,7 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer
+        __fauxServer
         .setLatency(latency)
         .setDefaultHandler(function () {
             var dt = now() - t0;
@@ -205,7 +207,7 @@
         book606.urlRoot = "library-app/books";
         book909.urlRoot = "library-app/books";
 
-        fauxServer
+        __fauxServer
         .setLatency(function (context) { return idToLatency[context.data.id]; })
         .setDefaultHandler(function (context) {
             var dt = now() - t0,
@@ -231,7 +233,7 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer
+        __fauxServer
         .setLatency(latencyMin, latencyMax)
         .setDefaultHandler(function () {
             var dt = now() - t0;
