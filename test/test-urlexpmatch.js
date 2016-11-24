@@ -12,6 +12,8 @@
             return d.join(", ");
         };
 
+    var __fauxServer;
+
     //
     QUnit.module("URL-exp matching", {
         setup: function () {
@@ -19,9 +21,11 @@
 
             Backbone.$ = undefined;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+
+            __fauxServer = fauxServer.create(Backbone);
         },
         teardown: function () {
-            fauxServer.removeRoutes();
+            __fauxServer.destroy();
         }
     });
 
@@ -34,8 +38,8 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
             deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
         }
@@ -86,8 +90,8 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
             deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
         }
@@ -150,8 +154,8 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
             deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
         }
@@ -182,9 +186,9 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
-            fauxServer.removeRoute("testRoute");
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.removeRoute("testRoute");
 
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
         }
@@ -195,9 +199,9 @@
         }
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
-            fauxServer.removeRoute("testRoute");
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.removeRoute("testRoute");
 
             ok(!matchingRoute, tests[i].urlExp + " does not match " + tests[i].url);
         }
@@ -208,9 +212,9 @@
         }
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
-            fauxServer.removeRoute("testRoute");
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.removeRoute("testRoute");
 
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
         }
@@ -245,9 +249,9 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
-            fauxServer.removeRoute("testRoute");
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.removeRoute("testRoute");
 
             ok(matchingRoute, tests[i].urlExp + " matches " + tests[i].url);
             deepEqual(matchingRoute.handlerParams, tests[i].params, "with _handerParams_: " + dumpArray(tests[i].params));
@@ -268,9 +272,9 @@
             }];
 
         for (i = 0, numOfTests = tests.length; i < numOfTests; ++i) {
-            fauxServer.addRoute("testRoute", tests[i].urlExp);
-            matchingRoute = fauxServer.getMatchingRoute(tests[i].url);
-            fauxServer.removeRoute("testRoute");
+            __fauxServer.addRoute("testRoute", tests[i].urlExp);
+            matchingRoute = __fauxServer.getMatchingRoute(tests[i].url);
+            __fauxServer.removeRoute("testRoute");
 
             ok(!matchingRoute, tests[i].urlExp + " does not match " + tests[i].url);
         }
