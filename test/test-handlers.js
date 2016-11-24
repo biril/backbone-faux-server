@@ -14,6 +14,8 @@
             }, 100);
         };
 
+    var __fauxServer;
+
     //
     QUnit.module("handlers", {
         setup: function () {
@@ -44,15 +46,15 @@
             Backbone.ajax = function () {
                 throw "Unexpected call to DOM-library ajax";
             };
+
+            __fauxServer = fauxServer.create(Backbone);
         },
         teardown: function () {
             delete this.Book;
             delete this.Books;
             delete this.createDummyBook;
 
-            fauxServer.removeRoutes();
-            fauxServer.setDefaultHandler();
-            fauxServer.setLatency();
+            __fauxServer.destroy();
         }
     });
 
@@ -63,7 +65,7 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
             ok(isOuterScopeExecuted);
             start();
         });
@@ -77,7 +79,7 @@
         var book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
             ok(true, "POST-handler is called");
             ok(context, "_context_ is passed to POST-handler");
             deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
@@ -95,7 +97,7 @@
             book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function () {
             return { id: createdBookId, creationTime: "now" };
         });
 
@@ -117,7 +119,7 @@
             book = new this.Book({ id: fetchedBookId });
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
             ok(isOuterScopeExecuted);
             start();
         });
@@ -132,7 +134,7 @@
             book = new this.Book({ id: fetchedBookId });
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function (context, bookId) {
             ok(true, "GET-handler is called");
             ok(context, "_context_ is passed to GET-handler");
             strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
@@ -155,7 +157,7 @@
         // We've created a book of id 0123456789 and we'll be fetching it. The retBookAttrs hash
         //  holds the supposed attributes of the book so we'll be returning these from the GET-handler
 
-        fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
+        __fauxServer.addRoute("readBook", "library-app/books/:id", "GET", function () {
             return retBookAttrs;
         });
 
@@ -174,7 +176,7 @@
         var isOuterScopeExecuted = false,
             books = new this.Books();
 
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+        __fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
             ok(isOuterScopeExecuted);
             start();
         });
@@ -187,7 +189,7 @@
     asyncTest("GET-handler invoked with expected context when fetching a Collection", 5, function () {
         var books = new this.Books();
 
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
+        __fauxServer.addRoute("readBooks", "library-app/books", "GET", function (context) {
             ok(true, "GET-handler is called");
             ok(context, "_context_ is passed to GET-handler");
             strictEqual(context.httpMethod, "GET", "_context.httpMethod_ is set to 'GET'");
@@ -207,7 +209,7 @@
         //  The retBooksAttrs is an array of attributes hashes for the supposed models in the collection
         //  so we'll be returning that from the GET-handler
 
-        fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
+        __fauxServer.addRoute("readBooks", "library-app/books", "GET", function () {
             return retBooksAttrs;
         });
 
@@ -227,7 +229,7 @@
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
             ok(isOuterScopeExecuted);
             start();
         });
@@ -242,7 +244,7 @@
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function (context, bookId) {
             ok(true, "PUT-handler is called");
             ok(context, "_context_ is passed to PUT-handler");
             deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
@@ -261,7 +263,7 @@
             book = this.createDummyBook(updatedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PUT", function () {
             return { modificationTime: "now" };
         });
 
@@ -282,7 +284,7 @@
         book.urlRoot = "library-app/books";
 
         // Test patching when _no_ changed attributes are given (expecting complete model data)
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context, bookId) {
             ok(true, "PATCH-handler is called (when patching without 'changed attributes')");
             ok(context, "_context_ is passed to PATCH-handler");
             deepEqual(context.data, book.toJSON(), "_context.data_ is set and reflects Model attributes");
@@ -302,7 +304,7 @@
         book.urlRoot = "library-app/books";
 
         // Test patching with some specific changed attributes (expecting only changed attributes)
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context) {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function (context) {
             ok(true, "PATCH-handler is called (when patching with some specific 'changed attributes')");
             deepEqual(context.data, { author: "Me" }, "_context.data_ is set and equals 'changed attributes'");
             start();
@@ -317,7 +319,7 @@
         book.urlRoot = "library-app/books";
 
         // Test patching when no 'changed attributes' are given (expecting complete model data)
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "PATCH", function () {
             return { modificationTime: "now" };
         });
 
@@ -338,7 +340,7 @@
             book = this.createDummyBook(deletedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function () {
+        __fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function () {
             ok(isOuterScopeExecuted);
             start();
         });
@@ -353,7 +355,7 @@
             book = this.createDummyBook(deletedBookId);
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function (context, bookId) {
+        __fauxServer.addRoute("deleteBook", "library-app/books/:id", "DELETE", function (context, bookId) {
             ok(true, "DELETE-handler is called");
             ok(context, "_context_ is passed to DELETE-handler");
             strictEqual(context.httpMethod, "DELETE", "_context.httpMethod_ is set to 'DELETE'");
@@ -376,7 +378,7 @@
 
         // A POST-handler is called for 'create' regardless of the value of emulateHTTP.
         //  Still, we want to make sure that context.httpMethodOverride is there, and set to POST
-        fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
+        __fauxServer.addRoute("createBook", "library-app/books", "POST", function (context) {
             ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
             ok(context, "_context_ is passed to POST-handler");
             strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -399,7 +401,7 @@
             book = this.createDummyBook("0123456789");
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
             ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
             ok(context, "_context_ is passed to POST-handler");
             strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -411,7 +413,7 @@
 
         // Also test with emulateHTTP as an inline option during update
         Backbone.emulateHTTP = false;
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
             ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
             startIfDone();
         });
@@ -430,7 +432,7 @@
             book = this.createDummyBook("0123456789");
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function (context) {
             ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
             ok(context, "_context_ is passed to POST-handler");
             strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -442,7 +444,7 @@
 
         // Also test with emulateHTTP as an inline option during patch
         Backbone.emulateHTTP = false;
-        fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
+        __fauxServer.addRoute("updateBook", "library-app/books/:id", "POST", function () {
             ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
             startIfDone();
         });
@@ -461,7 +463,7 @@
             book = this.createDummyBook("0123456789");
         book.urlRoot = "library-app/books";
 
-        fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
+        __fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function (context) {
             ok(true, "POST-handler is called when Backbone.emulateHTTP is true");
             ok(context, "_context_ is passed to POST-handler");
             strictEqual(context.httpMethod, "POST", "_context.httpMethod_ is set to 'POST'");
@@ -473,7 +475,7 @@
 
         // Also test with emulateHTTP as an inline option during delete
         Backbone.emulateHTTP = false;
-        fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function () {
+        __fauxServer.addRoute("deleteBook", "library-app/books/:id", "POST", function () {
             ok(true, "POST-handler is also called when emulateHTTP passed as an inline option");
             startIfDone();
         });
@@ -484,7 +486,7 @@
         var book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer
+        __fauxServer
         .addRoute("library-app/books", "POST", (function () {
             var isCalled = false;
             return function () {
@@ -550,7 +552,7 @@
         var book = this.createDummyBook();
         book.urlRoot = "library-app/books";
 
-        fauxServer
+        __fauxServer
         .post("library-app/books", (function () {
             var isCalled = false;
             return function () {
@@ -625,7 +627,7 @@
             book.save();
         });
         andThenWhen(function () { return isFirstSaveDone; }, function () {
-            fauxServer.addRoute("createBook", "library-app/books", "*", function () {
+            __fauxServer.addRoute("createBook", "library-app/books", "*", function () {
                 ok(true, "Handler called when route matches");
                 isSecondSaveDone = true;
             });
@@ -641,7 +643,7 @@
         book.urlRoot = "library-app/books";
 
         atFirst(function () {
-            fauxServer.setDefaultHandler(function () {
+            __fauxServer.setDefaultHandler(function () {
                 ok(true, "Default-handler called");
                 isFirstSaveDone = true;
             });
@@ -649,7 +651,7 @@
             book.save();
         });
         andThenWhen(function () { return isFirstSaveDone; }, function () {
-            fauxServer.setDefaultHandler(); // Remove default handler
+            __fauxServer.setDefaultHandler(); // Remove default handler
             Backbone.ajax = function () {
                 ok(true, "Native sync called when no default-handler defined");
                 isSecondSaveDone = true;
@@ -665,15 +667,15 @@
         book.urlRoot = "library-app/books";
 
         atFirst(function () {
-            fauxServer.addRoute("createBook", "library-app/books", "*", function () {
+            __fauxServer.addRoute("createBook", "library-app/books", "*", function () {
                 ok(true, "Handler called when faux-server enabled");
                 isFirstSaveDone = true;
             });
             book.save();
         });
         andThenWhen(function () { return isFirstSaveDone; }, function () {
-            fauxServer.enable(false);
-            fauxServer.addRoute("createBook", "library-app/books", "*", function () {
+            __fauxServer.enable(false);
+            __fauxServer.addRoute("createBook", "library-app/books", "*", function () {
                 ok(false, "Fail: Handler called when faux-server disabled");
             });
             Backbone.ajax = function () {
@@ -683,8 +685,8 @@
             book.save();
         });
         andThenWhen(function () { return isSecondSaveDone; }, function () {
-            fauxServer.enable();
-            fauxServer.addRoute("createBook", "library-app/books", "*", function () {
+            __fauxServer.enable();
+            __fauxServer.addRoute("createBook", "library-app/books", "*", function () {
                 ok(true, "Handler called when faux-server re-enabled");
                 isThirdSaveDone = true;
             });
