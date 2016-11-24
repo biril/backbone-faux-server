@@ -553,16 +553,8 @@
         enable: function (shouldEnable) {
             this._isEnabled = _.isUndefined(shouldEnable) || shouldEnable;
             return this;
-        },
-
-
-        // #### getVersion()
-        // Get faux-server version
-
-        //
-        getVersion: function () {
-            return "0.10.5"; // Keep in sync with package.json
         }
+
     };
 
 
@@ -589,6 +581,18 @@
             return this.addRoute.apply(this, args);
         };
     });
+
+
+    // #### getVersion()
+    // Get faux-server version
+
+    //
+    fauxServer.getVersion = function () {
+        return "0.10.5"; // Keep in sync with package.json
+    };
+
+    // #### create(Backbone)
+    // Create a faux-server given the Backbone object
 
     //
     fauxServer.create = function (Backbone) {
