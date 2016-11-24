@@ -3,6 +3,8 @@
 (function () {
     "use strict";
 
+    var __fauxServer;
+
     // Helpers
 
     var
@@ -39,15 +41,15 @@
 
             Backbone.emulateHTTP = false;
             Backbone.ajax = function () { throw "Unexpected call to DOM-library ajax"; };
+
+            __fauxServer = fauxServer.create(Backbone);
         },
         doGenericTeardown = function () {
             delete this.Book;
             delete this.Books;
             delete this.createDummyBook;
 
-            fauxServer.removeRoutes();
-            fauxServer.setDefaultHandler();
-            fauxServer.setLatency();
+            __fauxServer.destroy();
         };
 
     //
@@ -62,7 +64,7 @@
     });
 
     test("Sync returns previously defined custom transport", function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -76,7 +78,7 @@
             transport = {};
         book.urlRoot = "library-app/books";
 
-        fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
+        __fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
             return {
                 promise: function () { return transport; },
                 resolve: function () {},
@@ -94,7 +96,7 @@
     });
 
     test("request event includes previously defined custom transport's promise", function () {
-        fauxServer.addRoutes({
+        __fauxServer.addRoutes({
             createBook: { urlExp: "library-app/books",     httpMethod: "POST" },
             readBook:   { urlExp: "library-app/books/:id", httpMethod: "GET" },
             readBooks:  { urlExp: "library-app/books",     httpMethod: "GET" },
@@ -108,7 +110,7 @@
             transport = {};
         book.urlRoot = "library-app/books";
 
-        fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
+        __fauxServer.setTransportFactory(function (/* syncOptions, syncContext */) {
             return {
                 promise: function () { return transport; },
                 resolve: function () {},
@@ -165,7 +167,7 @@
             book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedResult, msg) {
-                fauxServer.setTransportFactory(function (/* options */) {
+                __fauxServer.setTransportFactory(function (/* options */) {
                     isPromiseResolved = false;
                     return {
                         promise: function () {},
@@ -180,33 +182,33 @@
         book.urlRoot = "library-app/books";
 
         atFirst(function () {
-            fauxServer.addRoute("library-app/books", "POST", function () { return 303; });
+            __fauxServer.addRoute("library-app/books", "POST", function () { return 303; });
             setTransportFactoryAndExpect(303, "true when saving a Model");
             book.save();
         });
         andThenWhen(function () { return isPromiseResolved; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "GET", function () { return 304; });
+            __fauxServer.addRoute("library-app/books/:id", "GET", function () { return 304; });
             setTransportFactoryAndExpect(304, "true when reading a Model");
             book.set({ id: "0123456789" });
             book.fetch();
         });
         andThenWhen(function () { return isPromiseResolved; }, function () {
-            fauxServer.addRoute("library-app/books", "GET", function () { return 305; });
+            __fauxServer.addRoute("library-app/books", "GET", function () { return 305; });
             setTransportFactoryAndExpect(305, "true when reading a Collection");
             books.fetch();
         });
         andThenWhen(function () { return isPromiseResolved; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "PUT", function () { return 306; });
+            __fauxServer.addRoute("library-app/books/:id", "PUT", function () { return 306; });
             setTransportFactoryAndExpect(306, "true when updating a Model");
             book.save();
         });
         andThenWhen(function () { return isPromiseResolved; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return 307; });
+            __fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return 307; });
             setTransportFactoryAndExpect(307, "true when updating a Model by patching");
             book.save(null, { patch: true });
         });
         andThenWhen(function () { return isPromiseResolved; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return 308; });
+            __fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return 308; });
             setTransportFactoryAndExpect(308, "true when deleting a Model");
             book.destroy();
         });
@@ -218,7 +220,7 @@
             book = this.createDummyBook(),
             books = new this.Books(),
             setTransportFactoryAndExpect = function (expectedReason, msg) {
-                fauxServer.setTransportFactory(function (/* options */) {
+                __fauxServer.setTransportFactory(function (/* options */) {
                     isPromiseRejected = false;
                     return {
                         promise: function () {},
@@ -233,33 +235,33 @@
         book.urlRoot = "library-app/books";
 
         atFirst(function () {
-            fauxServer.addRoute("library-app/books", "POST", function () { return "303"; });
+            __fauxServer.addRoute("library-app/books", "POST", function () { return "303"; });
             setTransportFactoryAndExpect("303", "true when saving a Model");
             book.save();
         });
         andThenWhen(function () { return isPromiseRejected; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "GET", function () { return "304"; });
+            __fauxServer.addRoute("library-app/books/:id", "GET", function () { return "304"; });
             setTransportFactoryAndExpect("304", "true when reading a Model");
             book.set({ id: "0123456789" });
             book.fetch();
         });
         andThenWhen(function () { return isPromiseRejected; }, function () {
-            fauxServer.addRoute("library-app/books", "GET", function () { return "305"; });
+            __fauxServer.addRoute("library-app/books", "GET", function () { return "305"; });
             setTransportFactoryAndExpect("305", "true when reading a Collection");
             books.fetch();
         });
         andThenWhen(function () { return isPromiseRejected; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "PUT", function () { return "306"; });
+            __fauxServer.addRoute("library-app/books/:id", "PUT", function () { return "306"; });
             setTransportFactoryAndExpect("306", "true when updating a Model");
             book.save();
         });
         andThenWhen(function () { return isPromiseRejected; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return "307"; });
+            __fauxServer.addRoute("library-app/books/:id", "PATCH", function () { return "307"; });
             setTransportFactoryAndExpect("307", "true when updating a Model by patching");
             book.save(null, { patch: true });
         });
         andThenWhen(function () { return isPromiseRejected; }, function () {
-            fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return "308"; });
+            __fauxServer.addRoute("library-app/books/:id", "DELETE", function () { return "308"; });
             setTransportFactoryAndExpect("308", "true when deleting a Model");
             book.destroy();
         });
